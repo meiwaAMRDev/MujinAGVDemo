@@ -19,6 +19,9 @@ namespace MujinAGVDemo
         {
             InitializeComponent();
         }
+
+        #region Event
+
         private void Form1_Load(object sender, EventArgs e)
         {
             textBoxServerIP.Text = Setting.ServerIP;
@@ -58,6 +61,10 @@ namespace MujinAGVDemo
             {
                 Setting.Logger.Error(ee.Message);
             }
+            catch (Exception ex)
+            {
+                Setting.Logger.Error(ex);
+            }
         }
 
         private void btnRemovePod_Click(object sender, EventArgs e)
@@ -82,10 +89,14 @@ namespace MujinAGVDemo
             try
             {
                 factory.Create(new RemovePodParam(podID)).DoAction();
-            }            
+            }
             catch (EmergencyException ee)
             {
                 Setting.Logger.Error(ee.Message);
+            }
+            catch(Exception ex)
+            {
+                Setting.Logger.Error(ex);
             }
         }
 
@@ -104,15 +115,43 @@ namespace MujinAGVDemo
             var robotID = Setting.RobotID;
             var podDirection = getDirection(listBoxPodDirection.SelectedIndex);
             var agvDirection = getDirection(listBoxAGVDirection.SelectedIndex);
+            var turnMode = 1;
+            var unload = 1;
+
+            movePod(serverIP, warehouseID, podID, nodeID, robotID,turnMode,unload);
+        }
+
+        
+
+        
+
+        private void btnMoveST1_Click(object sender, EventArgs e)
+        {
+            var serverIP = textBoxServerIP.Text;
+            var warehouseID = textBoxWarehouseID.Text;
+            //var layoutID = textBoxLayoutID.Text;
 
 
+            var podID = textBoxPodID.Text;
+            //var nodeID = textBoxNodeID.Text;
+            var robotID = Setting.RobotID;
+
+            movePodToST1(serverIP, warehouseID, podID, robotID);
+        }
+
+        #endregion Event
+
+        #region Method
+
+        private static void movePod(string serverIP, string warehouseID, string podID
+            , string nodeID, string robotID, int turnMode, int unload)
+        {
             var factory = new CommandFactory(serverIP, warehouseID);
             if (!factory.IsConnectedTESServer())
             {
                 Setting.Logger.Error(Setting.NotConnectMsg);
                 return;
             }
-
             try
             {
                 var movePodResult = (MovePodReturnMessage)factory.Create(new MovePodParam(
@@ -127,13 +166,31 @@ namespace MujinAGVDemo
                     nodeID,
                     //このタスクが終わるまでこの関数を抜けないようにする
                     isEndWait: true,
+                    //ロボットと棚をシンクロさせる
+                    turnMode: turnMode,
                     //最終的な棚の姿勢
-                    //podFace: Direction.North,
-                    podFace:podDirection,
+                    robotFace: Direction.North,
+                    //robotFace: agvDirection,
+                    podFace: Direction.North,
+                    //podFace: podDirection,
                     //最終的なAGVの姿勢
-                    //robotFace: Direction.North
-                    robotFace:agvDirection
+
+
+                    //ゴール地点で棚を下ろすか
+                    unload: unload
                     )).DoAction();
+
+                //var movePodResult = (MovePodReturnMessage)factory.Create(new MovePodParam(
+                //        robotID,
+                //        podID,
+                //        DestinationModes.StorageID,
+                //        nodeID,
+                //        isEndWait: false,
+                //        turnMode: 1
+                //        )).DoAction();
+                ////Debug.WriteLine(movePodResult.Data.TaskID);
+                //factory.Create(new WaitEndTaskParam(movePodResult.Data.TaskID, watchRobotID: robotID)).DoAction();
+
                 Setting.Logger.Info(movePodResult.ReturnMsg);
             }
             //AGVに異常が発生したら例外を出す
@@ -141,6 +198,31 @@ namespace MujinAGVDemo
             {
                 Setting.Logger.Error(ee.Message);
             }
+            catch (Exception ex)
+            {
+                Setting.Logger.Error(ex);
+            }
+        }
+        private static void movePodToST1(string serverIP, string warehouseID, string podID
+            , string robotID)
+        {
+            movePod(serverIP, warehouseID, podID, Setting.ST1WaitNodeID, robotID, 1, 0);
+            movePod(serverIP, warehouseID, podID, Setting.ST1NodeID, robotID, 1, 1);
+            //movePod(serverIP, warehouseID, podID, Setting.ST1ZoneID, robotID,1,1);
+        }
+        private static void movePodToST2(string serverIP, string warehouseID, string podID
+            , string robotID)
+        {
+            movePod(serverIP, warehouseID, podID, Setting.ST2WaitNodeID, robotID, 1, 0);
+            movePod(serverIP, warehouseID, podID, Setting.ST2NodeID, robotID, 1, 1);
+            //movePod(serverIP, warehouseID, podID, Setting.ST2ZoneID, robotID, 1, 1);
+        }
+        private static void movePodToST3(string serverIP, string warehouseID, string podID
+            , string robotID)
+        {
+            movePod(serverIP, warehouseID, podID, Setting.ST3WaitNodeID, robotID, 1, 0);
+            movePod(serverIP, warehouseID, podID, Setting.ST3NodeID, robotID, 1, 1);
+            //movePod(serverIP, warehouseID, podID, Setting.ST3ZoneID, robotID, 1, 1);
         }
         private double getDirection(int direction)
         {
@@ -162,5 +244,7 @@ namespace MujinAGVDemo
             }
             return result;
         }
+
+        #endregion Method
     }
 }

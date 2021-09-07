@@ -48,6 +48,7 @@ namespace MujinAGVDemo
             this.listBoxAGVDirection = new System.Windows.Forms.ListBox();
             this.label6 = new System.Windows.Forms.Label();
             this.label7 = new System.Windows.Forms.Label();
+            this.btnMoveST1 = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.SuspendLayout();
             // 
@@ -75,7 +76,7 @@ namespace MujinAGVDemo
             // 
             this.textBoxServerIP.Location = new System.Drawing.Point(93, 39);
             this.textBoxServerIP.Name = "textBoxServerIP";
-            this.textBoxServerIP.Size = new System.Drawing.Size(100, 19);
+            this.textBoxServerIP.Size = new System.Drawing.Size(148, 19);
             this.textBoxServerIP.TabIndex = 2;
             this.textBoxServerIP.Text = "serverIP";
             // 
@@ -83,7 +84,7 @@ namespace MujinAGVDemo
             // 
             this.textBoxWarehouseID.Location = new System.Drawing.Point(93, 64);
             this.textBoxWarehouseID.Name = "textBoxWarehouseID";
-            this.textBoxWarehouseID.Size = new System.Drawing.Size(100, 19);
+            this.textBoxWarehouseID.Size = new System.Drawing.Size(148, 19);
             this.textBoxWarehouseID.TabIndex = 3;
             this.textBoxWarehouseID.Text = "warehouseID";
             // 
@@ -91,7 +92,7 @@ namespace MujinAGVDemo
             // 
             this.textBoxLayoutID.Location = new System.Drawing.Point(93, 89);
             this.textBoxLayoutID.Name = "textBoxLayoutID";
-            this.textBoxLayoutID.Size = new System.Drawing.Size(100, 19);
+            this.textBoxLayoutID.Size = new System.Drawing.Size(148, 19);
             this.textBoxLayoutID.TabIndex = 4;
             this.textBoxLayoutID.Text = "layoutID";
             // 
@@ -99,7 +100,7 @@ namespace MujinAGVDemo
             // 
             this.textBoxNodeID.Location = new System.Drawing.Point(93, 138);
             this.textBoxNodeID.Name = "textBoxNodeID";
-            this.textBoxNodeID.Size = new System.Drawing.Size(100, 19);
+            this.textBoxNodeID.Size = new System.Drawing.Size(148, 19);
             this.textBoxNodeID.TabIndex = 6;
             this.textBoxNodeID.Text = "nodeID";
             // 
@@ -107,7 +108,7 @@ namespace MujinAGVDemo
             // 
             this.textBoxPodID.Location = new System.Drawing.Point(93, 113);
             this.textBoxPodID.Name = "textBoxPodID";
-            this.textBoxPodID.Size = new System.Drawing.Size(100, 19);
+            this.textBoxPodID.Size = new System.Drawing.Size(148, 19);
             this.textBoxPodID.TabIndex = 5;
             this.textBoxPodID.Text = "podID";
             // 
@@ -115,7 +116,7 @@ namespace MujinAGVDemo
             // 
             this.pictureBox1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.pictureBox1.BackColor = System.Drawing.Color.Gray;
+            this.pictureBox1.BackColor = System.Drawing.Color.White;
             this.pictureBox1.Image = ((System.Drawing.Image)(resources.GetObject("pictureBox1.Image")));
             this.pictureBox1.Location = new System.Drawing.Point(372, 12);
             this.pictureBox1.Name = "pictureBox1";
@@ -225,11 +226,22 @@ namespace MujinAGVDemo
             this.label7.TabIndex = 17;
             this.label7.Text = "AGVの向き";
             // 
+            // btnMoveST1
+            // 
+            this.btnMoveST1.Location = new System.Drawing.Point(13, 356);
+            this.btnMoveST1.Name = "btnMoveST1";
+            this.btnMoveST1.Size = new System.Drawing.Size(75, 23);
+            this.btnMoveST1.TabIndex = 18;
+            this.btnMoveST1.Text = "ST1へ移動";
+            this.btnMoveST1.UseVisualStyleBackColor = true;
+            this.btnMoveST1.Click += new System.EventHandler(this.btnMoveST1_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(808, 391);
+            this.Controls.Add(this.btnMoveST1);
             this.Controls.Add(this.label7);
             this.Controls.Add(this.label6);
             this.Controls.Add(this.listBoxAGVDirection);
@@ -277,6 +289,7 @@ namespace MujinAGVDemo
         private System.Windows.Forms.ListBox listBoxAGVDirection;
         private System.Windows.Forms.Label label6;
         private System.Windows.Forms.Label label7;
+        private System.Windows.Forms.Button btnMoveST1;
     }
 }
 
