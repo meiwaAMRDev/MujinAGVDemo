@@ -29,23 +29,21 @@ namespace MujinAGVDemo
             textBoxLayoutID.Text = Setting.LayoutID;
             textBoxPodID.Text = Setting.PodID;
             textBoxNodeID.Text = Setting.NodeID;
+            textBoxRobotID.Text = Setting.RobotID;
             listBoxPodDirection.SelectedIndex = 0;
             listBoxAGVDirection.SelectedIndex = 0;
         }
         private void btnAddPod_Click(object sender, EventArgs e)
         {
-            #region AGVデモエリアの設定
+            #region フォームコントロールから設定を読み込む
 
             var serverIP = textBoxServerIP.Text;
             var warehouseID = textBoxWarehouseID.Text;
             var layoutID = textBoxLayoutID.Text;
-
-            #endregion AGVデモエリアの設定
-
             var podID = textBoxPodID.Text;
             var nodeID = textBoxNodeID.Text;
 
-
+            #endregion フォームコントロールから設定を読み込む
 
             var factory = new CommandFactory(serverIP, warehouseID);
             if (!factory.IsConnectedTESServer())
@@ -69,14 +67,15 @@ namespace MujinAGVDemo
 
         private void btnRemovePod_Click(object sender, EventArgs e)
         {
-            #region AGVデモエリアの設定
+            #region フォームコントロールから設定を読み込む
 
             var serverIP = textBoxServerIP.Text;
             var warehouseID = textBoxWarehouseID.Text;
-
-            #endregion AGVデモエリアの設定
-
             var podID = textBoxPodID.Text;
+
+            #endregion フォームコントロールから設定を読み込む
+
+
 
 
             var factory = new CommandFactory(serverIP, warehouseID);
@@ -94,7 +93,7 @@ namespace MujinAGVDemo
             {
                 Setting.Logger.Error(ee.Message);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 Setting.Logger.Error(ex);
             }
@@ -102,28 +101,29 @@ namespace MujinAGVDemo
 
         private void btnMovePod_Click(object sender, EventArgs e)
         {
-            #region AGVデモエリアの設定
+            #region フォームコントロールから設定を読み込む
 
             var serverIP = textBoxServerIP.Text;
             var warehouseID = textBoxWarehouseID.Text;
             //var layoutID = textBoxLayoutID.Text;
-
-            #endregion AGVデモエリアの設定
-
             var podID = textBoxPodID.Text;
             var nodeID = textBoxNodeID.Text;
             var robotID = Setting.RobotID;
             var podDirection = getDirection(listBoxPodDirection.SelectedIndex);
             var agvDirection = getDirection(listBoxAGVDirection.SelectedIndex);
+
+            #endregion フォームコントロールから設定を読み込む
+
+
             var turnMode = 1;
             var unload = 1;
 
-            movePod(serverIP, warehouseID, podID, nodeID, robotID,turnMode,unload);
+            movePod(serverIP, warehouseID, podID, nodeID, robotID, turnMode, unload);
         }
 
-        
 
-        
+
+
 
         private void btnMoveST1_Click(object sender, EventArgs e)
         {
@@ -154,42 +154,46 @@ namespace MujinAGVDemo
             }
             try
             {
-                var movePodResult = (MovePodReturnMessage)factory.Create(new MovePodParam(
-                    //robotID
-                    robotID,
-                    //棚のID
-                    podID,
-                    //NodeIDで動かす場合はStorageID（副作用あり、下参照）、ZoneIDで動かす場合はZoneID
-                    //StorageID＆NodeIDで動かすと、Pエリアに下ろせないらしい、棚を回転させれない。
-                    DestinationModes.StorageID,
-                    //NodeID or ZoneID（DestinationModesによる）
-                    nodeID,
-                    //このタスクが終わるまでこの関数を抜けないようにする
-                    isEndWait: true,
-                    //ロボットと棚をシンクロさせる
-                    turnMode: turnMode,
-                    //最終的な棚の姿勢
-                    robotFace: Direction.North,
-                    //robotFace: agvDirection,
-                    podFace: Direction.North,
-                    //podFace: podDirection,
-                    //最終的なAGVの姿勢
-
-
-                    //ゴール地点で棚を下ろすか
-                    unload: unload
-                    )).DoAction();
-
+                #region
                 //var movePodResult = (MovePodReturnMessage)factory.Create(new MovePodParam(
-                //        robotID,
-                //        podID,
-                //        DestinationModes.StorageID,
-                //        nodeID,
-                //        isEndWait: false,
-                //        turnMode: 1
-                //        )).DoAction();
-                ////Debug.WriteLine(movePodResult.Data.TaskID);
-                //factory.Create(new WaitEndTaskParam(movePodResult.Data.TaskID, watchRobotID: robotID)).DoAction();
+                //    //robotID
+                //    robotID,
+                //    //棚のID
+                //    podID,
+                //    //NodeIDで動かす場合はStorageID（副作用あり、下参照）、ZoneIDで動かす場合はZoneID
+                //    //StorageID＆NodeIDで動かすと、Pエリアに下ろせないらしい、棚を回転させれない。
+                //    DestinationModes.StorageID,
+                //    //NodeID or ZoneID（DestinationModesによる）
+                //    nodeID,
+                //    //このタスクが終わるまでこの関数を抜けないようにする
+                //    isEndWait: true,
+                //    //ロボットと棚をシンクロさせる
+                //    turnMode: turnMode,
+                //    //最終的な棚の姿勢
+                //    robotFace: Direction.North,
+                //    //robotFace: agvDirection,
+                //    podFace: Direction.North,
+                //    //podFace: podDirection,
+                //    //最終的なAGVの姿勢
+
+
+                //    //ゴール地点で棚を下ろすか
+                //    unload: unload
+                //    )).DoAction();
+                #endregion
+
+                var movePodResult = (MovePodReturnMessage)factory.Create(new MovePodParam(
+                        robotID,
+                        podID,
+                        DestinationModes.StorageID,
+                        nodeID,
+                        isEndWait: false,
+                        //turnMode: 1
+                        turnMode: turnMode,
+                        unload: unload
+                        )).DoAction();
+                //Debug.WriteLine(movePodResult.Data.TaskID);
+                factory.Create(new WaitEndTaskParam(movePodResult.Data.TaskID, watchRobotID: robotID)).DoAction();
 
                 Setting.Logger.Info(movePodResult.ReturnMsg);
             }
@@ -246,5 +250,84 @@ namespace MujinAGVDemo
         }
 
         #endregion Method
+
+        //private void checkBoxStraightMove_CheckedChanged(object sender, EventArgs e)
+        //{
+        //    var isChecked = checkBoxStraightMove.Checked;
+        //}
+
+        //private void checkBoxRotationMove_CheckedChanged(object sender, EventArgs e)
+        //{
+        //    var isChecked = checkBoxRotationMove.Checked;
+
+
+        //}
+
+        private void btnStraightMove_Click(object sender, EventArgs e)
+        {
+            #region フォームコントロールから設定を読み込む
+
+            var serverIP = textBoxServerIP.Text;
+            var warehouseID = textBoxWarehouseID.Text;
+            //var layoutID = textBoxLayoutID.Text;
+            var podID = textBoxPodID.Text;
+            var nodeID = textBoxNodeID.Text;
+            var robotID =
+                //Setting.RobotID;
+                textBoxRobotID.Text;
+            var podDirection = getDirection(listBoxPodDirection.SelectedIndex);
+            var agvDirection = getDirection(listBoxAGVDirection.SelectedIndex);
+            var turnMode = 0;
+            var unload = 1;
+
+            #endregion フォームコントロールから設定を読み込む
+
+            var tryCount = 1;
+            if (checkBoxStraightMove.Checked)
+            {
+                tryCount = 3;
+            }
+
+            for (int i=0;i<tryCount;i++)
+            {
+                movePod(serverIP, warehouseID, podID, Setting.ST1NodeID, robotID, turnMode, unload);
+                movePod(serverIP, warehouseID, podID, Setting.ST4NodeID, robotID, turnMode, unload);
+            }
+        }
+
+        private void btnRotationMove_Click(object sender, EventArgs e)
+        {
+            #region フォームコントロールから設定を読み込む
+
+            var serverIP = textBoxServerIP.Text;
+            var warehouseID = textBoxWarehouseID.Text;
+            //var layoutID = textBoxLayoutID.Text;
+            var podID = textBoxPodID.Text;
+            var nodeID = textBoxNodeID.Text;
+            var robotID =
+                //Setting.RobotID;
+                textBoxRobotID.Text;
+            var podDirection = getDirection(listBoxPodDirection.SelectedIndex);
+            var agvDirection = getDirection(listBoxAGVDirection.SelectedIndex);
+            //var turnMode = 0;
+            //var unload = 1;
+
+            #endregion フォームコントロールから設定を読み込む
+
+            var tryCount = 1;
+            if (checkBoxRotationMove.Checked)
+            {
+                tryCount = 3;
+            }
+
+            for (int i = 0; i < tryCount; i++)
+            {
+                movePod(serverIP, warehouseID, podID, "161095107535", robotID, 0, 0);
+                movePod(serverIP, warehouseID, podID, "161095107537", robotID, 1, 0);
+                movePod(serverIP, warehouseID, podID, "161095107567", robotID, 1, 0);
+                movePod(serverIP, warehouseID, podID, "161095107565", robotID, 1, 0);
+                movePod(serverIP, warehouseID, podID, Setting.ST1NodeID, robotID, 1, 1);
+            }
+        }
     }
 }

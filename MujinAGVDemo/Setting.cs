@@ -77,9 +77,9 @@ namespace MujinAGVDemo
         public static string ST3WaitNodeID = "161095107565";
         public static string ST3ZoneID = "16309775633";
 
-        public static string ST4NodeID = "161095107567";
-        public static string ST4WaitNodeID = "161095107566";
-        public static string ST4ZoneID = "16309783694";
+        public static string ST4NodeID = "161095107537";
+        public static string ST4WaitNodeID = "161095107536";
+        public static string ST4ZoneID = "16310594702";
 
         public static string ChargerNodeID = "1610951075127";
         public static string ChargerZoneID = "16111867461";
