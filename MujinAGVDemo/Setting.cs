@@ -31,18 +31,18 @@ namespace MujinAGVDemo
 
         #region AGVデモエリア用設定
 
-        public static string ServerIP =
-            "192.168.1.202";
-        public static string WarehouseID =
-            "363402754208563209";
-        public static string LayoutID =
-            "c1610957014289";
-        public static string NodeID =
-            "161095107533";
-        public static string PodID =
-            "1120";
-        public static string RobotID =
-            "50";
+        //public static string ServerIP =
+        //    "192.168.1.202";
+        //public static string WarehouseID =
+        //    "363402754208563209";
+        //public static string LayoutID =
+        //    "c1610957014289";
+        //public static string NodeID =
+        //    "161095107533";
+        //public static string PodID =
+        //    "1120";
+        //public static string RobotID =
+        //    "50";
 
         #endregion AGVデモエリア用設定
 
@@ -85,5 +85,6 @@ namespace MujinAGVDemo
         public static string ChargerZoneID = "16111867461";
 
         #endregion 各地点のID
+
     }
 }
