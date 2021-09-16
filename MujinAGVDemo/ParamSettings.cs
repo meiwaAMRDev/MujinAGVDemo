@@ -21,22 +21,27 @@ namespace MujinAGVDemo
         public string RobotID { get; set; }
         public DestinationModes DestinationMode { get; set; }
         public string StationListPath { get; set; }
+        public double Direction { get; set; }
 
 
         public ParamSettings()
         {
             TurnMode = 0;
             Unload = 1;
-            RepeatCount = 3;
+            RepeatCount = 1;
 
             ServerIP ="192.168.1.202";
             WarehouseID ="363402754208563209";
             LayoutID ="c1610957014289";
             NodeID ="161095107533";
             RobotID ="50";
-            StationListPath = "StationList.csv";
+            StationListPath = "RotateMoveLeft.csv";
+            PodID =
+            "1120";
+            //"1135";
 
             DestinationMode = DestinationModes.StorageID;
+            Direction = Hetu20dotnet.Direction.NoSelect;
         }
     }
 }

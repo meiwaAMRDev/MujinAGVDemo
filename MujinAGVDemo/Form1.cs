@@ -15,14 +15,13 @@ namespace MujinAGVDemo
 {
     public partial class Form1 : Form
     {
-        ParamSettings param;
-        public Form1()
-        {
-            InitializeComponent();
-        }
+        #region delegate
+        #endregion delegate
 
-        #region Event
+        #region Const
+        #endregion Const
 
+        #region Events
         private void Form1_Load(object sender, EventArgs e)
         {
             param = new ParamSettings();
@@ -33,8 +32,12 @@ namespace MujinAGVDemo
             textBoxPodID.Text = param.PodID;
             textBoxNodeID.Text = param.NodeID;
             textBoxRobotID.Text = param.RobotID;
+            textBoxStationListPath.Text = param.StationListPath;
+            numRepeatCount.Value = param.RepeatCount;
 
-
+            checkBoxSynchroTurn.Checked = param.TurnMode == 1 ? true : false;
+            checkBoxUnload.Checked = param.Unload == 1 ? true : false;
+            checkBoxIsError.Checked = isError;
         }
         private void btnAddPod_Click(object sender, EventArgs e)
         {
@@ -52,7 +55,7 @@ namespace MujinAGVDemo
             var factory = new CommandFactory(serverIP, warehouseID);
             if (!factory.IsConnectedTESServer())
             {
-                Setting.Logger.Error(Setting.NotConnectMsg);
+                logError(Setting.NotConnectMsg);
                 return;
             }
             try
@@ -61,11 +64,11 @@ namespace MujinAGVDemo
             }
             catch (EmergencyException ee)
             {
-                Setting.Logger.Error(ee.Message);
+                logError(ee.Message);
             }
             catch (Exception ex)
             {
-                Setting.Logger.Error(ex);
+                logError(ex.ToString());
             }
         }
 
@@ -82,7 +85,7 @@ namespace MujinAGVDemo
             var factory = new CommandFactory(serverIP, warehouseID);
             if (!factory.IsConnectedTESServer())
             {
-                Setting.Logger.Error(Setting.NotConnectMsg);
+                logError(Setting.NotConnectMsg);
                 return;
             }
 
@@ -92,11 +95,11 @@ namespace MujinAGVDemo
             }
             catch (EmergencyException ee)
             {
-                Setting.Logger.Error(ee.Message);
+                logError(ee.Message);
             }
             catch (Exception ex)
             {
-                Setting.Logger.Error(ex);
+                logError(ex.ToString());
             }
         }
 
@@ -113,26 +116,20 @@ namespace MujinAGVDemo
             var podID = textBoxPodID.Text;
             var robotID = param.RobotID;
 
-            movePodToST1(serverIP, warehouseID, podID, robotID);
+            var nodeID = Setting.ST1NodeID;
+            moveRobot(serverIP, warehouseID, robotID, nodeID);
         }
 
         private void btnRotationMove_Click(object sender, EventArgs e)
         {
-            var stationListPath = "StationList.csv";
+            var stationListPath =
+                param.StationListPath;
 
             if (!FileIO.TryGetAllLines(stationListPath, out var nodeList))
             {
                 return;
             }
             nodeList.RemoveAt(0);
-            //var nodeList = new List<string>
-            //{
-            //    "161095107535",
-            //    "161095107537",
-            //    "161095107567",
-            //    "161095107565",
-            //    Setting.ST1NodeID
-            //};
             movePodRotate(param, nodeList);
         }
         private void textBoxServerIP_TextChanged(object sender, EventArgs e)
@@ -164,6 +161,10 @@ namespace MujinAGVDemo
         {
             param.RobotID = textBoxRobotID.Text;
         }
+        private void textBoxStationListPath_TextChanged(object sender, EventArgs e)
+        {
+            param.StationListPath = textBoxStationListPath.Text;
+        }
 
         private void checkBoxSynchroTurn_CheckedChanged(object sender, EventArgs e)
         {
@@ -181,138 +182,267 @@ namespace MujinAGVDemo
                 param.Unload = 0;
             }
         }
-        #endregion Event
 
-        #region Method
-        private static void movePod(ParamSettings param)
+        private void checkBoxIsStop_CheckedChanged(object sender, EventArgs e)
+        {
+            var serverIP =
+                param.ServerIP;
+            var warehouseID =
+                param.WarehouseID;
+            var robotID =
+                param.RobotID;
+
+            var factory = new CommandFactory(serverIP, warehouseID);
+            if (!factory.IsConnectedTESServer())
+            {
+                logError(Setting.NotConnectMsg);
+                return;
+            }
+
+            isStop = !isStop;
+            if (isStop == false)
+            {
+                factory.Create(new PauseRobotParam(robotID)).DoAction();
+            }
+            else
+            {
+                factory.Create(new ResumeRobotParam(robotID)).DoAction();
+            }
+        }
+
+        private void btnMoveAGV_Click(object sender, EventArgs e)
+        {
+            var serverIP = param.ServerIP;
+            var warehouseID = param.WarehouseID;
+            var nodeID = param.NodeID;
+            var robotID = param.RobotID;
+            var direction = param.Direction;
+
+            moveRobot(serverIP, warehouseID, robotID, nodeID, direction);
+        }
+
+        private void numRepeatCount_ValueChanged(object sender, EventArgs e)
+        {
+            param.RepeatCount = (int)numRepeatCount.Value;
+        }
+
+        private void checkBoxIsError_CheckedChanged(object sender, EventArgs e)
+        {
+            isError = !isError;
+            checkBoxIsError.Checked = isError;
+        }
+
+        private void btnMovePodFromST3_Click(object sender, EventArgs e)
+        {
+            var serverIP =
+                param.ServerIP;
+            var warehouseID =
+                param.WarehouseID;
+            var layoutID =
+                param.LayoutID;
+            var podID =
+                param.PodID;
+
+            var direction = param.Direction;
+
+            var robotID = param.RobotID;
+
+
+            moveRobot(serverIP, warehouseID, robotID, "161095107563", direction);
+            movePod(serverIP, warehouseID, podID, "161095107565", robotID, 0, 1);
+            movePod(serverIP, warehouseID, podID, "161095107563", robotID, 0, 1);
+            moveRobot(serverIP, warehouseID, robotID, "161095107567", direction);
+        }
+
+        private void listBox1_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            var index = listBox1.SelectedIndex;
+            Setting.Logger.Info(index);
+            switch (index)
+            {
+                case 0:
+                    param.Direction = Direction.North;
+                    break;
+                case 1:
+                    param.Direction = Direction.East;
+                    break;
+                case 2:
+                    param.Direction = Direction.South;
+                    break;
+                case 3:
+                    param.Direction = Direction.West;
+                    break;
+                default:
+                    param.Direction = Direction.NoSelect;
+                    break;
+            }
+            Setting.Logger.Info(param.Direction);
+        }
+        #endregion Events
+
+        #region Property(Public Paramater)
+        #endregion Property(Public Paramater)
+
+        #region Private Parameter
+        ParamSettings param;
+        bool isStop = false;
+        bool isError = false;
+        #endregion Private Parameter
+
+        #region Constructor
+        public Form1()
+        {
+            InitializeComponent();
+        }
+        #endregion Constructor
+
+        #region Public Method
+        #endregion Public Method
+
+        #region Private Method
+        private void movePod(ParamSettings param)
         {
             movePod(param.ServerIP, param.WarehouseID, param.PodID
                 , param.NodeID, param.RobotID, param.TurnMode, param.Unload);
         }
-        private static void movePod(string serverIP, string warehouseID, string podID
+        private void movePod(string serverIP, string warehouseID, string podID
             , string nodeID, string robotID, int turnMode, int unload)
         {
             var factory = new CommandFactory(serverIP, warehouseID);
             if (!factory.IsConnectedTESServer())
             {
-                Setting.Logger.Error(Setting.NotConnectMsg);
+                logError(Setting.NotConnectMsg);
                 return;
             }
             try
             {
-                #region
-                //var movePodResult = (MovePodReturnMessage)factory.Create(new MovePodParam(
-                //    //robotID
-                //    robotID,
-                //    //棚のID
-                //    podID,
-                //    //NodeIDで動かす場合はStorageID（副作用あり、下参照）、ZoneIDで動かす場合はZoneID
-                //    //StorageID＆NodeIDで動かすと、Pエリアに下ろせないらしい、棚を回転させれない。
-                //    DestinationModes.StorageID,
-                //    //NodeID or ZoneID（DestinationModesによる）
-                //    nodeID,
-                //    //このタスクが終わるまでこの関数を抜けないようにする
-                //    isEndWait: true,
-                //    //ロボットと棚をシンクロさせる
-                //    turnMode: turnMode,
-                //    //最終的な棚の姿勢
-                //    robotFace: Direction.North,
-                //    //robotFace: agvDirection,
-                //    podFace: Direction.North,
-                //    //podFace: podDirection,
-                //    //最終的なAGVの姿勢
-
-
-                //    //ゴール地点で棚を下ろすか
-                //    unload: unload
-                //    )).DoAction();
-                #endregion
-
-                var movePodResult = (MovePodReturnMessage)factory.Create(new MovePodParam(
+                Task.Run(() =>
+                {
+                    
+                    var movePodResult = (MovePodReturnMessage)factory.Create(new MovePodParam(
                         robotID,
                         podID,
                         DestinationModes.StorageID,
                         nodeID,
-                        isEndWait: false,
+                        //isEndWait: false,
+                        isEndWait: true,
                         turnMode: turnMode,
                         unload: unload
                         )).DoAction();
-                factory.Create(new WaitEndTaskParam(movePodResult.Data.TaskID
-                    , watchRobotID: robotID)).DoAction();
+                    //factory.Create(new WaitEndTaskParam(movePodResult.Data.TaskID
+                    //    , watchRobotID: robotID)).DoAction();
 
-                Setting.Logger.Info(movePodResult.ReturnMsg);
+                    Setting.Logger.Info(movePodResult.ReturnMsg);
+                });
             }
             //AGVに異常が発生したら例外を出す
             catch (EmergencyException ee)
             {
-                Setting.Logger.Error(ee.Message);
+                logError(ee.Message);
             }
             catch (Exception ex)
             {
-                Setting.Logger.Error(ex);
+                logError(ex.ToString());
             }
         }
-        private static void movePodRotate(ParamSettings param, List<string> nodeList)
+        private void movePodRotate(ParamSettings param, List<string> allLines)
         {
             var serverIP =
-                //textBoxServerIP.Text;
                 param.ServerIP;
             var warehouseID =
-                //textBoxWarehouseID.Text;
                 param.WarehouseID;
             var layoutID =
-                //textBoxLayoutID.Text;
                 param.LayoutID;
             var podID =
-                //textBoxPodID.Text;
                 param.PodID;
-            var nodeID =
-                //textBoxNodeID.Text;
-                param.NodeID;
+
             var robotID = param.RobotID;
-            var turnMode = param.TurnMode;
-            var unload = param.Unload;
 
             for (var i = 0; i < param.RepeatCount; i++)
             {
-                if (i == param.RepeatCount)
+                Setting.Logger.Info(string.Format("{0}回目開始", i + 1));
+                for (var j = 0; j < allLines.Count; j++)
                 {
-                    movePod(serverIP, warehouseID, podID, nodeList[i], robotID, turnMode, 1);
-                }
-                else
-                {
-                    movePod(serverIP, warehouseID, podID, nodeList[i], robotID, turnMode, unload);
+
+                    var splitLine = allLines[j].Split(',').ToList();
+
+                    if (!int.TryParse(splitLine[1], out var turnMode))
+                    {
+                        logError(string.Format("turnModeが読み込めません：{0}", splitLine[1]));
+
+                        continue;
+                    }
+                    if (!int.TryParse(splitLine[2], out var unload))
+                    {
+                        logError(string.Format("unloadが読み込めません：{0}", splitLine[2]));
+                        continue;
+                    }
+
+                    var nodeID =
+                    splitLine[0];
+
+                    movePod(serverIP, warehouseID, podID, nodeID, robotID, turnMode, unload);
                 }
             }
+
         }
-        private static void movePodToST1(string serverIP, string warehouseID, string podID
-            , string robotID)
+        private void moveRobot(string serverIP, string warehouseID, string robotID, string nodeID)
         {
-            movePod(serverIP, warehouseID, podID, Setting.ST1NodeID, robotID, 1, 1);
+            moveRobot(serverIP, warehouseID, robotID, nodeID, Direction.NoSelect);
+
         }
-        private double getDirection(int direction)
+
+        private void moveRobot(string serverIP, string warehouseID, string robotID, string nodeID, double direction)
         {
-            var result = Direction.North;
-            switch (direction)
+            Setting.Logger.Info(direction);
+
+            var factory = new CommandFactory(serverIP, warehouseID);
+            if (!factory.IsConnectedTESServer())
             {
-                case 0:
-                    result = Direction.North;
-                    break;
-                case 1:
-                    result = Direction.East;
-                    break;
-                case 2:
-                    result = Direction.South;
-                    break;
-                case 3:
-                    result = Direction.West;
-                    break;
+                logError(Setting.NotConnectMsg);
+                return;
             }
-            return result;
+
+            try
+            {
+                Task.Run(() =>
+                {
+                    var mvrtA = new MoveRobotReturnMessage();
+                    var ret = factory.Create(new UnsetOwnerParam(robotID)).DoAction();
+                    var rett = factory.Create(new SetOwnerParam(robotID)).DoAction();
+                    mvrtA = (MoveRobotReturnMessage)(factory.Create(new MoveRobotParam(
+                        robotID,
+                        DestinationModes.NodeID,
+                        nodeID,
+                        //isEndWait: false,
+                        isEndWait: true,
+                        ownerRegist: false,
+                         robotFace: direction
+                        )).DoAction());
+                    var waitResult = factory.Create(new WaitEndTaskParam(mvrtA.Data.TaskID, watchRobotID: robotID)).DoAction();
+                    if (waitResult.ReturnCode != 0)
+                    {
+                        Setting.Logger.Info("タスクキャンセル＆ぬける。");
+                        factory.Create(new CancelTaskParam(mvrtA.Data.TaskID)).DoAction();
+                    }
+                });
+            }
+            //AGVに異常が発生したら例外を出す
+            catch (EmergencyException ee)
+            {
+                logError(ee.Message);
+            }
+            catch (Exception ex)
+            {
+                logError(ex.ToString());
+            }
         }
-
-        #endregion Method
-
-
+        private void logError(string message)
+        {
+            Setting.Logger.Error(message);
+            isError = true;
+            checkBoxIsError.Checked = isError;
+        }
+        #endregion Private Method
     }
 }

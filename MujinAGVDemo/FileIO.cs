@@ -25,9 +25,14 @@ namespace MujinAGVDemo
                 if (!File.Exists(filePath))
                 {
                     result = false;
-                    Setting.Logger.Error(string.Format("file not exist:{0}", filePath));
+                    Setting.Logger.Error(string.Format("ファイルが存在しません。:{0}", filePath));
                 }
                 allLines = File.ReadAllLines(filePath, Encoding.UTF8).ToList();
+                if (allLines.Count == 0)
+                {
+                    result = false;
+                    Setting.Logger.Error(string.Format("ファイル内にデータがありません。:{0}", filePath));
+                }
             }
             catch(Exception ex)
             {
