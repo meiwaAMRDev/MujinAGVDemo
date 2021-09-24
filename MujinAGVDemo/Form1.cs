@@ -123,8 +123,10 @@ namespace MujinAGVDemo
             moveRobot(serverIP, warehouseID, robotID, nodeID);
         }
 
-        private void btnRotationMove_Click(object sender, EventArgs e)
+        private async void btnRotationMove_Click(object sender, EventArgs e)
         {
+            prgRepeartCount.Value = 0;
+
             var stationListPath =
                 //"StationList.csv";
                 //textBoxStationListPath.Text;
@@ -143,7 +145,7 @@ namespace MujinAGVDemo
             //    "161095107565",
             //    Setting.ST1NodeID
             //};
-            movePodRotate(param, nodeList);
+            await movePodRotate(param, nodeList);
         }
         private void textBoxServerIP_TextChanged(object sender, EventArgs e)
         {
@@ -198,12 +200,12 @@ namespace MujinAGVDemo
         #endregion Event
 
         #region Method
-        private static void movePod(ParamSettings param)
+        private  void movePod(ParamSettings param)
         {
             movePod(param.ServerIP, param.WarehouseID, param.PodID
                 , param.NodeID, param.RobotID, param.TurnMode, param.Unload);
         }
-        private static void movePod(string serverIP, string warehouseID, string podID
+        private async Task movePod(string serverIP, string warehouseID, string podID
             , string nodeID, string robotID, int turnMode, int unload)
         {
             var factory = new CommandFactory(serverIP, warehouseID);
@@ -244,19 +246,34 @@ namespace MujinAGVDemo
                 //    )).DoAction();
                 #endregion
 
-                var movePodResult = (MovePodReturnMessage)factory.Create(new MovePodParam(
-                        robotID,
-                        podID,
-                        DestinationModes.StorageID,
-                        nodeID,
-                        isEndWait: false,
-                        turnMode: turnMode,
-                        unload: unload
-                        )).DoAction();
+                var moveTask = new Task(() =>
+                   {
+                       var movePodResult = (MovePodReturnMessage)factory.Create(new MovePodParam(
+                               robotID,
+                               podID,
+                               DestinationModes.StorageID,
+                               nodeID,
+                               isEndWait: true,
+                               turnMode: turnMode,
+                               unload: unload
+                               )).DoAction();
+
+                       
+                string logMessage = $"ロボットID {robotID},棚 {podID},移動先 {nodeID}";
+                       Setting.Logger.Info(logMessage);
+                       Setting.Logger.Info(movePodResult.ReturnMsg);
+
+                       this.Invoke((MethodInvoker)(() =>
+                       {
+                           lblCurrentLineProcess.Text = logMessage;
+                       }));
+                   });
+                moveTask.Start();
+                await moveTask.ConfigureAwait(true);
+
                 //factory.Create(new WaitEndTaskParam(movePodResult.Data.TaskID
                 //    , watchRobotID: robotID)).DoAction();
 
-                Setting.Logger.Info(movePodResult.ReturnMsg);
                 //});
 
 
@@ -271,7 +288,7 @@ namespace MujinAGVDemo
                 Setting.Logger.Error(ex);
             }
         }
-        private static void movePodRotate(ParamSettings param, List<string> allLines)
+        private async Task movePodRotate(ParamSettings param, List<string> allLines)
         {
             var serverIP =
                 //textBoxServerIP.Text;
@@ -290,12 +307,19 @@ namespace MujinAGVDemo
             //var turnMode = param.TurnMode;
             //var unload = param.Unload;
 
+            int nowCount = 1;
+
+
             for (var i = 0; i < param.RepeatCount; i++)
             {
+                prgRepeartCount.Value = (int)((double)nowCount / (double)param.RepeatCount * 100);
+
+
+                lblProgress.Text = $"繰り返し回数 {nowCount}/{param.RepeatCount}";
                 Setting.Logger.Info(string.Format("{0}回目開始", i + 1));
                 for (var j = 0; j < allLines.Count; j++)
                 {
-
+                    lblRunLineIndex.Text = $"実行行数 {j+1}/{allLines.Count}";
                     var splitLine = allLines[j].Split(',').ToList();
 
                     if (!int.TryParse(splitLine[1], out var turnMode))
@@ -322,8 +346,10 @@ namespace MujinAGVDemo
                     //param.NodeID;
                     splitLine[0];
 
-                    movePod(serverIP, warehouseID, podID, nodeID, robotID, turnMode, unload);
+                    await movePod(serverIP, warehouseID, podID, nodeID, robotID, turnMode, unload);
                 }
+
+                nowCount++;
             }
 
         }
@@ -417,9 +443,12 @@ namespace MujinAGVDemo
             if (isStop == false)
             {
                 factory.Create(new PauseRobotParam(robotID)).DoAction();
+                checkBoxIsStop.Text = "AGV再開";
             }
             else
             {
+
+                checkBoxIsStop.Text = "AGV停止";
                 factory.Create(new ResumeRobotParam(robotID)).DoAction();
             }
         }

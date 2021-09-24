@@ -57,8 +57,14 @@ namespace MujinAGVDemo
             this.numRepeatCount = new System.Windows.Forms.NumericUpDown();
             this.label7 = new System.Windows.Forms.Label();
             this.checkBoxIsError = new System.Windows.Forms.CheckBox();
+            this.lblProgress = new System.Windows.Forms.ToolStripStatusLabel();
+            this.statusStrip1 = new System.Windows.Forms.StatusStrip();
+            this.lblRunLineIndex = new System.Windows.Forms.ToolStripStatusLabel();
+            this.lblCurrentLineProcess = new System.Windows.Forms.ToolStripStatusLabel();
+            this.prgRepeartCount = new System.Windows.Forms.ToolStripProgressBar();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.numRepeatCount)).BeginInit();
+            this.statusStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
             // btnAddPod
@@ -142,7 +148,7 @@ namespace MujinAGVDemo
             this.pictureBox1.Location = new System.Drawing.Point(496, 15);
             this.pictureBox1.Margin = new System.Windows.Forms.Padding(4);
             this.pictureBox1.Name = "pictureBox1";
-            this.pictureBox1.Size = new System.Drawing.Size(577, 468);
+            this.pictureBox1.Size = new System.Drawing.Size(577, 522);
             this.pictureBox1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
             this.pictureBox1.TabIndex = 7;
             this.pictureBox1.TabStop = false;
@@ -349,11 +355,47 @@ namespace MujinAGVDemo
             this.checkBoxIsError.UseVisualStyleBackColor = true;
             this.checkBoxIsError.CheckedChanged += new System.EventHandler(this.checkBoxIsError_CheckedChanged);
             // 
+            // lblProgress
+            // 
+            this.lblProgress.Name = "lblProgress";
+            this.lblProgress.Size = new System.Drawing.Size(0, 17);
+            // 
+            // statusStrip1
+            // 
+            this.statusStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
+            this.statusStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.lblProgress,
+            this.lblRunLineIndex,
+            this.lblCurrentLineProcess,
+            this.prgRepeartCount});
+            this.statusStrip1.Location = new System.Drawing.Point(0, 520);
+            this.statusStrip1.Name = "statusStrip1";
+            this.statusStrip1.Size = new System.Drawing.Size(1077, 23);
+            this.statusStrip1.TabIndex = 34;
+            this.statusStrip1.Text = "statusStrip1";
+            // 
+            // lblRunLineIndex
+            // 
+            this.lblRunLineIndex.Name = "lblRunLineIndex";
+            this.lblRunLineIndex.Size = new System.Drawing.Size(0, 17);
+            // 
+            // lblCurrentLineProcess
+            // 
+            this.lblCurrentLineProcess.Name = "lblCurrentLineProcess";
+            this.lblCurrentLineProcess.Size = new System.Drawing.Size(0, 17);
+            // 
+            // prgRepeartCount
+            // 
+            this.prgRepeartCount.Name = "prgRepeartCount";
+            this.prgRepeartCount.Size = new System.Drawing.Size(100, 15);
+            this.prgRepeartCount.Step = 1;
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1077, 489);
+            this.ClientSize = new System.Drawing.Size(1077, 543);
+            this.Controls.Add(this.statusStrip1);
             this.Controls.Add(this.checkBoxIsError);
             this.Controls.Add(this.label7);
             this.Controls.Add(this.numRepeatCount);
@@ -387,6 +429,8 @@ namespace MujinAGVDemo
             this.Load += new System.EventHandler(this.Form1_Load);
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.numRepeatCount)).EndInit();
+            this.statusStrip1.ResumeLayout(false);
+            this.statusStrip1.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -421,6 +465,11 @@ namespace MujinAGVDemo
         private System.Windows.Forms.NumericUpDown numRepeatCount;
         private System.Windows.Forms.Label label7;
         private System.Windows.Forms.CheckBox checkBoxIsError;
+        private System.Windows.Forms.ToolStripStatusLabel lblProgress;
+        private System.Windows.Forms.StatusStrip statusStrip1;
+        private System.Windows.Forms.ToolStripStatusLabel lblRunLineIndex;
+        private System.Windows.Forms.ToolStripStatusLabel lblCurrentLineProcess;
+        private System.Windows.Forms.ToolStripProgressBar prgRepeartCount;
     }
 }
 

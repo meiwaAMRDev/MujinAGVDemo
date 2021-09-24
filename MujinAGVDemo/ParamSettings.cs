@@ -33,11 +33,11 @@ namespace MujinAGVDemo
             WarehouseID ="363402754208563209";
             LayoutID ="c1610957014289";
             NodeID ="161095107533";
-            RobotID ="50";
-            StationListPath = "RotateMoveLeft.csv";
+            RobotID ="104";
+            StationListPath = "RotateMoveLeftS.csv";
             PodID =
             //"1120";
-            "1135";
+            "1120";
 
             DestinationMode = DestinationModes.StorageID;
         }

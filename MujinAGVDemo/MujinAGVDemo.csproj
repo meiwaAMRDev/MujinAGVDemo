@@ -154,6 +154,7 @@
     <None Include="LMoveRightS.csv">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Include="Nakamura.csv" />
     <None Include="NLog.xsd">
       <SubType>Designer</SubType>
     </None>
@@ -174,9 +175,12 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Include="RotateMoveLeftS.csv">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="LMoveRight.csv">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="RotateMoveLeftS2.csv">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Include="RotateMoveRightS.csv">
