@@ -160,7 +160,6 @@
     <None Include="LMoveRightS.csv">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="Nakamura.csv" />
     <None Include="NLog.xsd">
       <SubType>Designer</SubType>
     </None>
