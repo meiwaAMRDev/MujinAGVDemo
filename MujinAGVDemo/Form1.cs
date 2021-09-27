@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -15,9 +16,14 @@ namespace MujinAGVDemo
 {
     public partial class Form1 : Form
     {
+        #region Property
+
         ParamSettings param;
         bool isStop = false;
-        bool isError = false;
+        string settingPath = "ParamSetting.xml";
+
+        #endregion Property
+
         public Form1()
         {
             InitializeComponent();
@@ -27,20 +33,17 @@ namespace MujinAGVDemo
 
         private void Form1_Load(object sender, EventArgs e)
         {
-            param = new ParamSettings();
-
-            textBoxServerIP.Text = param.ServerIP;
-            textBoxWarehouseID.Text = param.WarehouseID;
-            textBoxLayoutID.Text = param.LayoutID;
-            textBoxPodID.Text = param.PodID;
-            textBoxNodeID.Text = param.NodeID;
-            textBoxRobotID.Text = param.RobotID;
-            textBoxStationListPath.Text = param.StationListPath;
-            numRepeatCount.Value = param.RepeatCount;
-
-            checkBoxSynchroTurn.Checked = param.TurnMode == 1 ? true : false;
-            checkBoxUnload.Checked = param.Unload == 1 ? true : false;
+            //param = new ParamSettings();
+            if (!TryLoadSetting())
+            {
+                return;
+            }
+            btnLoadSetting.BackColor = Color.LightGray;
+            updateControl();
         }
+
+
+
         private void btnAddPod_Click(object sender, EventArgs e)
         {
             var serverIP =
@@ -58,19 +61,39 @@ namespace MujinAGVDemo
             if (!factory.IsConnectedTESServer())
             {
                 Setting.Logger.Error(Setting.NotConnectMsg);
+                MessageBox.Show($"棚作成に失敗しました。" +
+                    $"{Environment.NewLine}{Setting.NotConnectMsg}");
                 return;
             }
             try
             {
-                factory.Create(new AddPodParam(podID, nodeID, layoutID)).DoAction();
+                var addPodResult = factory.Create(new AddPodParam(podID, nodeID, layoutID)).DoAction();
+                string logMessage = $"棚 {podID},作成位置 {nodeID}";
+                Setting.Logger.Info(logMessage);
+                Setting.Logger.Info(addPodResult.ReturnMsg);
+                this.Invoke((MethodInvoker)(() =>
+                {
+                    lblCurrentLineProcess.Text = logMessage;
+                }));
+                //lblCurrentLineProcess.Text =
+                //    $"棚 {podID},作成位置 {nodeID},結果 {addPodResult.ReturnMsg}";
+                ////addPodResult.ReturnMsg;
+                var resultMessage =
+                    addPodResult.ReturnMsg == "succ" ? "成功" : "失敗";
+                MessageBox.Show($"棚作成に{resultMessage}しました。" +
+                    $"{Environment.NewLine}棚 {podID},作成位置 {nodeID}");
             }
             catch (EmergencyException ee)
             {
                 Setting.Logger.Error(ee.Message);
+                MessageBox.Show($"棚作成に失敗しました。" +
+                    $"{Environment.NewLine}{ee.Message}");
             }
             catch (Exception ex)
             {
                 Setting.Logger.Error(ex);
+                MessageBox.Show($"棚作成に失敗しました。" +
+                    $"{Environment.NewLine}{ex.Message}");
             }
         }
 
@@ -88,39 +111,52 @@ namespace MujinAGVDemo
             if (!factory.IsConnectedTESServer())
             {
                 Setting.Logger.Error(Setting.NotConnectMsg);
+                MessageBox.Show($"棚削除に失敗しました。" +
+                    $"{Environment.NewLine}{Setting.NotConnectMsg}");
                 return;
             }
 
             try
             {
-                factory.Create(new RemovePodParam(podID)).DoAction();
+                var removePodResult = factory.Create(new RemovePodParam(podID)).DoAction();
+                string logMessage = $"棚 {podID}";
+                Setting.Logger.Info(logMessage);
+                Setting.Logger.Info(removePodResult.ReturnMsg);
+                this.Invoke((MethodInvoker)(() =>
+                {
+                    lblCurrentLineProcess.Text = logMessage;
+                }));
+                //lblCurrentLineProcess.Text =
+                //    $"棚 {podID},結果 {removePodResult.ReturnMsg}";
+                //lblCurrentLineProcess.BackColor =
+                //    removePodResult.ReturnMsg == "succ" ? Color.Green : Color.Red;
+                var resultMessage =
+                    removePodResult.ReturnMsg == "succ" ? "成功" : "失敗";
+                MessageBox.Show($"棚削除に{resultMessage}しました。" +
+                    $"{Environment.NewLine}棚 {podID}");
             }
             catch (EmergencyException ee)
             {
                 Setting.Logger.Error(ee.Message);
+                MessageBox.Show($"棚削除に失敗しました。" +
+                    $"{Environment.NewLine}{ee.Message}");
             }
             catch (Exception ex)
             {
                 Setting.Logger.Error(ex);
+                MessageBox.Show($"棚削除に失敗しました。" +
+                    $"{Environment.NewLine}{ex.Message}");
             }
         }
 
-        private void btnMovePod_Click(object sender, EventArgs e)
+        private async void btnMovePod_Click(object sender, EventArgs e)
         {
-            movePod(param);
-        }
+            //movePod(param);
+            MessageBox.Show($"棚搬送指示を作成しました。" +
+                $"{Environment.NewLine}AGV:{param.RobotID},移動先:{param.NodeID},棚:{param.NodeID}");
 
-        private void btnMoveST1_Click(object sender, EventArgs e)
-        {
-            var serverIP = textBoxServerIP.Text;
-            var warehouseID = textBoxWarehouseID.Text;
-
-            var podID = textBoxPodID.Text;
-            var robotID = param.RobotID;
-
-            var nodeID = Setting.ST1NodeID;
-            //movePod(serverIP, warehouseID, podID, Setting.ST1NodeID, robotID, 1, 1);
-            moveRobot(serverIP, warehouseID, robotID, nodeID);
+            await movePod(param.ServerIP, param.WarehouseID, param.PodID
+                , param.NodeID, param.RobotID, param.TurnMode, param.Unload);
         }
 
         private async void btnRotationMove_Click(object sender, EventArgs e)
@@ -128,8 +164,6 @@ namespace MujinAGVDemo
             prgRepeartCount.Value = 0;
 
             var stationListPath =
-                //"StationList.csv";
-                //textBoxStationListPath.Text;
                 param.StationListPath;
 
             if (!FileIO.TryGetAllLines(stationListPath, out var nodeList))
@@ -137,14 +171,6 @@ namespace MujinAGVDemo
                 return;
             }
             nodeList.RemoveAt(0);
-            //var nodeList = new List<string>
-            //{
-            //    "161095107535",
-            //    "161095107537",
-            //    "161095107567",
-            //    "161095107565",
-            //    Setting.ST1NodeID
-            //};
             await movePodRotate(param, nodeList);
         }
         private void textBoxServerIP_TextChanged(object sender, EventArgs e)
@@ -197,14 +223,65 @@ namespace MujinAGVDemo
                 param.Unload = 0;
             }
         }
+        private void checkBoxIsStop_CheckedChanged(object sender, EventArgs e)
+        {
+            var serverIP =
+                param.ServerIP;
+            var warehouseID =
+                param.WarehouseID;
+            var robotID =
+                param.RobotID;
+
+            var factory = new CommandFactory(serverIP, warehouseID);
+            if (!factory.IsConnectedTESServer())
+            {
+                Setting.Logger.Error(Setting.NotConnectMsg);
+                return;
+            }
+
+            isStop = !isStop;
+            if (isStop == false)
+            {
+                factory.Create(new PauseRobotParam(robotID)).DoAction();
+                checkBoxIsStop.Text = "AGV再開";
+                checkBoxIsStop.BackColor = Color.Green;
+            }
+            else
+            {
+                checkBoxIsStop.Text = "AGV停止";
+                checkBoxIsStop.BackColor = Color.Red;
+                factory.Create(new ResumeRobotParam(robotID)).DoAction();
+            }
+        }
+
+        private void btnMoveAGV_Click(object sender, EventArgs e)
+        {
+            var serverIP = param.ServerIP;
+            var warehouseID = param.WarehouseID;
+            var nodeID = param.NodeID;
+            //var podID = textBoxPodID.Text;
+
+            var robotID = param.RobotID;
+            MessageBox.Show($"AGV移動指示を作成しました。" +
+                $"{Environment.NewLine}AGV:{robotID},移動先:{nodeID}");
+            moveRobot(serverIP, warehouseID, robotID, nodeID);
+        }
+
+        private void numRepeatCount_ValueChanged(object sender, EventArgs e)
+        {
+            param.RepeatCount = (int)numRepeatCount.Value;
+        }
+
+
+        private void btnSaveSetting_Click(object sender, EventArgs e)
+        {
+            FileIO.SaveSetting(settingPath, param);
+        }
+
         #endregion Event
 
-        #region Method
-        private  void movePod(ParamSettings param)
-        {
-            movePod(param.ServerIP, param.WarehouseID, param.PodID
-                , param.NodeID, param.RobotID, param.TurnMode, param.Unload);
-        }
+        #region Task
+
         private async Task movePod(string serverIP, string warehouseID, string podID
             , string nodeID, string robotID, int turnMode, int unload)
         {
@@ -258,25 +335,23 @@ namespace MujinAGVDemo
                                unload: unload
                                )).DoAction();
 
-                       
-                string logMessage = $"ロボットID {robotID},棚 {podID},移動先 {nodeID}";
+
+                       string logMessage = $"ロボットID {robotID},棚 {podID},移動先 {nodeID}";
                        Setting.Logger.Info(logMessage);
                        Setting.Logger.Info(movePodResult.ReturnMsg);
-
+                       //lblCurrentLineProcess.Text = logMessage;
                        this.Invoke((MethodInvoker)(() =>
                        {
                            lblCurrentLineProcess.Text = logMessage;
                        }));
+                       //lblCurrentLineProcess.Text = movePodResult.ReturnMsg;
+                       //lblCurrentLineProcess.BackColor =
+                       // movePodResult.ReturnMsg == "succ" ? Color.Green : Color.Red;
                    });
                 moveTask.Start();
                 await moveTask.ConfigureAwait(true);
-
-                //factory.Create(new WaitEndTaskParam(movePodResult.Data.TaskID
-                //    , watchRobotID: robotID)).DoAction();
-
-                //});
-
-
+                //lblCurrentLineProcess.Text =
+                //    $"ロボットID {robotID},棚 {podID},移動先 {nodeID} 棚搬送完了";
             }
             //AGVに異常が発生したら例外を出す
             catch (EmergencyException ee)
@@ -308,70 +383,94 @@ namespace MujinAGVDemo
             //var unload = param.Unload;
 
             int nowCount = 1;
-
-
-            for (var i = 0; i < param.RepeatCount; i++)
+            if (param.RepeatCount == 0)
             {
-                prgRepeartCount.Value = (int)((double)nowCount / (double)param.RepeatCount * 100);
-
-
-                lblProgress.Text = $"繰り返し回数 {nowCount}/{param.RepeatCount}";
-                Setting.Logger.Info(string.Format("{0}回目開始", i + 1));
-                for (var j = 0; j < allLines.Count; j++)
+                while (true)
                 {
-                    lblRunLineIndex.Text = $"実行行数 {j+1}/{allLines.Count}";
-                    var splitLine = allLines[j].Split(',').ToList();
-
-                    if (!int.TryParse(splitLine[1], out var turnMode))
+                    lblProgress.Text = $"繰り返し回数 {nowCount}/制限なし";
+                    Setting.Logger.Info(string.Format("{0}回目開始", nowCount + 1));
+                    for (var j = 0; j < allLines.Count; j++)
                     {
-                        Setting.Logger.Error("turnModeが読み込めません：{0}", splitLine[1]);
-                        continue;
-                    }
-                    if (!int.TryParse(splitLine[2], out var unload))
-                    {
-                        Setting.Logger.Error("unloadが読み込めません：{0}", splitLine[2]);
-                        continue;
-                    }
+                        lblRunLineIndex.Text = $"実行行数 {j + 1}/{allLines.Count}";
+                        var splitLine = allLines[j].Split(',').ToList();
 
-                    //if (i >= param.RepeatCount)
-                    //{
-                    //    movePod(serverIP, warehouseID, podID, splitLine[j], robotID, turnMode, 1);
-                    //}
-                    //else
-                    //{
-                    //    movePod(serverIP, warehouseID, podID, splitLine[j], robotID, turnMode, unload);
-                    //}
-                    var nodeID =
-                    //textBoxNodeID.Text;
-                    //param.NodeID;
-                    splitLine[0];
+                        if (!int.TryParse(splitLine[1], out var turnMode))
+                        {
+                            Setting.Logger.Error("turnModeが読み込めません：{0}", splitLine[1]);
+                            continue;
+                        }
+                        if (!int.TryParse(splitLine[2], out var unload))
+                        {
+                            Setting.Logger.Error("unloadが読み込めません：{0}", splitLine[2]);
+                            continue;
+                        }
 
-                    await movePod(serverIP, warehouseID, podID, nodeID, robotID, turnMode, unload);
+                        var nodeID = splitLine[0];
+
+                        await movePod(serverIP, warehouseID, podID, nodeID, robotID, turnMode, unload);
+                    }
+                    nowCount++;
                 }
+            }
+            else
+            {
+                for (var i = 0; i < param.RepeatCount; i++)
+                {
+                    prgRepeartCount.Value = (int)((double)nowCount / (double)param.RepeatCount * 100);
 
-                nowCount++;
+
+                    lblProgress.Text = $"繰り返し回数 {nowCount}/{param.RepeatCount}";
+                    Setting.Logger.Info(string.Format("{0}回目開始", i + 1));
+                    for (var j = 0; j < allLines.Count; j++)
+                    {
+                        lblRunLineIndex.Text = $"実行行数 {j + 1}/{allLines.Count}";
+                        var splitLine = allLines[j].Split(',').ToList();
+
+                        if (!int.TryParse(splitLine[1], out var turnMode))
+                        {
+                            Setting.Logger.Error("turnModeが読み込めません：{0}", splitLine[1]);
+                            continue;
+                        }
+                        if (!int.TryParse(splitLine[2], out var unload))
+                        {
+                            Setting.Logger.Error("unloadが読み込めません：{0}", splitLine[2]);
+                            continue;
+                        }
+
+                        var nodeID = splitLine[0];
+
+                        await movePod(serverIP, warehouseID, podID, nodeID, robotID, turnMode, unload);
+                    }
+
+                    nowCount++;
+                }
             }
 
+            
+
         }
-
-
-        private static void moveRobot(string serverIP, string warehouseID, string robotID, string nodeID)
+        private async Task moveRobot(string serverIP, string warehouseID, string robotID, string nodeID)
         {
             var factory = new CommandFactory(serverIP, warehouseID);
             if (!factory.IsConnectedTESServer())
             {
                 Setting.Logger.Error(Setting.NotConnectMsg);
+                //MessageBox.Show($"AGVの移動に失敗しました。" +
+                //    $"{Environment.NewLine}{Setting.NotConnectMsg}");
                 return;
             }
 
             try
             {
-                Task.Run(() =>
+                var moveTask = new Task(() =>
+                //Task.Run(() =>
                 {
-                    var mvrtA = new MoveRobotReturnMessage();
+                    var moveRobotResult = new MoveRobotReturnMessage();
                     var ret = factory.Create(new UnsetOwnerParam(robotID)).DoAction();
+                    Setting.Logger.Info($"AGV{robotID}に対してUnsetOwnerを行いました。");
                     var rett = factory.Create(new SetOwnerParam(robotID)).DoAction();
-                    mvrtA = (MoveRobotReturnMessage)(factory.Create(new MoveRobotParam(
+                    Setting.Logger.Info($"AGV{robotID}に対してSetOwnerを行いました。");
+                    moveRobotResult = (MoveRobotReturnMessage)(factory.Create(new MoveRobotParam(
                         robotID,
                         DestinationModes.NodeID,
                         nodeID,
@@ -379,25 +478,46 @@ namespace MujinAGVDemo
                         ownerRegist: false
                         // robotFace: Direction.North
                         )).DoAction());
-                    var waitResult = factory.Create(new WaitEndTaskParam(mvrtA.Data.TaskID, watchRobotID: robotID)).DoAction();
+                    var waitResult = factory.Create(new WaitEndTaskParam(moveRobotResult.Data.TaskID, watchRobotID: robotID)).DoAction();
                     if (waitResult.ReturnCode != 0)
                     {
                         Setting.Logger.Info("タスクキャンセル＆ぬける。");
-                        factory.Create(new CancelTaskParam(mvrtA.Data.TaskID)).DoAction();
+                        factory.Create(new CancelTaskParam(moveRobotResult.Data.TaskID)).DoAction();
                     }
+
+                    string logMessage = $"ロボットID {robotID},移動先 {nodeID}";
+                    Setting.Logger.Info(logMessage);
+                    Setting.Logger.Info(moveRobotResult.ReturnMsg);
+
+                    this.Invoke((MethodInvoker)(() =>
+                    {
+                        lblCurrentLineProcess.Text = logMessage;
+                    }));
+                    //lblCurrentLineProcess.Text = $"ロボットID {robotID},移動先 {nodeID}　AGV移動完了";
+                    //lblCurrentLineProcess.BackColor =
+                    //    moveRobotResult.ReturnMsg == "succ" ? Color.Green : Color.Red;
                 });
+                moveTask.Start();
+                await moveTask.ConfigureAwait(true);
             }
             //AGVに異常が発生したら例外を出す
             catch (EmergencyException ee)
             {
                 Setting.Logger.Error(ee.Message);
+                MessageBox.Show($"AGVの移動に失敗しました。" +
+                    $"{Environment.NewLine}{ee.Message}");
             }
             catch (Exception ex)
             {
                 Setting.Logger.Error(ex);
+                MessageBox.Show($"AGVの移動に失敗しました。" +
+                    $"{Environment.NewLine}{ex.Message}");
             }
         }
 
+        #endregion Task
+
+        #region Method
         private double getDirection(int direction)
         {
             var result = Direction.North;
@@ -419,60 +539,68 @@ namespace MujinAGVDemo
             return result;
         }
 
-
-
-        #endregion Method
-
-        private void checkBoxIsStop_CheckedChanged(object sender, EventArgs e)
+        private bool TryLoadSetting()
         {
-            var serverIP =
-                param.ServerIP;
-            var warehouseID =
-                param.WarehouseID;
-            var robotID =
-                param.RobotID;
-
-            var factory = new CommandFactory(serverIP, warehouseID);
-            if (!factory.IsConnectedTESServer())
+            var result = FileIO.TryLoadSetting(settingPath, out param);
+            var message = string.Empty;
+            if (!result)
             {
-                Setting.Logger.Error(Setting.NotConnectMsg);
-                return;
+                message =
+                    $"設定ファイルの読込に失敗しました。{Path.GetFullPath(settingPath)}";
+                Setting.Logger.Error(message);
+                btnLoadSetting.BackColor = Color.Red;
+                return result;
             }
 
-            isStop = !isStop;
-            if (isStop == false)
+            message =
+                $"設定ファイルの読込に成功しました。{Path.GetFullPath(settingPath)}";
+            Setting.Logger.Info(message);
+            btnLoadSetting.BackColor = Color.Green;
+            return result;
+        }
+        private void updateControl()
+        {
+            textBoxServerIP.Text = param.ServerIP;
+            textBoxWarehouseID.Text = param.WarehouseID;
+            textBoxLayoutID.Text = param.LayoutID;
+            textBoxPodID.Text = param.PodID;
+            textBoxNodeID.Text = param.NodeID;
+            textBoxRobotID.Text = param.RobotID;
+            textBoxStationListPath.Text = param.StationListPath;
+            numRepeatCount.Value = param.RepeatCount;
+
+            checkBoxSynchroTurn.Checked = param.TurnMode == 1 ? true : false;
+            checkBoxUnload.Checked = param.Unload == 1 ? true : false;
+        }
+        #endregion Method
+
+        private void btnLoadSetting_Click(object sender, EventArgs e)
+        {
+            if (!TryLoadSetting())
             {
-                factory.Create(new PauseRobotParam(robotID)).DoAction();
-                checkBoxIsStop.Text = "AGV再開";
+                return;
+            }
+            updateControl();
+        }
+
+        private void btnSelectCSV_Click(object sender, EventArgs e)
+        {
+            var openFileDialog = new OpenFileDialog
+            {
+                Title = "CSVファイルを選択",
+                InitialDirectory = Environment.CurrentDirectory
+            };
+
+            if (openFileDialog.ShowDialog() == DialogResult.OK)
+            {
+                textBoxStationListPath.Text = openFileDialog.FileName;
+                Setting.Logger.Info(openFileDialog.FileName);
             }
             else
             {
-
-                checkBoxIsStop.Text = "AGV停止";
-                factory.Create(new ResumeRobotParam(robotID)).DoAction();
+                Setting.Logger.Info("キャンセルされました。");
             }
-        }
-
-        private void btnMoveAGV_Click(object sender, EventArgs e)
-        {
-            var serverIP = param.ServerIP;
-            var warehouseID = param.WarehouseID;
-            var nodeID = param.NodeID;
-            //var podID = textBoxPodID.Text;
-
-            var robotID = param.RobotID;
-
-            moveRobot(serverIP, warehouseID, robotID, nodeID);
-        }
-
-        private void numRepeatCount_ValueChanged(object sender, EventArgs e)
-        {
-            param.RepeatCount = (int)numRepeatCount.Value;
-        }
-
-        private void checkBoxIsError_CheckedChanged(object sender, EventArgs e)
-        {
-
+            openFileDialog.Dispose();
         }
     }
 }

@@ -42,5 +42,32 @@ namespace MujinAGVDemo
             result = true;
             return result;
         }
+        public static void SaveSetting(string filePath, ParamSettings param)
+        {
+            var serializer = new System.Xml.Serialization.XmlSerializer(typeof(ParamSettings));
+            using (var sw = new StreamWriter(filePath, false, Encoding.UTF8))
+            {
+                serializer.Serialize(sw, param);
+                sw.Close();
+            }
+        }
+        public static bool TryLoadSetting(string filePath,out ParamSettings param)
+        {
+            var result = false;
+            param = new ParamSettings();
+            if (!File.Exists(filePath))
+            {
+                Setting.Logger.Error(string.Format("ファイルが存在しません。:{0}", filePath));
+                return result;
+            }
+            
+            var serializer = new System.Xml.Serialization.XmlSerializer(typeof(ParamSettings));
+            using (var sr = new StreamReader(filePath, Encoding.UTF8))
+            {
+                param = (ParamSettings)serializer.Deserialize(sr);
+                result = true;
+            }
+            return result;
+        }
     }
 }

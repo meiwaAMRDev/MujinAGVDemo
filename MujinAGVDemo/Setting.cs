@@ -27,6 +27,10 @@ namespace MujinAGVDemo
         /// TESサーバー接続失敗時のメッセージ
         /// </summary>
         public static string NotConnectMsg = "TESサーバーに接続失敗";
+        /// <summary>
+        /// 設定ファイル読込失敗時のメッセージ
+        /// </summary>
+        public static string CannotLoad = "設定ファイルの読込失敗";
         #endregion メッセージ
 
         #region AGVデモエリア用設定
