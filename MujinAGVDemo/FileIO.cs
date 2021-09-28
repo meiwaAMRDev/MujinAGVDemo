@@ -8,7 +8,7 @@ using NLog;
 
 namespace MujinAGVDemo
 {
-    public static class FileIO
+    public class FileIO
     {
         /// <summary>
         /// ファイルを読み込む
@@ -16,7 +16,7 @@ namespace MujinAGVDemo
         /// <param name="filePath">ファイルのパス</param>
         /// <param name="allLines">読み込んだ全ての行データ</param>
         /// <returns>読込成功ならtrue</returns>
-        public static bool TryGetAllLines(string filePath,out List<string> allLines)
+        public bool TryGetAllLines(string filePath, out List<string> allLines)
         {
             var result = false;
             allLines = new List<string>();
@@ -25,24 +25,24 @@ namespace MujinAGVDemo
                 if (!File.Exists(filePath))
                 {
                     result = false;
-                    Setting.Logger.Error(string.Format("ファイルが存在しません。:{0}", filePath));
+                    Messages.Logger.Error(string.Format("ファイルが存在しません。:{0}", filePath));
                 }
                 allLines = File.ReadAllLines(filePath, Encoding.UTF8).ToList();
                 if (allLines.Count == 0)
                 {
                     result = false;
-                    Setting.Logger.Error(string.Format("ファイル内にデータがありません。:{0}", filePath));
+                    Messages.Logger.Error(string.Format("ファイル内にデータがありません。:{0}", filePath));
                 }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
-                Setting.Logger.Error(ex);
+                Messages.Logger.Error(ex);
             }
-            
+
             result = true;
             return result;
         }
-        public static void SaveSetting(string filePath, ParamSettings param)
+        public void SaveSetting(string filePath, ParamSettings param)
         {
             var serializer = new System.Xml.Serialization.XmlSerializer(typeof(ParamSettings));
             using (var sw = new StreamWriter(filePath, false, Encoding.UTF8))
@@ -51,16 +51,16 @@ namespace MujinAGVDemo
                 sw.Close();
             }
         }
-        public static bool TryLoadSetting(string filePath,out ParamSettings param)
+        public bool TryLoadSetting(string filePath, out ParamSettings param)
         {
             var result = false;
             param = new ParamSettings();
             if (!File.Exists(filePath))
             {
-                Setting.Logger.Error(string.Format("ファイルが存在しません。:{0}", filePath));
+                Messages.Logger.Error(string.Format("ファイルが存在しません。:{0}", filePath));
                 return result;
             }
-            
+
             var serializer = new System.Xml.Serialization.XmlSerializer(typeof(ParamSettings));
             using (var sr = new StreamReader(filePath, Encoding.UTF8))
             {

@@ -1,7 +1,7 @@
 ﻿
 namespace MujinAGVDemo
 {
-    partial class Form1
+    partial class frmMain
     {
         /// <summary>
         /// 必要なデザイナー変数です。
@@ -66,12 +66,13 @@ namespace MujinAGVDemo
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabPage1 = new System.Windows.Forms.TabPage();
             this.tabPage2 = new System.Windows.Forms.TabPage();
+            this.btnSelectCSV = new System.Windows.Forms.Button();
             this.label15 = new System.Windows.Forms.Label();
             this.label13 = new System.Windows.Forms.Label();
             this.label14 = new System.Windows.Forms.Label();
             this.label16 = new System.Windows.Forms.Label();
             this.btnLoadSetting = new System.Windows.Forms.Button();
-            this.btnSelectCSV = new System.Windows.Forms.Button();
+            this.btnCancel = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.numRepeatCount)).BeginInit();
             this.statusStrip1.SuspendLayout();
             this.tabControl1.SuspendLayout();
@@ -106,7 +107,6 @@ namespace MujinAGVDemo
             this.textBoxServerIP.Size = new System.Drawing.Size(148, 19);
             this.textBoxServerIP.TabIndex = 2;
             this.textBoxServerIP.Text = "serverIP";
-            this.textBoxServerIP.TextChanged += new System.EventHandler(this.textBoxServerIP_TextChanged);
             // 
             // textBoxWarehouseID
             // 
@@ -115,7 +115,6 @@ namespace MujinAGVDemo
             this.textBoxWarehouseID.Size = new System.Drawing.Size(148, 19);
             this.textBoxWarehouseID.TabIndex = 3;
             this.textBoxWarehouseID.Text = "warehouseID";
-            this.textBoxWarehouseID.TextChanged += new System.EventHandler(this.textBoxWarehouseID_TextChanged);
             // 
             // textBoxLayoutID
             // 
@@ -124,7 +123,6 @@ namespace MujinAGVDemo
             this.textBoxLayoutID.Size = new System.Drawing.Size(148, 19);
             this.textBoxLayoutID.TabIndex = 4;
             this.textBoxLayoutID.Text = "layoutID";
-            this.textBoxLayoutID.TextChanged += new System.EventHandler(this.textBoxLayoutID_TextChanged);
             // 
             // textBoxNodeID
             // 
@@ -133,7 +131,6 @@ namespace MujinAGVDemo
             this.textBoxNodeID.Size = new System.Drawing.Size(148, 19);
             this.textBoxNodeID.TabIndex = 6;
             this.textBoxNodeID.Text = "nodeID";
-            this.textBoxNodeID.TextChanged += new System.EventHandler(this.textBoxNodeID_TextChanged);
             // 
             // textBoxPodID
             // 
@@ -142,7 +139,6 @@ namespace MujinAGVDemo
             this.textBoxPodID.Size = new System.Drawing.Size(148, 19);
             this.textBoxPodID.TabIndex = 5;
             this.textBoxPodID.Text = "podID";
-            this.textBoxPodID.TextChanged += new System.EventHandler(this.textBoxPodID_TextChanged);
             // 
             // btnMovePod
             // 
@@ -215,7 +211,6 @@ namespace MujinAGVDemo
             this.textBoxRobotID.Size = new System.Drawing.Size(148, 19);
             this.textBoxRobotID.TabIndex = 21;
             this.textBoxRobotID.Text = "robotID";
-            this.textBoxRobotID.TextChanged += new System.EventHandler(this.textBoxRobotID_TextChanged);
             // 
             // btnRotationMove
             // 
@@ -237,7 +232,6 @@ namespace MujinAGVDemo
             this.checkBoxSynchroTurn.TabIndex = 25;
             this.checkBoxSynchroTurn.Text = "シンクロターン";
             this.checkBoxSynchroTurn.UseVisualStyleBackColor = true;
-            this.checkBoxSynchroTurn.CheckedChanged += new System.EventHandler(this.checkBoxSynchroTurn_CheckedChanged);
             // 
             // checkBoxUnload
             // 
@@ -248,7 +242,6 @@ namespace MujinAGVDemo
             this.checkBoxUnload.TabIndex = 26;
             this.checkBoxUnload.Text = "移動先で棚を下ろす";
             this.checkBoxUnload.UseVisualStyleBackColor = true;
-            this.checkBoxUnload.CheckedChanged += new System.EventHandler(this.checkBoxUnload_CheckedChanged);
             // 
             // textBoxStationListPath
             // 
@@ -257,7 +250,6 @@ namespace MujinAGVDemo
             this.textBoxStationListPath.Size = new System.Drawing.Size(120, 19);
             this.textBoxStationListPath.TabIndex = 27;
             this.textBoxStationListPath.Text = "stationListPath";
-            this.textBoxStationListPath.TextChanged += new System.EventHandler(this.textBoxStationListPath_TextChanged);
             // 
             // label6
             // 
@@ -293,7 +285,7 @@ namespace MujinAGVDemo
             // 
             // numRepeatCount
             // 
-            this.numRepeatCount.Location = new System.Drawing.Point(15, 31);
+            this.numRepeatCount.Location = new System.Drawing.Point(198, 36);
             this.numRepeatCount.Margin = new System.Windows.Forms.Padding(2);
             this.numRepeatCount.Name = "numRepeatCount";
             this.numRepeatCount.Size = new System.Drawing.Size(90, 19);
@@ -303,12 +295,11 @@ namespace MujinAGVDemo
             0,
             0,
             0});
-            this.numRepeatCount.ValueChanged += new System.EventHandler(this.numRepeatCount_ValueChanged);
             // 
             // label7
             // 
             this.label7.AutoSize = true;
-            this.label7.Location = new System.Drawing.Point(169, 33);
+            this.label7.Location = new System.Drawing.Point(16, 31);
             this.label7.Name = "label7";
             this.label7.Size = new System.Drawing.Size(160, 24);
             this.label7.TabIndex = 32;
@@ -428,6 +419,7 @@ namespace MujinAGVDemo
             // 
             // tabPage2
             // 
+            this.tabPage2.Controls.Add(this.btnCancel);
             this.tabPage2.Controls.Add(this.btnSelectCSV);
             this.tabPage2.Controls.Add(this.label15);
             this.tabPage2.Controls.Add(this.btnRotationMove);
@@ -442,6 +434,15 @@ namespace MujinAGVDemo
             this.tabPage2.TabIndex = 1;
             this.tabPage2.Text = "連続動作";
             this.tabPage2.UseVisualStyleBackColor = true;
+            // 
+            // btnSelectCSV
+            // 
+            this.btnSelectCSV.Location = new System.Drawing.Point(131, 77);
+            this.btnSelectCSV.Name = "btnSelectCSV";
+            this.btnSelectCSV.Size = new System.Drawing.Size(32, 19);
+            this.btnSelectCSV.TabIndex = 34;
+            this.btnSelectCSV.UseVisualStyleBackColor = true;
+            this.btnSelectCSV.Click += new System.EventHandler(this.btnSelectCSV_Click);
             // 
             // label15
             // 
@@ -490,16 +491,17 @@ namespace MujinAGVDemo
             this.btnLoadSetting.UseVisualStyleBackColor = true;
             this.btnLoadSetting.Click += new System.EventHandler(this.btnLoadSetting_Click);
             // 
-            // btnSelectCSV
+            // btnCancel
             // 
-            this.btnSelectCSV.Location = new System.Drawing.Point(131, 77);
-            this.btnSelectCSV.Name = "btnSelectCSV";
-            this.btnSelectCSV.Size = new System.Drawing.Size(32, 19);
-            this.btnSelectCSV.TabIndex = 34;
-            this.btnSelectCSV.UseVisualStyleBackColor = true;
-            this.btnSelectCSV.Click += new System.EventHandler(this.btnSelectCSV_Click);
+            this.btnCancel.Location = new System.Drawing.Point(15, 166);
+            this.btnCancel.Name = "btnCancel";
+            this.btnCancel.Size = new System.Drawing.Size(147, 23);
+            this.btnCancel.TabIndex = 45;
+            this.btnCancel.Text = "連続動作キャンセル";
+            this.btnCancel.UseVisualStyleBackColor = true;
+            this.btnCancel.Click += new System.EventHandler(this.btnCancel_Click);
             // 
-            // Form1
+            // frmMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
@@ -524,9 +526,9 @@ namespace MujinAGVDemo
             this.Controls.Add(this.textBoxLayoutID);
             this.Controls.Add(this.textBoxWarehouseID);
             this.Controls.Add(this.textBoxServerIP);
-            this.Name = "Form1";
+            this.Name = "frmMain";
             this.Text = "AGVデモソフト";
-            this.Load += new System.EventHandler(this.Form1_Load);
+            this.Load += new System.EventHandler(this.frmMain_Load);
             ((System.ComponentModel.ISupportInitialize)(this.numRepeatCount)).EndInit();
             this.statusStrip1.ResumeLayout(false);
             this.statusStrip1.PerformLayout();
@@ -585,6 +587,7 @@ namespace MujinAGVDemo
         private System.Windows.Forms.Label label16;
         private System.Windows.Forms.Button btnLoadSetting;
         private System.Windows.Forms.Button btnSelectCSV;
+        private System.Windows.Forms.Button btnCancel;
     }
 }
 
