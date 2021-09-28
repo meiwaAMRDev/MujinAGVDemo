@@ -92,7 +92,7 @@ namespace MujinAGVDemo
                 lblCurrentLineProcess.Text = logMessage;
                 var resultMessage =
                     addPodResult.ReturnMsg == "succ" ? "成功" : "失敗";
-                MessageBox.Show($"棚作成に{resultMessage}しました。{Environment.NewLine}棚 {podID},作成位置 {nodeID}");
+                showInfoMessageBox($"棚作成に{resultMessage}しました。{Environment.NewLine}棚 {podID},作成位置 {nodeID}");
             }
             catch (EmergencyException ee)
             {
@@ -133,7 +133,7 @@ namespace MujinAGVDemo
                 lblCurrentLineProcess.Text = logMessage;
                 var resultMessage =
                     removePodResult.ReturnMsg == "succ" ? "成功" : "失敗";
-                MessageBox.Show($"棚削除に{resultMessage}しました。{Environment.NewLine}棚 {podID}");
+                showInfoMessageBox($"棚削除に{resultMessage}しました。{Environment.NewLine}棚 {podID}");
             }
             catch (EmergencyException ee)
             {
@@ -150,12 +150,12 @@ namespace MujinAGVDemo
         private async void btnMovePod_Click(object sender, EventArgs e)
         {
             updateParam();
-            if (ownerUserDetection())
+            if (isHetuUsed())
             {
                 return;
             }
             var token = cancelTokenSource.Token;
-            MessageBox.Show($"棚搬送指示を作成しました。" +
+            showInfoMessageBox($"棚搬送指示を作成しました。" +
                 $"{Environment.NewLine}AGV:{param.RobotID},移動先:{param.NodeID},棚:{param.NodeID}");
 
             await movePod(param.ServerIP, param.WarehouseID, param.PodID
@@ -165,7 +165,7 @@ namespace MujinAGVDemo
         private async void btnRotationMove_Click(object sender, EventArgs e)
         {
             updateParam();
-            if (ownerUserDetection())
+            if (isHetuUsed())
             {
                 return;
             }
@@ -176,7 +176,7 @@ namespace MujinAGVDemo
 
             if (!fileIO.TryGetAllLines(stationListPath, out var nodeList))
             {
-                MessageBox.Show("CSVファイルの読込に失敗しました。");
+                showErrorMessageBox("CSVファイルの読込に失敗しました。");
                 return;
             }
             // ヘッダー行を取り除く処理
@@ -218,7 +218,7 @@ namespace MujinAGVDemo
         private async void btnMoveAGV_Click(object sender, EventArgs e)
         {
             updateParam();
-            if (ownerUserDetection())
+            if (isHetuUsed())
             {
                 return;
             }
@@ -227,8 +227,7 @@ namespace MujinAGVDemo
             var nodeID = param.NodeID;
             var robotID = param.RobotID;
 
-            MessageBox.Show($"AGV移動指示を作成しました。" +
-                $"{Environment.NewLine}AGV:{robotID},移動先:{nodeID}");
+            showInfoMessageBox($"AGV移動指示を作成しました。{Environment.NewLine}AGV:{robotID},移動先:{nodeID}");
             await moveRobot(serverIP, warehouseID, robotID, nodeID);
         }
 
@@ -242,8 +241,7 @@ namespace MujinAGVDemo
         {
             updateParam();
             fileIO.SaveSetting(settingPath, param);
-            MessageBox.Show($"設定ファイルを保存しました。" +
-                $"{Environment.NewLine}保存先:{Path.GetFullPath(settingPath)}");
+            showInfoMessageBox($"設定ファイルを保存しました。{Environment.NewLine}保存先:{Path.GetFullPath(settingPath)}");
         }
 
         #endregion Event
@@ -341,7 +339,7 @@ namespace MujinAGVDemo
 
 
             lblCurrentLineProcess.Text = "連続動作完了";
-            MessageBox.Show("連続動作完了");
+            showInfoMessageBox("連続動作完了");
 
         }
         private async Task moveRobot(string serverIP, string warehouseID, string robotID, string nodeID)
@@ -358,46 +356,41 @@ namespace MujinAGVDemo
                 var moveTask = new Task(() =>
                 {
                     var moveRobotResult = new MoveRobotReturnMessage();
-                                        
-                    if (ownerUserDetection())
+
+                    var unsetOwnerResult = factory.Create(new UnsetOwnerParam(robotID)).DoAction();
+
+                    if (unsetOwnerResult.ReturnMsg != "succ")
                     {
+                        showUnsetOwnerErrorDialog(unsetOwnerResult.ReturnMsg);
+                        logger.Error($"{Messages.UnsetOwnerError}:AGV{param.RobotID}{unsetOwnerResult.ReturnMsg}");
+                        //return;
+                    }
+                    logger.Info($"AGV{robotID}に対してUnsetOwnerが成功しました。");
+
+                    var setOwnerResult = factory.Create(new SetOwnerParam(robotID)).DoAction();
+
+                    if (setOwnerResult.ReturnMsg != "succ")
+                    {
+                        showUnsetOwnerErrorDialog(unsetOwnerResult.ReturnMsg);
+                        logger.Error($"{Messages.SetOwnerError}:AGV{param.RobotID}{setOwnerResult.ReturnMsg}");
                         return;
                     }
+                    logger.Info($"AGV{robotID}に対してSetOwnerが成功しました。");
 
-                    //var unsetOwnerResult = factory.Create(new UnsetOwnerParam(robotID)).DoAction();
-                    
-                    //if (unsetOwnerResult.ReturnMsg != "succ")
-                    //{
-                    //    showUnsetOwnerErrorDialog(unsetOwnerResult.ReturnMsg);
-                    //    logger.Error($"AGV{robotID}に対してUnsetOwnerが失敗しました。{unsetOwnerResult.ReturnMsg}");
-                    //    //return;
-                    //}
-                    //logger.Info($"AGV{robotID}に対してUnsetOwnerが成功しました。");
-
-                    //var setOwnerResult = factory.Create(new SetOwnerParam(robotID)).DoAction();
-                    
-                    //if (setOwnerResult.ReturnMsg != "succ")
-                    //{
-                    //    showUnsetOwnerErrorDialog(unsetOwnerResult.ReturnMsg);
-                    //    logger.Error($"AGV{robotID}に対してSetOwnerが失敗しました。{setOwnerResult.ReturnMsg}");
-                    //    return;
-                    //}
-                    //logger.Info($"AGV{robotID}に対してSetOwnerが成功しました。");
-
-                    moveRobotResult = (MoveRobotReturnMessage)(factory.Create(new MoveRobotParam(
+                    moveRobotResult = (MoveRobotReturnMessage)factory.Create(new MoveRobotParam(
                         robotID,
                         DestinationModes.NodeID,
                         nodeID,
                         isEndWait: false,
                         ownerRegist: false
                         // robotFace: Direction.North
-                        )).DoAction());
-                    var waitResult = factory.Create(new WaitEndTaskParam(moveRobotResult.Data.TaskID, watchRobotID: robotID)).DoAction();
-                    if (waitResult.ReturnCode != 0)
-                    {
-                        logger.Info("タスクキャンセル＆ぬける。");
-                        factory.Create(new CancelTaskParam(moveRobotResult.Data.TaskID)).DoAction();
-                    }
+                        )).DoAction();
+                    //var waitResult = factory.Create(new WaitEndTaskParam(moveRobotResult.Data.TaskID, watchRobotID: robotID)).DoAction();
+                    //if (waitResult.ReturnCode != 0)
+                    //{
+                    //    logger.Info("タスクキャンセル＆ぬける。");
+                    //    factory.Create(new CancelTaskParam(moveRobotResult.Data.TaskID)).DoAction();
+                    //}
 
                     string logMessage = $"ロボットID {robotID},移動先 {nodeID}";
                     logger.Info(logMessage);
@@ -429,23 +422,23 @@ namespace MujinAGVDemo
         #region Method
         private void showAddPodErrorDialog(string errorMessage)
         {
-            MessageBox.Show($"棚作成に失敗しました。{Environment.NewLine}{errorMessage}");
+            showErrorMessageBox($"棚作成に失敗しました。{Environment.NewLine}{errorMessage}");
         }
         private void showRemovePodErrorDialog(string errorMessage)
         {
-            MessageBox.Show($"棚削除に失敗しました。{Environment.NewLine}{errorMessage}");
+            showErrorMessageBox($"棚削除に失敗しました。{Environment.NewLine}{errorMessage}");
         }
         private void showMoveRobotErrorDialog(string errorMessage)
         {
-            MessageBox.Show($"AGVの移動に失敗しました。{Environment.NewLine}{errorMessage}");
+            showErrorMessageBox($"AGVの移動に失敗しました。{Environment.NewLine}{errorMessage}");
         }
         private void showSetOwnerErrorDialog(string errorMessage)
         {
-            MessageBox.Show($"SetOwnerに失敗しました。{Environment.NewLine}{errorMessage}");
+            showErrorMessageBox($"SetOwnerに失敗しました。{Environment.NewLine}{errorMessage}");
         }
         private void showUnsetOwnerErrorDialog(string errorMessage)
         {
-            MessageBox.Show($"UnsetOwnerに失敗しました。{Environment.NewLine}{errorMessage}");
+            showErrorMessageBox($"UnsetOwnerに失敗しました。{Environment.NewLine}{errorMessage}");
         }
         private bool tryLoadSetting()
         {
@@ -457,7 +450,7 @@ namespace MujinAGVDemo
                     $"設定ファイルの読込に失敗しました。{Path.GetFullPath(settingPath)}";
                 logger.Error(message);
                 btnLoadSetting.BackColor = Color.Red;
-                MessageBox.Show(message);
+                showErrorMessageBox(message);
                 return result;
             }
 
@@ -465,7 +458,7 @@ namespace MujinAGVDemo
                 $"設定ファイルの読込に成功しました。{Path.GetFullPath(settingPath)}";
             logger.Info(message);
             btnLoadSetting.BackColor = Color.Green;
-            MessageBox.Show(message);
+            showInfoMessageBox(message);
             return result;
         }
         /// <summary>
@@ -537,10 +530,10 @@ namespace MujinAGVDemo
             logger.Info("連続動作キャンセルをクリックしました。");
         }
         /// <summary>
-        /// AGVのオーナーを調べる
+        /// Hetuで占有されていないかを調べる
         /// </summary>
         /// <returns>Hetuで占有している場合はtrue,Hetu以外の場合はfalse</returns>
-        private bool ownerUserDetection()
+        private bool isHetuUsed()
         {
             var clientCode = "biz_test";
 
@@ -548,19 +541,42 @@ namespace MujinAGVDemo
             if (!factory.IsConnectedTESServer())
                 logger.Error(Messages.NotConnectMsg);
 
-            var getRobotRetMsg = (GetRobotListFromDBReturnMessage)(factory.Create(new GetRobotListFromDBParam()).DoAction());
-            var anyUsed = false;
-            getRobotRetMsg.Data.RobotList.ForEach(rb =>
+            var getRobotRetMsg = (GetRobotListFromDBReturnMessage)factory.Create(new GetRobotListFromDBParam()).DoAction();
+            
+            var rb=getRobotRetMsg.Data.RobotList.Where(x => x.RobotID == param.RobotID).FirstOrDefault();
+            if (rb == null)
             {
-                if (rb.Owner == "SUPER")
-                {
-                    var message = $"AGV[{rb.RobotID}]がHetuで使用されています。占有をキャンセルしてください。状態【{rb.TaskType}】";
-                    logger.Error(message);
-                    MessageBox.Show(message);
-                    anyUsed = true;
-                }
-            });
-            return anyUsed;
+                var message = $"AGV[{param.RobotID}]が存在しません。";
+                logger.Error(message);
+                showErrorMessageBox(message);
+                return true;
+            }
+            
+            if (rb.Owner == "SUPER")
+            {
+                var message = $"AGV[{rb.RobotID}]がHetuで使用されています。占有をキャンセルしてください。状態【{rb.TaskType}】";
+                logger.Error(message);
+                showErrorMessageBox(message);
+                return true;
+            }
+
+            return false;
+        }
+        /// <summary>
+        /// エラーメッセージを表示する
+        /// </summary>
+        /// <param name="message">表示するメッセージ</param>
+        private void showErrorMessageBox(string message)
+        {
+            MessageBox.Show(message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        }
+        /// <summary>
+        /// エラーではないメッセージを表示する
+        /// </summary>
+        /// <param name="message">表示するメッセージ</param>
+        private void showInfoMessageBox(string message)
+        {
+            MessageBox.Show(message, "Info", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
     }
 }

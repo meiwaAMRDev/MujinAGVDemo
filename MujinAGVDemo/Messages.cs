@@ -31,6 +31,8 @@ namespace MujinAGVDemo
         /// 設定ファイル読込失敗時のメッセージ
         /// </summary>
         public const string CannotLoad = "設定ファイルの読込失敗";
+        public const string UnsetOwnerError = "UnsetOwnerが失敗しました。";
+        public const string SetOwnerError = "SetOwnerが失敗しました。";
         #endregion メッセージ
     }
 }
