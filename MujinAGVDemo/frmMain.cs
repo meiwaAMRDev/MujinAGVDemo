@@ -150,6 +150,10 @@ namespace MujinAGVDemo
         private async void btnMovePod_Click(object sender, EventArgs e)
         {
             updateParam();
+            if (ownerUserDetection())
+            {
+                return;
+            }
             var token = cancelTokenSource.Token;
             MessageBox.Show($"棚搬送指示を作成しました。" +
                 $"{Environment.NewLine}AGV:{param.RobotID},移動先:{param.NodeID},棚:{param.NodeID}");
@@ -161,6 +165,10 @@ namespace MujinAGVDemo
         private async void btnRotationMove_Click(object sender, EventArgs e)
         {
             updateParam();
+            if (ownerUserDetection())
+            {
+                return;
+            }
             cancelTokenSource = new CancellationTokenSource();
             var token = cancelTokenSource.Token;
 
@@ -210,6 +218,10 @@ namespace MujinAGVDemo
         private async void btnMoveAGV_Click(object sender, EventArgs e)
         {
             updateParam();
+            if (ownerUserDetection())
+            {
+                return;
+            }
             var serverIP = param.ServerIP;
             var warehouseID = param.WarehouseID;
             var nodeID = param.NodeID;
