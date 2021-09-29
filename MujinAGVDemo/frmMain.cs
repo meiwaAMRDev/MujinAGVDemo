@@ -37,6 +37,7 @@ namespace MujinAGVDemo
         const int unloadModeIndex = 2;
         const int ON = 1;
         const int OFF = 0;
+        
         #endregion Const
 
         #region Property
@@ -449,16 +450,9 @@ namespace MujinAGVDemo
                 message =
                     $"設定ファイルの読込に失敗しました。{Path.GetFullPath(settingPath)}";
                 logger.Error(message);
-                btnLoadSetting.BackColor = Color.Red;
                 showErrorMessageBox(message);
                 return result;
             }
-
-            message =
-                $"設定ファイルの読込に成功しました。{Path.GetFullPath(settingPath)}";
-            logger.Info(message);
-            btnLoadSetting.BackColor = Color.Green;
-            showInfoMessageBox(message);
             return result;
         }
         /// <summary>
@@ -499,8 +493,14 @@ namespace MujinAGVDemo
         {
             if (!tryLoadSetting())
             {
+                btnLoadSetting.BackColor = Color.Red;
                 return;
             }
+            var message =
+                $"設定ファイルの読込に成功しました。{Path.GetFullPath(settingPath)}";
+            logger.Info(message);
+            btnLoadSetting.BackColor = Color.Green;
+            showInfoMessageBox(message);
             updateControl();
         }
 
@@ -509,7 +509,8 @@ namespace MujinAGVDemo
             var openFileDialog = new OpenFileDialog
             {
                 Title = "CSVファイルを選択",
-                InitialDirectory = Environment.CurrentDirectory
+                InitialDirectory = Environment.CurrentDirectory,
+                Filter = "CSVファイル|*.csv"
             };
 
             if (openFileDialog.ShowDialog() == DialogResult.OK)
@@ -577,6 +578,25 @@ namespace MujinAGVDemo
         private void showInfoMessageBox(string message)
         {
             MessageBox.Show(message, "Info", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        }
+        /// <summary>
+        /// サンプルCSVファイルの場所を開く
+        /// </summary>
+        private void openSampleCSVDir()
+        {
+            /// <summary>
+            /// サンプルCSVファイルのパス
+            /// </summary>
+            const string sampleCSVPath = @"CSVSample\サンプル.csv";
+            
+            System.Diagnostics.Process.Start("EXPLORER.EXE", $"/select,{sampleCSVPath}");
+            textBoxStationListPath.Text = sampleCSVPath;
+            param.StationListPath = sampleCSVPath;
+        }
+
+        private void btnSaveSampleCSV_Click(object sender, EventArgs e)
+        {
+            openSampleCSVDir();            
         }
     }
 }

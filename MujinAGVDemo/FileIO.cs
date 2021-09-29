@@ -42,6 +42,31 @@ namespace MujinAGVDemo
             result = true;
             return result;
         }
+        /// <summary>
+        /// ファイルを保存する
+        /// </summary>
+        /// <param name="savePath">保存先ファイルパス</param>
+        /// <param name="allLines">書き込む文字列のリスト</param>
+        /// <returns>保存成功ならtrue</returns>
+        public bool TrySaveAllLines(string savePath,List<string> allLines)
+        {
+            try
+            {
+                using (var sw = new StreamWriter(savePath, false, Encoding.UTF8))
+                {
+                    foreach(var line in allLines)
+                    {
+                        sw.WriteLine(line);
+                    }
+                }
+            }
+            catch(Exception ex)
+            {
+                Messages.Logger.Error(ex);
+                return false;
+            }
+            return true;
+        }
         public void SaveSetting(string filePath, ParamSettings param)
         {
             var serializer = new System.Xml.Serialization.XmlSerializer(typeof(ParamSettings));

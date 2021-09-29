@@ -66,13 +66,16 @@ namespace MujinAGVDemo
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabPage1 = new System.Windows.Forms.TabPage();
             this.tabPage2 = new System.Windows.Forms.TabPage();
+            this.label17 = new System.Windows.Forms.Label();
+            this.btnSaveSampleCSV = new System.Windows.Forms.Button();
+            this.btnCancel = new System.Windows.Forms.Button();
             this.btnSelectCSV = new System.Windows.Forms.Button();
             this.label15 = new System.Windows.Forms.Label();
             this.label13 = new System.Windows.Forms.Label();
             this.label14 = new System.Windows.Forms.Label();
             this.label16 = new System.Windows.Forms.Label();
             this.btnLoadSetting = new System.Windows.Forms.Button();
-            this.btnCancel = new System.Windows.Forms.Button();
+            this.label18 = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.numRepeatCount)).BeginInit();
             this.statusStrip1.SuspendLayout();
             this.tabControl1.SuspendLayout();
@@ -214,7 +217,7 @@ namespace MujinAGVDemo
             // 
             // btnRotationMove
             // 
-            this.btnRotationMove.Location = new System.Drawing.Point(15, 123);
+            this.btnRotationMove.Location = new System.Drawing.Point(308, 115);
             this.btnRotationMove.Margin = new System.Windows.Forms.Padding(2);
             this.btnRotationMove.Name = "btnRotationMove";
             this.btnRotationMove.Size = new System.Drawing.Size(147, 38);
@@ -245,7 +248,7 @@ namespace MujinAGVDemo
             // 
             // textBoxStationListPath
             // 
-            this.textBoxStationListPath.Location = new System.Drawing.Point(15, 77);
+            this.textBoxStationListPath.Location = new System.Drawing.Point(309, 50);
             this.textBoxStationListPath.Name = "textBoxStationListPath";
             this.textBoxStationListPath.Size = new System.Drawing.Size(120, 19);
             this.textBoxStationListPath.TabIndex = 27;
@@ -254,7 +257,7 @@ namespace MujinAGVDemo
             // label6
             // 
             this.label6.AutoSize = true;
-            this.label6.Location = new System.Drawing.Point(169, 80);
+            this.label6.Location = new System.Drawing.Point(8, 57);
             this.label6.Name = "label6";
             this.label6.Size = new System.Drawing.Size(102, 12);
             this.label6.TabIndex = 28;
@@ -285,7 +288,7 @@ namespace MujinAGVDemo
             // 
             // numRepeatCount
             // 
-            this.numRepeatCount.Location = new System.Drawing.Point(198, 36);
+            this.numRepeatCount.Location = new System.Drawing.Point(309, 13);
             this.numRepeatCount.Margin = new System.Windows.Forms.Padding(2);
             this.numRepeatCount.Name = "numRepeatCount";
             this.numRepeatCount.Size = new System.Drawing.Size(90, 19);
@@ -299,7 +302,7 @@ namespace MujinAGVDemo
             // label7
             // 
             this.label7.AutoSize = true;
-            this.label7.Location = new System.Drawing.Point(16, 31);
+            this.label7.Location = new System.Drawing.Point(8, 8);
             this.label7.Name = "label7";
             this.label7.Size = new System.Drawing.Size(160, 24);
             this.label7.TabIndex = 32;
@@ -419,6 +422,9 @@ namespace MujinAGVDemo
             // 
             // tabPage2
             // 
+            this.tabPage2.Controls.Add(this.label18);
+            this.tabPage2.Controls.Add(this.label17);
+            this.tabPage2.Controls.Add(this.btnSaveSampleCSV);
             this.tabPage2.Controls.Add(this.btnCancel);
             this.tabPage2.Controls.Add(this.btnSelectCSV);
             this.tabPage2.Controls.Add(this.label15);
@@ -435,9 +441,38 @@ namespace MujinAGVDemo
             this.tabPage2.Text = "連続動作";
             this.tabPage2.UseVisualStyleBackColor = true;
             // 
+            // label17
+            // 
+            this.label17.AutoSize = true;
+            this.label17.Location = new System.Drawing.Point(16, 161);
+            this.label17.Name = "label17";
+            this.label17.Size = new System.Drawing.Size(195, 24);
+            this.label17.TabIndex = 47;
+            this.label17.Text = "連続動作をキャンセルします。\r\n現在のサイクルを行った後に終了します。";
+            // 
+            // btnSaveSampleCSV
+            // 
+            this.btnSaveSampleCSV.Location = new System.Drawing.Point(308, 81);
+            this.btnSaveSampleCSV.Name = "btnSaveSampleCSV";
+            this.btnSaveSampleCSV.Size = new System.Drawing.Size(147, 19);
+            this.btnSaveSampleCSV.TabIndex = 46;
+            this.btnSaveSampleCSV.Text = "サンプルCSVの場所を開く";
+            this.btnSaveSampleCSV.UseVisualStyleBackColor = true;
+            this.btnSaveSampleCSV.Click += new System.EventHandler(this.btnSaveSampleCSV_Click);
+            // 
+            // btnCancel
+            // 
+            this.btnCancel.Location = new System.Drawing.Point(308, 162);
+            this.btnCancel.Name = "btnCancel";
+            this.btnCancel.Size = new System.Drawing.Size(147, 23);
+            this.btnCancel.TabIndex = 45;
+            this.btnCancel.Text = "連続動作キャンセル";
+            this.btnCancel.UseVisualStyleBackColor = true;
+            this.btnCancel.Click += new System.EventHandler(this.btnCancel_Click);
+            // 
             // btnSelectCSV
             // 
-            this.btnSelectCSV.Location = new System.Drawing.Point(131, 77);
+            this.btnSelectCSV.Location = new System.Drawing.Point(423, 50);
             this.btnSelectCSV.Name = "btnSelectCSV";
             this.btnSelectCSV.Size = new System.Drawing.Size(32, 19);
             this.btnSelectCSV.TabIndex = 34;
@@ -447,12 +482,11 @@ namespace MujinAGVDemo
             // label15
             // 
             this.label15.AutoSize = true;
-            this.label15.Location = new System.Drawing.Point(169, 123);
+            this.label15.Location = new System.Drawing.Point(13, 115);
             this.label15.Name = "label15";
-            this.label15.Size = new System.Drawing.Size(286, 48);
+            this.label15.Size = new System.Drawing.Size(181, 24);
             this.label15.TabIndex = 33;
-            this.label15.Text = "CSVの内容に従って棚を運搬します。\r\nnodeID:移動先ノードID\r\nturnMode:0=シンクロターンしない　1=シンクロターンする\r\nunload:0=" +
-    "移動先で棚を下ろさない　1=移動先で棚を下ろす\r\n";
+            this.label15.Text = "CSVの内容に従って棚を運搬します。\r\nヘッダー1行は必ず付与してください。\r\n";
             // 
             // label13
             // 
@@ -491,15 +525,14 @@ namespace MujinAGVDemo
             this.btnLoadSetting.UseVisualStyleBackColor = true;
             this.btnLoadSetting.Click += new System.EventHandler(this.btnLoadSetting_Click);
             // 
-            // btnCancel
+            // label18
             // 
-            this.btnCancel.Location = new System.Drawing.Point(15, 166);
-            this.btnCancel.Name = "btnCancel";
-            this.btnCancel.Size = new System.Drawing.Size(147, 23);
-            this.btnCancel.TabIndex = 45;
-            this.btnCancel.Text = "連続動作キャンセル";
-            this.btnCancel.UseVisualStyleBackColor = true;
-            this.btnCancel.Click += new System.EventHandler(this.btnCancel_Click);
+            this.label18.AutoSize = true;
+            this.label18.Location = new System.Drawing.Point(6, 84);
+            this.label18.Name = "label18";
+            this.label18.Size = new System.Drawing.Size(157, 12);
+            this.label18.TabIndex = 48;
+            this.label18.Text = "サンプルCSVの場所を開きます。";
             // 
             // frmMain
             // 
@@ -588,6 +621,9 @@ namespace MujinAGVDemo
         private System.Windows.Forms.Button btnLoadSetting;
         private System.Windows.Forms.Button btnSelectCSV;
         private System.Windows.Forms.Button btnCancel;
+        private System.Windows.Forms.Button btnSaveSampleCSV;
+        private System.Windows.Forms.Label label17;
+        private System.Windows.Forms.Label label18;
     }
 }
 
