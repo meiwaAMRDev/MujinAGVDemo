@@ -19,10 +19,7 @@ namespace MujinAGVDemo
     public partial class frmMain : Form
     {
         #region Const
-        /// <summary>
-        /// 設定ファイルのパス
-        /// </summary>
-        const string settingPath = "ParamSetting.xml";
+        
         /// <summary>
         /// CSVファイルの中のnodeIDのインデックス
         /// </summary>
@@ -37,11 +34,14 @@ namespace MujinAGVDemo
         const int unloadModeIndex = 2;
         const int ON = 1;
         const int OFF = 0;
-        
+
         #endregion Const
 
         #region Property
-
+        /// <summary>
+        /// 設定ファイルのパス
+        /// </summary>
+        string settingPath = "ParamSetting.xml";
         ParamSettings param;
         bool isStop = false;        
         FileIO fileIO = new FileIO();
@@ -91,9 +91,19 @@ namespace MujinAGVDemo
                 logger.Info(logMessage);
                 logger.Info(addPodResult.ReturnMsg);
                 lblCurrentLineProcess.Text = logMessage;
-                var resultMessage =
-                    addPodResult.ReturnMsg == "succ" ? "成功" : "失敗";
-                showInfoMessageBox($"棚作成に{resultMessage}しました。{Environment.NewLine}棚 {podID},作成位置 {nodeID}");
+                //var resultMessage =
+                //    addPodResult.ReturnMsg == "succ" ? "成功" : "失敗";
+
+                if (addPodResult.ReturnMsg == "succ")
+                {
+                    showInfoMessageBox($"棚作成に成功しました。{Environment.NewLine}棚 {podID},作成位置 {nodeID}");
+                }
+                else
+                {
+                    showInfoMessageBox($"棚作成に失敗しました。{addPodResult.ReturnMsg}{Environment.NewLine}棚 {podID},作成位置 {nodeID}");
+                }
+
+                
             }
             catch (EmergencyException ee)
             {
@@ -125,6 +135,11 @@ namespace MujinAGVDemo
                 return;
             }
 
+            removePod(podID, factory);
+        }
+
+        private void removePod(string podID, CommandFactory factory)
+        {
             try
             {
                 var removePodResult = factory.Create(new RemovePodParam(podID)).DoAction();
@@ -135,6 +150,15 @@ namespace MujinAGVDemo
                 var resultMessage =
                     removePodResult.ReturnMsg == "succ" ? "成功" : "失敗";
                 showInfoMessageBox($"棚削除に{resultMessage}しました。{Environment.NewLine}棚 {podID}");
+
+                if (removePodResult.ReturnMsg == "succ")
+                {
+                    showInfoMessageBox($"棚削除に成功しました。{Environment.NewLine}棚 {podID}");
+                }
+                else
+                {
+                    showInfoMessageBox($"棚削除に失敗しました。{removePodResult.ReturnMsg}{Environment.NewLine}棚 {podID}");
+                }
             }
             catch (EmergencyException ee)
             {
@@ -597,6 +621,30 @@ namespace MujinAGVDemo
         private void btnSaveSampleCSV_Click(object sender, EventArgs e)
         {
             openSampleCSVDir();            
+        }
+
+        private void btnRemoveAllPods_Click(object sender, EventArgs e)
+        {
+            var factory = new CommandFactory(param.ServerIP);
+            if (!factory.IsConnectedTESServer())
+            {
+                logger.Error(Messages.NotConnectMsg);
+                showAddPodErrorDialog(Messages.NotConnectMsg);
+                return;
+            }
+            try
+            {
+                var getPodResult = (GetPodListReturnMessage)factory.Create(new GetPodListParam()).DoAction();
+                getPodResult.Data.PodList.ForEach(pd => {
+                    removePod(pd.PodID, factory);
+                });
+            }
+            catch(Exception ex)
+            {
+                logger.Error(ex);
+                showAddPodErrorDialog(ex.Message);
+                return;
+            }
         }
     }
 }

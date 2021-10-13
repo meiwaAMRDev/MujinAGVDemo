@@ -65,7 +65,10 @@ namespace MujinAGVDemo
             this.label12 = new System.Windows.Forms.Label();
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabPage1 = new System.Windows.Forms.TabPage();
+            this.label19 = new System.Windows.Forms.Label();
+            this.btnRemoveAllPods = new System.Windows.Forms.Button();
             this.tabPage2 = new System.Windows.Forms.TabPage();
+            this.label18 = new System.Windows.Forms.Label();
             this.label17 = new System.Windows.Forms.Label();
             this.btnSaveSampleCSV = new System.Windows.Forms.Button();
             this.btnCancel = new System.Windows.Forms.Button();
@@ -75,7 +78,6 @@ namespace MujinAGVDemo
             this.label14 = new System.Windows.Forms.Label();
             this.label16 = new System.Windows.Forms.Label();
             this.btnLoadSetting = new System.Windows.Forms.Button();
-            this.label18 = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.numRepeatCount)).BeginInit();
             this.statusStrip1.SuspendLayout();
             this.tabControl1.SuspendLayout();
@@ -85,7 +87,7 @@ namespace MujinAGVDemo
             // 
             // btnAddPod
             // 
-            this.btnAddPod.Location = new System.Drawing.Point(6, 66);
+            this.btnAddPod.Location = new System.Drawing.Point(6, 50);
             this.btnAddPod.Name = "btnAddPod";
             this.btnAddPod.Size = new System.Drawing.Size(75, 23);
             this.btnAddPod.TabIndex = 0;
@@ -95,7 +97,7 @@ namespace MujinAGVDemo
             // 
             // btnRemovePod
             // 
-            this.btnRemovePod.Location = new System.Drawing.Point(6, 94);
+            this.btnRemovePod.Location = new System.Drawing.Point(6, 78);
             this.btnRemovePod.Name = "btnRemovePod";
             this.btnRemovePod.Size = new System.Drawing.Size(75, 23);
             this.btnRemovePod.TabIndex = 1;
@@ -145,7 +147,7 @@ namespace MujinAGVDemo
             // 
             // btnMovePod
             // 
-            this.btnMovePod.Location = new System.Drawing.Point(6, 123);
+            this.btnMovePod.Location = new System.Drawing.Point(6, 133);
             this.btnMovePod.Name = "btnMovePod";
             this.btnMovePod.Size = new System.Drawing.Size(75, 23);
             this.btnMovePod.TabIndex = 8;
@@ -278,7 +280,7 @@ namespace MujinAGVDemo
             // 
             // btnMoveAGV
             // 
-            this.btnMoveAGV.Location = new System.Drawing.Point(6, 152);
+            this.btnMoveAGV.Location = new System.Drawing.Point(6, 162);
             this.btnMoveAGV.Name = "btnMoveAGV";
             this.btnMoveAGV.Size = new System.Drawing.Size(75, 23);
             this.btnMoveAGV.TabIndex = 30;
@@ -357,7 +359,7 @@ namespace MujinAGVDemo
             // label9
             // 
             this.label9.AutoSize = true;
-            this.label9.Location = new System.Drawing.Point(102, 71);
+            this.label9.Location = new System.Drawing.Point(102, 55);
             this.label9.Name = "label9";
             this.label9.Size = new System.Drawing.Size(287, 12);
             this.label9.TabIndex = 36;
@@ -366,7 +368,7 @@ namespace MujinAGVDemo
             // label10
             // 
             this.label10.AutoSize = true;
-            this.label10.Location = new System.Drawing.Point(102, 99);
+            this.label10.Location = new System.Drawing.Point(102, 83);
             this.label10.Name = "label10";
             this.label10.Size = new System.Drawing.Size(167, 12);
             this.label10.TabIndex = 37;
@@ -375,7 +377,7 @@ namespace MujinAGVDemo
             // label11
             // 
             this.label11.AutoSize = true;
-            this.label11.Location = new System.Drawing.Point(102, 128);
+            this.label11.Location = new System.Drawing.Point(102, 138);
             this.label11.Name = "label11";
             this.label11.Size = new System.Drawing.Size(369, 12);
             this.label11.TabIndex = 38;
@@ -384,7 +386,7 @@ namespace MujinAGVDemo
             // label12
             // 
             this.label12.AutoSize = true;
-            this.label12.Location = new System.Drawing.Point(102, 157);
+            this.label12.Location = new System.Drawing.Point(102, 167);
             this.label12.Name = "label12";
             this.label12.Size = new System.Drawing.Size(309, 12);
             this.label12.TabIndex = 39;
@@ -402,6 +404,8 @@ namespace MujinAGVDemo
             // 
             // tabPage1
             // 
+            this.tabPage1.Controls.Add(this.label19);
+            this.tabPage1.Controls.Add(this.btnRemoveAllPods);
             this.tabPage1.Controls.Add(this.checkBoxUnload);
             this.tabPage1.Controls.Add(this.label12);
             this.tabPage1.Controls.Add(this.btnAddPod);
@@ -419,6 +423,25 @@ namespace MujinAGVDemo
             this.tabPage1.TabIndex = 0;
             this.tabPage1.Text = "各個操作";
             this.tabPage1.UseVisualStyleBackColor = true;
+            // 
+            // label19
+            // 
+            this.label19.AutoSize = true;
+            this.label19.Location = new System.Drawing.Point(102, 109);
+            this.label19.Name = "label19";
+            this.label19.Size = new System.Drawing.Size(107, 12);
+            this.label19.TabIndex = 41;
+            this.label19.Text = "棚を全て削除します。";
+            // 
+            // btnRemoveAllPods
+            // 
+            this.btnRemoveAllPods.Location = new System.Drawing.Point(6, 104);
+            this.btnRemoveAllPods.Name = "btnRemoveAllPods";
+            this.btnRemoveAllPods.Size = new System.Drawing.Size(75, 23);
+            this.btnRemoveAllPods.TabIndex = 40;
+            this.btnRemoveAllPods.Text = "棚全削除";
+            this.btnRemoveAllPods.UseVisualStyleBackColor = true;
+            this.btnRemoveAllPods.Click += new System.EventHandler(this.btnRemoveAllPods_Click);
             // 
             // tabPage2
             // 
@@ -440,6 +463,15 @@ namespace MujinAGVDemo
             this.tabPage2.TabIndex = 1;
             this.tabPage2.Text = "連続動作";
             this.tabPage2.UseVisualStyleBackColor = true;
+            // 
+            // label18
+            // 
+            this.label18.AutoSize = true;
+            this.label18.Location = new System.Drawing.Point(6, 84);
+            this.label18.Name = "label18";
+            this.label18.Size = new System.Drawing.Size(157, 12);
+            this.label18.TabIndex = 48;
+            this.label18.Text = "サンプルCSVの場所を開きます。";
             // 
             // label17
             // 
@@ -524,15 +556,6 @@ namespace MujinAGVDemo
             this.btnLoadSetting.Text = "設定読出";
             this.btnLoadSetting.UseVisualStyleBackColor = true;
             this.btnLoadSetting.Click += new System.EventHandler(this.btnLoadSetting_Click);
-            // 
-            // label18
-            // 
-            this.label18.AutoSize = true;
-            this.label18.Location = new System.Drawing.Point(6, 84);
-            this.label18.Name = "label18";
-            this.label18.Size = new System.Drawing.Size(157, 12);
-            this.label18.TabIndex = 48;
-            this.label18.Text = "サンプルCSVの場所を開きます。";
             // 
             // frmMain
             // 
@@ -624,6 +647,8 @@ namespace MujinAGVDemo
         private System.Windows.Forms.Button btnSaveSampleCSV;
         private System.Windows.Forms.Label label17;
         private System.Windows.Forms.Label label18;
+        private System.Windows.Forms.Label label19;
+        private System.Windows.Forms.Button btnRemoveAllPods;
     }
 }
 
