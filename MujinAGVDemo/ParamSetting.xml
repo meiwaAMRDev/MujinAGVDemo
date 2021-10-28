@@ -2,13 +2,13 @@
 <ParamSettings xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
   <TurnMode>0</TurnMode>
   <Unload>1</Unload>
-  <RepeatCount>0</RepeatCount>
-  <ServerIP>39.107.238.55</ServerIP>
-  <WarehouseID>373862339402792973</WarehouseID>
-  <LayoutID>c1631164315085</LayoutID>
-  <NodeID>1631150639893</NodeID>
-  <PodID>1198</PodID>
-  <RobotID>3</RobotID>
+  <RepeatCount>1</RepeatCount>
+  <ServerIP>192.168.1.202</ServerIP>
+  <WarehouseID>363402754208563209</WarehouseID>
+  <LayoutID>c1610957014289</LayoutID>
+  <NodeID>161095107535</NodeID>
+  <PodID>1120</PodID>
+  <RobotID>104</RobotID>
   <DestinationMode>StorageID</DestinationMode>
-  <StationListPath>エミュレータ用移動テスト.csv</StationListPath>
+  <StationListPath>C:\MEIWA\MujinAGVDemo\MujinAGVDemo\社内デモエリア用移動テスト.csv</StationListPath>
 </ParamSettings>

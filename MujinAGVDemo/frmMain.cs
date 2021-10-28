@@ -22,7 +22,7 @@ namespace MujinAGVDemo
         /// <summary>
         /// 設定ファイルのパス
         /// </summary>
-        const string settingPath = "ParamSetting.xml";
+        string settingPath = "ParamSetting.xml";
         /// <summary>
         /// CSVファイルの中のnodeIDのインデックス
         /// </summary>
@@ -43,7 +43,7 @@ namespace MujinAGVDemo
         #region Property
 
         ParamSettings param;
-        bool isStop = false;        
+        bool isStop = false;
         FileIO fileIO = new FileIO();
         CancellationTokenSource cancelTokenSource = new CancellationTokenSource();
         Logger logger = LogManager.GetLogger("ProgramLogger");
@@ -64,6 +64,9 @@ namespace MujinAGVDemo
             }
             btnLoadSetting.BackColor = Color.LightGray;
             updateControl();
+            listBoxDirection.SelectedIndex = 4;
+            checkBoxIsStop.Checked = isStop;
+            textBoxTaskID.Text = string.Empty;
         }
 
 
@@ -202,16 +205,22 @@ namespace MujinAGVDemo
             }
 
             isStop = !isStop;
+            //AGVを停止させる
             if (isStop == false)
             {
+                //AGV停止指示
                 factory.Create(new PauseRobotParam(robotID)).DoAction();
+                //ボタン表示の変更
                 checkBoxIsStop.Text = "AGV再開";
                 checkBoxIsStop.BackColor = Color.Green;
             }
+            //AGVを運航させる
             else
             {
+                //ボタン表示の変更
                 checkBoxIsStop.Text = "AGV停止";
                 checkBoxIsStop.BackColor = Color.Red;
+                //AGV運航指示
                 factory.Create(new ResumeRobotParam(robotID)).DoAction();
             }
         }
@@ -262,7 +271,7 @@ namespace MujinAGVDemo
             {
                 var moveTask = new Task(() =>
                    {
-                       var movePodResult = (MovePodReturnMessage)factory.Create(new MovePodParam(
+                       var movePodParam = new MovePodParam(
                                robotID,
                                podID,
                                DestinationModes.StorageID,
@@ -270,7 +279,28 @@ namespace MujinAGVDemo
                                isEndWait: true,
                                turnMode: turnMode,
                                unload: unload
-                               )).DoAction();
+                               );
+
+                       switch (listBoxDirection.SelectedIndex)
+                       {
+                           case 0:
+                               movePodParam.RobotFace = Direction.North;
+                               break;
+                           case 1:
+                               movePodParam.RobotFace = Direction.East;
+                               break;
+                           case 2:
+                               movePodParam.RobotFace = Direction.South;
+                               break;
+                           case 3:
+                               movePodParam.RobotFace = Direction.West;
+                               break;
+                           case 4:
+                               movePodParam.RobotFace = Direction.NoSelect;
+                               break;
+                       }
+
+                       var movePodResult = (MovePodReturnMessage)factory.Create(movePodParam).DoAction();
 
 
                        string logMessage = $"ロボットID {robotID},棚 {podID},移動先 {nodeID}";
@@ -378,20 +408,33 @@ namespace MujinAGVDemo
                     }
                     logger.Info($"AGV{robotID}に対してSetOwnerが成功しました。");
 
-                    moveRobotResult = (MoveRobotReturnMessage)factory.Create(new MoveRobotParam(
-                        robotID,
-                        DestinationModes.NodeID,
-                        nodeID,
-                        isEndWait: false,
-                        ownerRegist: false
-                        // robotFace: Direction.North
-                        )).DoAction();
-                    //var waitResult = factory.Create(new WaitEndTaskParam(moveRobotResult.Data.TaskID, watchRobotID: robotID)).DoAction();
-                    //if (waitResult.ReturnCode != 0)
-                    //{
-                    //    logger.Info("タスクキャンセル＆ぬける。");
-                    //    factory.Create(new CancelTaskParam(moveRobotResult.Data.TaskID)).DoAction();
-                    //}
+                    var moveRobotParam = new MoveRobotParam(
+                            robotID,
+                            DestinationModes.NodeID,
+                            nodeID,
+                            isEndWait: false,
+                            ownerRegist: false
+                            );
+
+                    switch (listBoxDirection.SelectedIndex)
+                    {
+                        case 0:
+                            moveRobotParam.RobotFace = Direction.North;
+                            break;
+                        case 1:
+                            moveRobotParam.RobotFace = Direction.East;
+                            break;
+                        case 2:
+                            moveRobotParam.RobotFace = Direction.South;
+                            break;
+                        case 3:
+                            moveRobotParam.RobotFace = Direction.West;
+                            break;
+                        case 4:
+                            moveRobotParam.RobotFace = Direction.NoSelect;
+                            break;
+                    }
+                    moveRobotResult = (MoveRobotReturnMessage)factory.Create(moveRobotParam).DoAction();
 
                     string logMessage = $"ロボットID {robotID},移動先 {nodeID}";
                     logger.Info(logMessage);
@@ -597,6 +640,121 @@ namespace MujinAGVDemo
         private void btnSaveSampleCSV_Click(object sender, EventArgs e)
         {
             openSampleCSVDir();            
+        }
+        private void getTaskDetailParam(string taskID)
+        {
+            var clientCode = "biz_test";
+            var factory = new CommandFactory(param.ServerIP, param.WarehouseID, clientCode);
+            if (!factory.IsConnectedTESServer())
+                logger.Error(Messages.NotConnectMsg);
+
+            var task = (GetTaskDetailReturnMessage)factory.Create(new GetTaskDetailParam(taskID)).DoAction();
+            logger.Info($"{task.ToString()}");
+
+            var detail = task.Data.Detail;
+            var message = string.Empty;
+            message = $"タスクID：{detail.TaskID}　状態：{detail.Status}　失敗理由：{detail.ErrorReason}";
+            showInfoMessageBox(message);
+        }
+
+        private void btnGetTaskDetail_Click(object sender, EventArgs e)
+        {
+            var taskID = textBoxTaskID.Text;
+            getTaskDetailParam(taskID);
+        }
+
+        private void unsetOwner()
+        {
+            var robotID = param.RobotID;
+            var factory = new CommandFactory(param.ServerIP, param.WarehouseID);
+
+            var unsetOwnerResult = factory.Create(new UnsetOwnerParam(robotID)).DoAction();
+
+            if (unsetOwnerResult.ReturnMsg != "succ")
+            {
+                showUnsetOwnerErrorDialog(unsetOwnerResult.ReturnMsg);
+                logger.Error($"{Messages.UnsetOwnerError}:AGV{param.RobotID}{unsetOwnerResult.ReturnMsg}");
+                //return;
+            }
+            logger.Info($"AGV{robotID}に対してUnsetOwnerが成功しました。");
+        }
+
+        private void btnUnSetOwner_Click(object sender, EventArgs e)
+        {
+            unsetOwner();
+        }
+
+        private void btnShowOwner_Click(object sender, EventArgs e)
+        {
+            updateParam();
+
+            var clientCode = "biz_test";
+            var factory = new CommandFactory(param.ServerIP, param.WarehouseID, clientCode);
+            if (!factory.IsConnectedTESServer())
+                logger.Error(Messages.NotConnectMsg);
+
+            var getRobotRetMsg = (GetRobotListFromDBReturnMessage)factory.Create(new GetRobotListFromDBParam()).DoAction();
+
+            var rb = getRobotRetMsg.Data.RobotList.Where(x => x.RobotID == param.RobotID).FirstOrDefault();
+            var message = string.Empty;
+            if (rb == null)
+            {
+                message = $"AGV[{param.RobotID}]が存在しません。";
+                logger.Error(message);
+                showErrorMessageBox(message);
+                return;
+            }
+            message = $"AGV{param.RobotID}の所有者は{rb.Owner}です。";
+            logger.Info(message);
+            showInfoMessageBox(message);
+        }
+
+        private double getDirection()
+        {
+            var direction = Direction.NoSelect;
+            switch (listBoxDirection.SelectedIndex)
+            {
+                case 0:
+                    direction = Direction.North;
+                    break;
+                case 1:
+                    direction = Direction.East;
+                    break;
+                case 2:
+                    direction = Direction.South;
+                    break;
+                case 3:
+                    direction = Direction.West;
+                    break;
+                case 4:
+                    direction = Direction.NoSelect;
+                    break;
+            }
+
+            return direction;
+        }
+
+        private void btnOpenParamSettings_Click(object sender, EventArgs e)
+        {
+            System.Diagnostics.Process.Start(settingPath);
+
+            var openFileDialog = new OpenFileDialog
+            {
+                Title = "設定ファイルを選択",
+                InitialDirectory =Path.GetDirectoryName(settingPath),
+                Filter = "XMLファイル|*.xml"
+            };
+
+            if (openFileDialog.ShowDialog() == DialogResult.OK)
+            {
+                settingPath = openFileDialog.FileName;
+                logger.Info(openFileDialog.FileName);
+            }
+            else
+            {
+                logger.Info("設定ファイルの選択がキャンセルされました。");
+            }
+            openFileDialog.Dispose();
         }
     }
 }

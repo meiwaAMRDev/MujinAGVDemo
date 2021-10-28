@@ -29,6 +29,7 @@ namespace MujinAGVDemo
         /// </summary>
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
             this.btnAddPod = new System.Windows.Forms.Button();
             this.btnRemovePod = new System.Windows.Forms.Button();
             this.textBoxServerIP = new System.Windows.Forms.TextBox();
@@ -65,27 +66,41 @@ namespace MujinAGVDemo
             this.label12 = new System.Windows.Forms.Label();
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabPage1 = new System.Windows.Forms.TabPage();
+            this.label20 = new System.Windows.Forms.Label();
+            this.listBoxDirection = new System.Windows.Forms.ListBox();
             this.tabPage2 = new System.Windows.Forms.TabPage();
+            this.label18 = new System.Windows.Forms.Label();
             this.label17 = new System.Windows.Forms.Label();
             this.btnSaveSampleCSV = new System.Windows.Forms.Button();
             this.btnCancel = new System.Windows.Forms.Button();
             this.btnSelectCSV = new System.Windows.Forms.Button();
             this.label15 = new System.Windows.Forms.Label();
+            this.tabPage3 = new System.Windows.Forms.TabPage();
+            this.btnGetTaskDetail = new System.Windows.Forms.Button();
+            this.label19 = new System.Windows.Forms.Label();
+            this.textBoxTaskID = new System.Windows.Forms.TextBox();
+            this.tabPage4 = new System.Windows.Forms.TabPage();
+            this.btnUnSetOwner = new System.Windows.Forms.Button();
+            this.btnShowOwner = new System.Windows.Forms.Button();
             this.label13 = new System.Windows.Forms.Label();
             this.label14 = new System.Windows.Forms.Label();
             this.label16 = new System.Windows.Forms.Label();
             this.btnLoadSetting = new System.Windows.Forms.Button();
-            this.label18 = new System.Windows.Forms.Label();
+            this.toolTip = new System.Windows.Forms.ToolTip(this.components);
+            this.btnOpenParamSettings = new System.Windows.Forms.Button();
+            this.label21 = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.numRepeatCount)).BeginInit();
             this.statusStrip1.SuspendLayout();
             this.tabControl1.SuspendLayout();
             this.tabPage1.SuspendLayout();
             this.tabPage2.SuspendLayout();
+            this.tabPage3.SuspendLayout();
+            this.tabPage4.SuspendLayout();
             this.SuspendLayout();
             // 
             // btnAddPod
             // 
-            this.btnAddPod.Location = new System.Drawing.Point(6, 66);
+            this.btnAddPod.Location = new System.Drawing.Point(382, 72);
             this.btnAddPod.Name = "btnAddPod";
             this.btnAddPod.Size = new System.Drawing.Size(75, 23);
             this.btnAddPod.TabIndex = 0;
@@ -95,7 +110,7 @@ namespace MujinAGVDemo
             // 
             // btnRemovePod
             // 
-            this.btnRemovePod.Location = new System.Drawing.Point(6, 94);
+            this.btnRemovePod.Location = new System.Drawing.Point(382, 100);
             this.btnRemovePod.Name = "btnRemovePod";
             this.btnRemovePod.Size = new System.Drawing.Size(75, 23);
             this.btnRemovePod.TabIndex = 1;
@@ -145,7 +160,7 @@ namespace MujinAGVDemo
             // 
             // btnMovePod
             // 
-            this.btnMovePod.Location = new System.Drawing.Point(6, 123);
+            this.btnMovePod.Location = new System.Drawing.Point(382, 129);
             this.btnMovePod.Name = "btnMovePod";
             this.btnMovePod.Size = new System.Drawing.Size(75, 23);
             this.btnMovePod.TabIndex = 8;
@@ -161,6 +176,7 @@ namespace MujinAGVDemo
             this.label1.Size = new System.Drawing.Size(47, 12);
             this.label1.TabIndex = 9;
             this.label1.Text = "serverIP";
+            this.toolTip.SetToolTip(this.label1, "HetuサーバーのIPアドレスです。");
             // 
             // label2
             // 
@@ -170,6 +186,7 @@ namespace MujinAGVDemo
             this.label2.Size = new System.Drawing.Size(70, 12);
             this.label2.TabIndex = 10;
             this.label2.Text = "warehouseID";
+            this.toolTip.SetToolTip(this.label2, "Hetuのトップ画面の右上に\r\n表示されるWarehouseIDです。");
             // 
             // label3
             // 
@@ -179,6 +196,7 @@ namespace MujinAGVDemo
             this.label3.Size = new System.Drawing.Size(47, 12);
             this.label3.TabIndex = 11;
             this.label3.Text = "layoutID";
+            this.toolTip.SetToolTip(this.label3, "マップエディタの「基本データ」→「コンテナタイプ」\r\n→「ID」で確認することができます");
             // 
             // label4
             // 
@@ -188,6 +206,7 @@ namespace MujinAGVDemo
             this.label4.Size = new System.Drawing.Size(34, 12);
             this.label4.TabIndex = 12;
             this.label4.Text = "podID";
+            this.toolTip.SetToolTip(this.label4, "棚のQRコード番号です。");
             // 
             // label5
             // 
@@ -197,6 +216,7 @@ namespace MujinAGVDemo
             this.label5.Size = new System.Drawing.Size(40, 12);
             this.label5.TabIndex = 13;
             this.label5.Text = "nodeID";
+            this.toolTip.SetToolTip(this.label5, "移動先地点のノードIDです。");
             // 
             // label8
             // 
@@ -206,6 +226,7 @@ namespace MujinAGVDemo
             this.label8.Size = new System.Drawing.Size(42, 12);
             this.label8.TabIndex = 22;
             this.label8.Text = "robotID";
+            this.toolTip.SetToolTip(this.label8, "AGVの番号です。");
             // 
             // textBoxRobotID
             // 
@@ -268,7 +289,7 @@ namespace MujinAGVDemo
             this.checkBoxIsStop.Appearance = System.Windows.Forms.Appearance.Button;
             this.checkBoxIsStop.AutoSize = true;
             this.checkBoxIsStop.BackColor = System.Drawing.Color.Red;
-            this.checkBoxIsStop.Location = new System.Drawing.Point(286, 39);
+            this.checkBoxIsStop.Location = new System.Drawing.Point(513, 34);
             this.checkBoxIsStop.Name = "checkBoxIsStop";
             this.checkBoxIsStop.Size = new System.Drawing.Size(63, 22);
             this.checkBoxIsStop.TabIndex = 29;
@@ -278,7 +299,7 @@ namespace MujinAGVDemo
             // 
             // btnMoveAGV
             // 
-            this.btnMoveAGV.Location = new System.Drawing.Point(6, 152);
+            this.btnMoveAGV.Location = new System.Drawing.Point(382, 158);
             this.btnMoveAGV.Name = "btnMoveAGV";
             this.btnMoveAGV.Size = new System.Drawing.Size(75, 23);
             this.btnMoveAGV.TabIndex = 30;
@@ -324,7 +345,7 @@ namespace MujinAGVDemo
             this.statusStrip1.Location = new System.Drawing.Point(0, 412);
             this.statusStrip1.Name = "statusStrip1";
             this.statusStrip1.Padding = new System.Windows.Forms.Padding(1, 0, 10, 0);
-            this.statusStrip1.Size = new System.Drawing.Size(695, 22);
+            this.statusStrip1.Size = new System.Drawing.Size(637, 22);
             this.statusStrip1.TabIndex = 34;
             this.statusStrip1.Text = "statusStrip1";
             // 
@@ -346,9 +367,9 @@ namespace MujinAGVDemo
             // 
             // btnSaveSetting
             // 
-            this.btnSaveSetting.Location = new System.Drawing.Point(286, 72);
+            this.btnSaveSetting.Location = new System.Drawing.Point(513, 74);
             this.btnSaveSetting.Name = "btnSaveSetting";
-            this.btnSaveSetting.Size = new System.Drawing.Size(75, 23);
+            this.btnSaveSetting.Size = new System.Drawing.Size(106, 23);
             this.btnSaveSetting.TabIndex = 35;
             this.btnSaveSetting.Text = "設定保存";
             this.btnSaveSetting.UseVisualStyleBackColor = true;
@@ -357,7 +378,7 @@ namespace MujinAGVDemo
             // label9
             // 
             this.label9.AutoSize = true;
-            this.label9.Location = new System.Drawing.Point(102, 71);
+            this.label9.Location = new System.Drawing.Point(6, 77);
             this.label9.Name = "label9";
             this.label9.Size = new System.Drawing.Size(287, 12);
             this.label9.TabIndex = 36;
@@ -366,7 +387,7 @@ namespace MujinAGVDemo
             // label10
             // 
             this.label10.AutoSize = true;
-            this.label10.Location = new System.Drawing.Point(102, 99);
+            this.label10.Location = new System.Drawing.Point(6, 105);
             this.label10.Name = "label10";
             this.label10.Size = new System.Drawing.Size(167, 12);
             this.label10.TabIndex = 37;
@@ -375,7 +396,7 @@ namespace MujinAGVDemo
             // label11
             // 
             this.label11.AutoSize = true;
-            this.label11.Location = new System.Drawing.Point(102, 128);
+            this.label11.Location = new System.Drawing.Point(6, 134);
             this.label11.Name = "label11";
             this.label11.Size = new System.Drawing.Size(369, 12);
             this.label11.TabIndex = 38;
@@ -384,7 +405,7 @@ namespace MujinAGVDemo
             // label12
             // 
             this.label12.AutoSize = true;
-            this.label12.Location = new System.Drawing.Point(102, 157);
+            this.label12.Location = new System.Drawing.Point(6, 163);
             this.label12.Name = "label12";
             this.label12.Size = new System.Drawing.Size(309, 12);
             this.label12.TabIndex = 39;
@@ -394,6 +415,8 @@ namespace MujinAGVDemo
             // 
             this.tabControl1.Controls.Add(this.tabPage1);
             this.tabControl1.Controls.Add(this.tabPage2);
+            this.tabControl1.Controls.Add(this.tabPage3);
+            this.tabControl1.Controls.Add(this.tabPage4);
             this.tabControl1.Location = new System.Drawing.Point(23, 191);
             this.tabControl1.Name = "tabControl1";
             this.tabControl1.SelectedIndex = 0;
@@ -402,15 +425,17 @@ namespace MujinAGVDemo
             // 
             // tabPage1
             // 
+            this.tabPage1.Controls.Add(this.label20);
+            this.tabPage1.Controls.Add(this.listBoxDirection);
             this.tabPage1.Controls.Add(this.checkBoxUnload);
             this.tabPage1.Controls.Add(this.label12);
             this.tabPage1.Controls.Add(this.btnAddPod);
             this.tabPage1.Controls.Add(this.label11);
             this.tabPage1.Controls.Add(this.btnRemovePod);
             this.tabPage1.Controls.Add(this.label10);
-            this.tabPage1.Controls.Add(this.btnMovePod);
             this.tabPage1.Controls.Add(this.label9);
             this.tabPage1.Controls.Add(this.checkBoxSynchroTurn);
+            this.tabPage1.Controls.Add(this.btnMovePod);
             this.tabPage1.Controls.Add(this.btnMoveAGV);
             this.tabPage1.Location = new System.Drawing.Point(4, 22);
             this.tabPage1.Name = "tabPage1";
@@ -419,6 +444,30 @@ namespace MujinAGVDemo
             this.tabPage1.TabIndex = 0;
             this.tabPage1.Text = "各個操作";
             this.tabPage1.UseVisualStyleBackColor = true;
+            // 
+            // label20
+            // 
+            this.label20.AutoSize = true;
+            this.label20.Location = new System.Drawing.Point(7, 55);
+            this.label20.Name = "label20";
+            this.label20.Size = new System.Drawing.Size(106, 12);
+            this.label20.TabIndex = 42;
+            this.label20.Text = "移動後のAGVの向き";
+            // 
+            // listBoxDirection
+            // 
+            this.listBoxDirection.FormattingEnabled = true;
+            this.listBoxDirection.ItemHeight = 12;
+            this.listBoxDirection.Items.AddRange(new object[] {
+            "北",
+            "東",
+            "南",
+            "西",
+            "指定しない"});
+            this.listBoxDirection.Location = new System.Drawing.Point(136, 51);
+            this.listBoxDirection.Name = "listBoxDirection";
+            this.listBoxDirection.Size = new System.Drawing.Size(99, 16);
+            this.listBoxDirection.TabIndex = 41;
             // 
             // tabPage2
             // 
@@ -440,6 +489,15 @@ namespace MujinAGVDemo
             this.tabPage2.TabIndex = 1;
             this.tabPage2.Text = "連続動作";
             this.tabPage2.UseVisualStyleBackColor = true;
+            // 
+            // label18
+            // 
+            this.label18.AutoSize = true;
+            this.label18.Location = new System.Drawing.Point(6, 84);
+            this.label18.Name = "label18";
+            this.label18.Size = new System.Drawing.Size(157, 12);
+            this.label18.TabIndex = 48;
+            this.label18.Text = "サンプルCSVの場所を開きます。";
             // 
             // label17
             // 
@@ -488,10 +546,91 @@ namespace MujinAGVDemo
             this.label15.TabIndex = 33;
             this.label15.Text = "CSVの内容に従って棚を運搬します。\r\nヘッダー1行は必ず付与してください。\r\n";
             // 
+            // tabPage3
+            // 
+            this.tabPage3.Controls.Add(this.btnGetTaskDetail);
+            this.tabPage3.Controls.Add(this.label19);
+            this.tabPage3.Controls.Add(this.textBoxTaskID);
+            this.tabPage3.Location = new System.Drawing.Point(4, 22);
+            this.tabPage3.Margin = new System.Windows.Forms.Padding(2);
+            this.tabPage3.Name = "tabPage3";
+            this.tabPage3.Padding = new System.Windows.Forms.Padding(2);
+            this.tabPage3.Size = new System.Drawing.Size(475, 191);
+            this.tabPage3.TabIndex = 2;
+            this.tabPage3.Text = "タスク確認";
+            this.tabPage3.UseVisualStyleBackColor = true;
+            // 
+            // btnGetTaskDetail
+            // 
+            this.btnGetTaskDetail.Location = new System.Drawing.Point(21, 54);
+            this.btnGetTaskDetail.Margin = new System.Windows.Forms.Padding(2);
+            this.btnGetTaskDetail.Name = "btnGetTaskDetail";
+            this.btnGetTaskDetail.Size = new System.Drawing.Size(234, 18);
+            this.btnGetTaskDetail.TabIndex = 12;
+            this.btnGetTaskDetail.Text = "情報をログに出力";
+            this.toolTip.SetToolTip(this.btnGetTaskDetail, "タスクの情報をログに出力します。");
+            this.btnGetTaskDetail.UseVisualStyleBackColor = true;
+            this.btnGetTaskDetail.Click += new System.EventHandler(this.btnGetTaskDetail_Click);
+            // 
+            // label19
+            // 
+            this.label19.AutoSize = true;
+            this.label19.Location = new System.Drawing.Point(19, 25);
+            this.label19.Name = "label19";
+            this.label19.Size = new System.Drawing.Size(41, 12);
+            this.label19.TabIndex = 11;
+            this.label19.Text = "タスクID";
+            this.toolTip.SetToolTip(this.label19, "状況を確認したいタスクのIDです。");
+            // 
+            // textBoxTaskID
+            // 
+            this.textBoxTaskID.Location = new System.Drawing.Point(108, 22);
+            this.textBoxTaskID.Name = "textBoxTaskID";
+            this.textBoxTaskID.Size = new System.Drawing.Size(148, 19);
+            this.textBoxTaskID.TabIndex = 10;
+            this.textBoxTaskID.Text = "taskID";
+            // 
+            // tabPage4
+            // 
+            this.tabPage4.Controls.Add(this.btnUnSetOwner);
+            this.tabPage4.Controls.Add(this.btnShowOwner);
+            this.tabPage4.Location = new System.Drawing.Point(4, 22);
+            this.tabPage4.Margin = new System.Windows.Forms.Padding(2);
+            this.tabPage4.Name = "tabPage4";
+            this.tabPage4.Padding = new System.Windows.Forms.Padding(2);
+            this.tabPage4.Size = new System.Drawing.Size(475, 191);
+            this.tabPage4.TabIndex = 3;
+            this.tabPage4.Text = "所有者確認";
+            this.tabPage4.UseVisualStyleBackColor = true;
+            // 
+            // btnUnSetOwner
+            // 
+            this.btnUnSetOwner.Location = new System.Drawing.Point(4, 126);
+            this.btnUnSetOwner.Margin = new System.Windows.Forms.Padding(2);
+            this.btnUnSetOwner.Name = "btnUnSetOwner";
+            this.btnUnSetOwner.Size = new System.Drawing.Size(234, 18);
+            this.btnUnSetOwner.TabIndex = 14;
+            this.btnUnSetOwner.Text = "UnSetOwner";
+            this.toolTip.SetToolTip(this.btnUnSetOwner, "AGVのSetOwnerを解除します。");
+            this.btnUnSetOwner.UseVisualStyleBackColor = true;
+            this.btnUnSetOwner.Click += new System.EventHandler(this.btnUnSetOwner_Click);
+            // 
+            // btnShowOwner
+            // 
+            this.btnShowOwner.Location = new System.Drawing.Point(4, 89);
+            this.btnShowOwner.Margin = new System.Windows.Forms.Padding(2);
+            this.btnShowOwner.Name = "btnShowOwner";
+            this.btnShowOwner.Size = new System.Drawing.Size(234, 18);
+            this.btnShowOwner.TabIndex = 13;
+            this.btnShowOwner.Text = "所有者確認";
+            this.toolTip.SetToolTip(this.btnShowOwner, "AGVの所有者を表示します。");
+            this.btnShowOwner.UseVisualStyleBackColor = true;
+            this.btnShowOwner.Click += new System.EventHandler(this.btnShowOwner_Click);
+            // 
             // label13
             // 
             this.label13.AutoSize = true;
-            this.label13.Location = new System.Drawing.Point(373, 46);
+            this.label13.Location = new System.Drawing.Point(296, 39);
             this.label13.Name = "label13";
             this.label13.Size = new System.Drawing.Size(210, 12);
             this.label13.TabIndex = 41;
@@ -500,45 +639,57 @@ namespace MujinAGVDemo
             // label14
             // 
             this.label14.AutoSize = true;
-            this.label14.Location = new System.Drawing.Point(373, 77);
+            this.label14.Location = new System.Drawing.Point(296, 79);
             this.label14.Name = "label14";
-            this.label14.Size = new System.Drawing.Size(264, 24);
+            this.label14.Size = new System.Drawing.Size(175, 12);
             this.label14.TabIndex = 42;
-            this.label14.Text = "現在の設定をファイルに保存します。\r\n実行ファイル直下のParamSetting.xmlに保存されます。";
+            this.label14.Text = "現在の設定をファイルに保存します。\r\n";
             // 
             // label16
             // 
             this.label16.AutoSize = true;
-            this.label16.Location = new System.Drawing.Point(373, 120);
+            this.label16.Location = new System.Drawing.Point(296, 113);
             this.label16.Name = "label16";
-            this.label16.Size = new System.Drawing.Size(265, 24);
+            this.label16.Size = new System.Drawing.Size(143, 24);
             this.label16.TabIndex = 44;
-            this.label16.Text = "設定ファイルを読み出します。\r\n実行ファイル直下のParamSetting.xmlを読み出します。\r\n";
+            this.label16.Text = "設定ファイルを読み出します。\r\n\r\n";
             // 
             // btnLoadSetting
             // 
-            this.btnLoadSetting.Location = new System.Drawing.Point(286, 115);
+            this.btnLoadSetting.Location = new System.Drawing.Point(513, 117);
             this.btnLoadSetting.Name = "btnLoadSetting";
-            this.btnLoadSetting.Size = new System.Drawing.Size(75, 23);
+            this.btnLoadSetting.Size = new System.Drawing.Size(106, 23);
             this.btnLoadSetting.TabIndex = 43;
             this.btnLoadSetting.Text = "設定読出";
             this.btnLoadSetting.UseVisualStyleBackColor = true;
             this.btnLoadSetting.Click += new System.EventHandler(this.btnLoadSetting_Click);
             // 
-            // label18
+            // btnOpenParamSettings
             // 
-            this.label18.AutoSize = true;
-            this.label18.Location = new System.Drawing.Point(6, 84);
-            this.label18.Name = "label18";
-            this.label18.Size = new System.Drawing.Size(157, 12);
-            this.label18.TabIndex = 48;
-            this.label18.Text = "サンプルCSVの場所を開きます。";
+            this.btnOpenParamSettings.Location = new System.Drawing.Point(513, 156);
+            this.btnOpenParamSettings.Name = "btnOpenParamSettings";
+            this.btnOpenParamSettings.Size = new System.Drawing.Size(106, 23);
+            this.btnOpenParamSettings.TabIndex = 45;
+            this.btnOpenParamSettings.Text = "設定ファイル選択";
+            this.btnOpenParamSettings.UseVisualStyleBackColor = true;
+            this.btnOpenParamSettings.Click += new System.EventHandler(this.btnOpenParamSettings_Click);
+            // 
+            // label21
+            // 
+            this.label21.AutoSize = true;
+            this.label21.Location = new System.Drawing.Point(296, 155);
+            this.label21.Name = "label21";
+            this.label21.Size = new System.Drawing.Size(132, 24);
+            this.label21.TabIndex = 46;
+            this.label21.Text = "設定ファイルを選択します。\r\n\r\n";
             // 
             // frmMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(695, 434);
+            this.ClientSize = new System.Drawing.Size(637, 434);
+            this.Controls.Add(this.label21);
+            this.Controls.Add(this.btnOpenParamSettings);
             this.Controls.Add(this.label16);
             this.Controls.Add(this.btnLoadSetting);
             this.Controls.Add(this.label14);
@@ -570,6 +721,9 @@ namespace MujinAGVDemo
             this.tabPage1.PerformLayout();
             this.tabPage2.ResumeLayout(false);
             this.tabPage2.PerformLayout();
+            this.tabPage3.ResumeLayout(false);
+            this.tabPage3.PerformLayout();
+            this.tabPage4.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -624,6 +778,18 @@ namespace MujinAGVDemo
         private System.Windows.Forms.Button btnSaveSampleCSV;
         private System.Windows.Forms.Label label17;
         private System.Windows.Forms.Label label18;
+        private System.Windows.Forms.TabPage tabPage3;
+        private System.Windows.Forms.Label label19;
+        private System.Windows.Forms.TextBox textBoxTaskID;
+        private System.Windows.Forms.Button btnGetTaskDetail;
+        private System.Windows.Forms.TabPage tabPage4;
+        private System.Windows.Forms.Button btnUnSetOwner;
+        private System.Windows.Forms.Button btnShowOwner;
+        private System.Windows.Forms.ListBox listBoxDirection;
+        private System.Windows.Forms.Label label20;
+        private System.Windows.Forms.ToolTip toolTip;
+        private System.Windows.Forms.Button btnOpenParamSettings;
+        private System.Windows.Forms.Label label21;
     }
 }
 
