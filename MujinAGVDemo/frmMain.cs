@@ -653,7 +653,8 @@ namespace MujinAGVDemo
 
             var detail = task.Data.Detail;
             var message = string.Empty;
-            message = $"タスクID：{detail.TaskID}　状態：{detail.Status}　失敗理由：{detail.ErrorReason}";
+            message = $"タスクID：{detail.TaskID}　状態：{detail.Status}　失敗理由：{detail.ErrorReason} エラーコード：{detail.ErrorCode}";
+            //message = $"タスクID：{detail.TaskID}　状態：{detail.Status}　失敗理由：{GetJapaneseErrorMsg(task.ReturnCode)}";
             showInfoMessageBox(message);
         }
 
@@ -694,19 +695,28 @@ namespace MujinAGVDemo
                 logger.Error(Messages.NotConnectMsg);
 
             var getRobotRetMsg = (GetRobotListFromDBReturnMessage)factory.Create(new GetRobotListFromDBParam()).DoAction();
+            var robotList = getRobotRetMsg.Data.RobotList.ToList();
+            var messageList = new List<string>();
 
             var rb = getRobotRetMsg.Data.RobotList.Where(x => x.RobotID == param.RobotID).FirstOrDefault();
+            //foreach(var rb in robotList)
+            //{
             var message = string.Empty;
-            if (rb == null)
-            {
-                message = $"AGV[{param.RobotID}]が存在しません。";
-                logger.Error(message);
-                showErrorMessageBox(message);
-                return;
-            }
-            message = $"AGV{param.RobotID}の所有者は{rb.Owner}です。";
-            logger.Info(message);
-            showInfoMessageBox(message);
+                if (rb == null)
+                {
+                    message = $"AGV[{param.RobotID}]が存在しません。";
+                    logger.Error(message);
+                    showErrorMessageBox(message);
+                    return;
+                }
+                message = $"AGV{rb.RobotID}の所有者は{rb.Owner}です。";
+                logger.Info(message);
+                messageList.Add(message);
+                showInfoMessageBox(message);
+            //}
+
+            
+            
         }
 
         private double getDirection()
@@ -755,6 +765,12 @@ namespace MujinAGVDemo
                 logger.Info("設定ファイルの選択がキャンセルされました。");
             }
             openFileDialog.Dispose();
+        }
+        public string GetJapaneseErrorMsg(int errCode)
+        {
+            var RMT = new ReturnMessageTranslator("JapaneseErrorCode.csv");
+            //Debug.WriteLine(RMT.ToJapaneseMessage(errCode));
+            return $"{RMT.ToJapaneseMessage(errCode)}:{RMT.ToJapaneseExplanation(errCode)}";
         }
     }
 }
