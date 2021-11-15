@@ -37,7 +37,7 @@ namespace MujinAGVDemo
         const int unloadModeIndex = 2;
         const int ON = 1;
         const int OFF = 0;
-        
+
         #endregion Const
 
         #region Property
@@ -269,6 +269,11 @@ namespace MujinAGVDemo
             }
             try
             {
+                //棚を下ろす際はシンクロターンできないようにする
+                if (unload == ON)
+                {
+                    turnMode = OFF;
+                }
                 var moveTask = new Task(() =>
                    {
                        var movePodParam = new MovePodParam(
@@ -511,8 +516,9 @@ namespace MujinAGVDemo
             textBoxRobotID.Text = param.RobotID;
             textBoxStationListPath.Text = param.StationListPath;
             numRepeatCount.Value = param.RepeatCount;
-            checkBoxSynchroTurn.Checked = param.TurnMode == ON;
+
             checkBoxUnload.Checked = param.Unload == ON;
+            checkBoxSynchroTurn.Checked = param.TurnMode == ON;
         }
         /// <summary>
         /// コントロールの内容をパラメータに反映する
@@ -586,8 +592,8 @@ namespace MujinAGVDemo
                 logger.Error(Messages.NotConnectMsg);
 
             var getRobotRetMsg = (GetRobotListFromDBReturnMessage)factory.Create(new GetRobotListFromDBParam()).DoAction();
-            
-            var rb=getRobotRetMsg.Data.RobotList.Where(x => x.RobotID == param.RobotID).FirstOrDefault();
+
+            var rb = getRobotRetMsg.Data.RobotList.Where(x => x.RobotID == param.RobotID).FirstOrDefault();
             if (rb == null)
             {
                 var message = $"AGV[{param.RobotID}]が存在しません。";
@@ -595,7 +601,7 @@ namespace MujinAGVDemo
                 showErrorMessageBox(message);
                 return true;
             }
-            
+
             if (rb.Owner == "SUPER")
             {
                 var message = $"AGV[{rb.RobotID}]がHetuで使用されています。占有をキャンセルしてください。状態【{rb.TaskType}】";
@@ -631,7 +637,7 @@ namespace MujinAGVDemo
             /// サンプルCSVファイルのパス
             /// </summary>
             const string sampleCSVPath = @"CSVSample\サンプル.csv";
-            
+
             System.Diagnostics.Process.Start("EXPLORER.EXE", $"/select,{sampleCSVPath}");
             textBoxStationListPath.Text = sampleCSVPath;
             param.StationListPath = sampleCSVPath;
@@ -639,7 +645,7 @@ namespace MujinAGVDemo
 
         private void btnSaveSampleCSV_Click(object sender, EventArgs e)
         {
-            openSampleCSVDir();            
+            openSampleCSVDir();
         }
         private void getTaskDetailParam(string taskID)
         {
@@ -702,21 +708,21 @@ namespace MujinAGVDemo
             //foreach(var rb in robotList)
             //{
             var message = string.Empty;
-                if (rb == null)
-                {
-                    message = $"AGV[{param.RobotID}]が存在しません。";
-                    logger.Error(message);
-                    showErrorMessageBox(message);
-                    return;
-                }
-                message = $"AGV{rb.RobotID}の所有者は{rb.Owner}です。";
-                logger.Info(message);
-                messageList.Add(message);
-                showInfoMessageBox(message);
+            if (rb == null)
+            {
+                message = $"AGV[{param.RobotID}]が存在しません。";
+                logger.Error(message);
+                showErrorMessageBox(message);
+                return;
+            }
+            message = $"AGV{rb.RobotID}の所有者は{rb.Owner}です。";
+            logger.Info(message);
+            messageList.Add(message);
+            showInfoMessageBox(message);
             //}
 
-            
-            
+
+
         }
 
         private double getDirection()
@@ -751,7 +757,7 @@ namespace MujinAGVDemo
             var openFileDialog = new OpenFileDialog
             {
                 Title = "設定ファイルを選択",
-                InitialDirectory =Path.GetDirectoryName(settingPath),
+                InitialDirectory = Path.GetDirectoryName(settingPath),
                 Filter = "XMLファイル|*.xml"
             };
 
