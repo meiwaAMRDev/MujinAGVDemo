@@ -1,0 +1,14 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ParamSettings xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <TurnMode>0</TurnMode>
+  <Unload>1</Unload>
+  <RepeatCount>0</RepeatCount>
+  <ServerIP>192.168.1.202</ServerIP>
+  <WarehouseID>363402754208563209</WarehouseID>
+  <LayoutID>c1631164315085</LayoutID>
+  <NodeID>161095107533</NodeID>
+  <PodID>1120</PodID>
+  <RobotID>104</RobotID>
+  <DestinationMode>StorageID</DestinationMode>
+  <StationListPath>エミュレータ用移動テスト.csv</StationListPath>
+</ParamSettings>

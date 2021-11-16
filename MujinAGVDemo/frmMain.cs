@@ -23,6 +23,9 @@ namespace MujinAGVDemo
         /// 設定ファイルのパス
         /// </summary>
         string settingPath = "ParamSetting.xml";
+
+        private const string logDirPath = @"logs";
+        int directionIndex = 4;
         /// <summary>
         /// CSVファイルの中のnodeIDのインデックス
         /// </summary>
@@ -65,6 +68,7 @@ namespace MujinAGVDemo
             btnLoadSetting.BackColor = Color.LightGray;
             updateControl();
             listBoxDirection.SelectedIndex = 4;
+            directionIndex = listBoxDirection.SelectedIndex;
             checkBoxIsStop.Checked = isStop;
             textBoxTaskID.Text = string.Empty;
         }
@@ -286,7 +290,8 @@ namespace MujinAGVDemo
                                unload: unload
                                );
 
-                       switch (listBoxDirection.SelectedIndex)
+                       //switch (listBoxDirection.SelectedIndex)
+                       switch(directionIndex)
                        {
                            case 0:
                                movePodParam.RobotFace = Direction.North;
@@ -307,10 +312,12 @@ namespace MujinAGVDemo
 
                        var movePodResult = (MovePodReturnMessage)factory.Create(movePodParam).DoAction();
 
-
+                       
                        string logMessage = $"ロボットID {robotID},棚 {podID},移動先 {nodeID}";
                        logger.Info(logMessage);
-                       logger.Info(movePodResult.ReturnMsg);
+                       logger.Info($"msg[{movePodResult.ReturnMsg}]returnCode[{movePodResult.ReturnCode}]");
+
+                       //logger.Info(movePodResult.ReturnMsg);
                        this.Invoke((MethodInvoker)(() =>
                        {
                            lblCurrentLineProcess.Text = logMessage;
@@ -421,7 +428,8 @@ namespace MujinAGVDemo
                             ownerRegist: false
                             );
 
-                    switch (listBoxDirection.SelectedIndex)
+                    //switch (listBoxDirection.SelectedIndex)
+                    switch(directionIndex)
                     {
                         case 0:
                             moveRobotParam.RobotFace = Direction.North;
@@ -609,7 +617,29 @@ namespace MujinAGVDemo
                 showErrorMessageBox(message);
                 return true;
             }
+            
+            return false;
+        }
+        private bool haveTask(string robotID)
+        {
+            var factory = new CommandFactory(param.ServerIP, param.WarehouseID);
+            if (!factory.IsConnectedTESServer())
+                logger.Error(Messages.NotConnectMsg);
 
+            var getRobotRetMsg = (GetRobotListFromDBReturnMessage)factory.Create(new GetRobotListFromDBParam()).DoAction();
+
+            var rb = getRobotRetMsg.Data.RobotList.Where(x => x.RobotID == robotID).FirstOrDefault();
+            if (rb == null)
+            {
+                var message = $"AGV[{param.RobotID}]が存在しません。";
+                logger.Error(message);
+                showErrorMessageBox(message);
+                return false;
+            }
+
+            var taskMessage = $"AGV[{rb.RobotID}]taskID[{rb.TaskID}]taskStatus[{rb.TaskStatus}]";
+            logger.Info(taskMessage);
+            showInfoMessageBox(taskMessage);
             return false;
         }
         /// <summary>
@@ -658,6 +688,7 @@ namespace MujinAGVDemo
             logger.Info($"{task.ToString()}");
 
             var detail = task.Data.Detail;
+            
             var message = string.Empty;
             message = $"タスクID：{detail.TaskID}　状態：{detail.Status}　失敗理由：{detail.ErrorReason} エラーコード：{detail.ErrorCode}";
             //message = $"タスクID：{detail.TaskID}　状態：{detail.Status}　失敗理由：{GetJapaneseErrorMsg(task.ReturnCode)}";
@@ -684,6 +715,21 @@ namespace MujinAGVDemo
                 //return;
             }
             logger.Info($"AGV{robotID}に対してUnsetOwnerが成功しました。");
+        }
+        private void setOwner()
+        {
+            var robotID = param.RobotID;
+            var factory = new CommandFactory(param.ServerIP, param.WarehouseID);
+
+            var setOwnerResult = factory.Create(new SetOwnerParam(robotID)).DoAction();
+
+            if (setOwnerResult.ReturnMsg != "succ")
+            {
+                showUnsetOwnerErrorDialog(setOwnerResult.ReturnMsg);
+                logger.Error($"{Messages.SetOwnerError}:AGV{param.RobotID}{setOwnerResult.ReturnMsg}");
+                //return;
+            }
+            logger.Info($"AGV{robotID}に対してsetOwnerが成功しました。");
         }
 
         private void btnUnSetOwner_Click(object sender, EventArgs e)
@@ -719,6 +765,8 @@ namespace MujinAGVDemo
             logger.Info(message);
             messageList.Add(message);
             showInfoMessageBox(message);
+
+            haveTask(rb.RobotID);
             //}
 
 
@@ -752,7 +800,7 @@ namespace MujinAGVDemo
 
         private void btnOpenParamSettings_Click(object sender, EventArgs e)
         {
-            System.Diagnostics.Process.Start(settingPath);
+            //System.Diagnostics.Process.Start(settingPath);
 
             var openFileDialog = new OpenFileDialog
             {
@@ -764,6 +812,12 @@ namespace MujinAGVDemo
             if (openFileDialog.ShowDialog() == DialogResult.OK)
             {
                 settingPath = openFileDialog.FileName;
+
+                if(tryLoadSetting())
+                {
+                    updateControl();
+                    updateParam();
+                }
                 logger.Info(openFileDialog.FileName);
             }
             else
@@ -777,6 +831,53 @@ namespace MujinAGVDemo
             var RMT = new ReturnMessageTranslator("JapaneseErrorCode.csv");
             //Debug.WriteLine(RMT.ToJapaneseMessage(errCode));
             return $"{RMT.ToJapaneseMessage(errCode)}:{RMT.ToJapaneseExplanation(errCode)}";
+        }
+
+        private void btnShowPodDetail_Click(object sender, EventArgs e)
+        {
+            var factory = new CommandFactory(param.ServerIP, param.WarehouseID);
+            try
+            {
+                var getPodListAns = (GetPodListReturnMessage)factory.Create(new GetPodListParam()).DoAction();
+
+
+
+                var podList = getPodListAns.Data.PodList.ToList();
+                logger.Info($"棚の位置を表示します");
+                foreach (var pod in podList)
+                {
+                    var podMessage = $"podID[{pod.PodID}]positionType[{pod.PositionType}]strageID[{pod.StorageID}]robotID[{pod.RobotID}]";
+                    logger.Info(podMessage);
+                    //if (pod.StorageID==string.Empty)
+                    //{
+                    //    continue;
+                    //}
+                    //var getNodeListAns = (GetNodeDetailReturnMessage)factory.Create(new GetNodeDetailParam(pod.StorageID)).DoAction();
+                    //logger.Info(getNodeListAns.ToString());
+
+
+
+                }
+            }
+            catch (Exception ex)
+            {
+                logger.Error(ex);
+            }
+        }
+
+        private void mnuOpenLogDir_Click(object sender, EventArgs e)
+        {
+            if (!Directory.Exists(logDirPath))
+            {
+                showErrorMessageBox(($"{Path.GetFullPath(logDirPath)}が見つかりません。"));
+                return;
+            }
+            System.Diagnostics.Process.Start("EXPLORER.EXE", logDirPath);
+        }
+
+        private void btnSetOwner_Click(object sender, EventArgs e)
+        {
+            setOwner();
         }
     }
 }

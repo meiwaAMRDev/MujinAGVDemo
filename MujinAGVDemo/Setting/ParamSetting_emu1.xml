@@ -1,0 +1,14 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ParamSettings xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <TurnMode>0</TurnMode>
+  <Unload>1</Unload>
+  <RepeatCount>1</RepeatCount>
+  <ServerIP>39.106.65.245</ServerIP>
+  <WarehouseID>361868188280946696</WarehouseID>
+  <LayoutID>c1610957014289</LayoutID>
+  <NodeID>161095107535</NodeID>
+  <PodID>1120</PodID>
+  <RobotID>104</RobotID>
+  <DestinationMode>StorageID</DestinationMode>
+  <StationListPath>C:\MEIWA\MujinAGVDemo\MujinAGVDemo\社内デモエリア用移動テスト.csv</StationListPath>
+</ParamSettings>

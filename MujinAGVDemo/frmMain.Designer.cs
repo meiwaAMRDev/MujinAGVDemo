@@ -82,6 +82,8 @@ namespace MujinAGVDemo
             this.tabPage4 = new System.Windows.Forms.TabPage();
             this.btnUnSetOwner = new System.Windows.Forms.Button();
             this.btnShowOwner = new System.Windows.Forms.Button();
+            this.tabPage5 = new System.Windows.Forms.TabPage();
+            this.btnShowPodDetail = new System.Windows.Forms.Button();
             this.label13 = new System.Windows.Forms.Label();
             this.label14 = new System.Windows.Forms.Label();
             this.label16 = new System.Windows.Forms.Label();
@@ -89,6 +91,10 @@ namespace MujinAGVDemo
             this.toolTip = new System.Windows.Forms.ToolTip(this.components);
             this.btnOpenParamSettings = new System.Windows.Forms.Button();
             this.label21 = new System.Windows.Forms.Label();
+            this.menuStrip1 = new System.Windows.Forms.MenuStrip();
+            this.ファイルToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.mnuOpenLogDir = new System.Windows.Forms.ToolStripMenuItem();
+            this.btnSetOwner = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.numRepeatCount)).BeginInit();
             this.statusStrip1.SuspendLayout();
             this.tabControl1.SuspendLayout();
@@ -96,6 +102,8 @@ namespace MujinAGVDemo
             this.tabPage2.SuspendLayout();
             this.tabPage3.SuspendLayout();
             this.tabPage4.SuspendLayout();
+            this.tabPage5.SuspendLayout();
+            this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
             // btnAddPod
@@ -417,6 +425,7 @@ namespace MujinAGVDemo
             this.tabControl1.Controls.Add(this.tabPage2);
             this.tabControl1.Controls.Add(this.tabPage3);
             this.tabControl1.Controls.Add(this.tabPage4);
+            this.tabControl1.Controls.Add(this.tabPage5);
             this.tabControl1.Location = new System.Drawing.Point(23, 191);
             this.tabControl1.Name = "tabControl1";
             this.tabControl1.SelectedIndex = 0;
@@ -592,6 +601,7 @@ namespace MujinAGVDemo
             // 
             // tabPage4
             // 
+            this.tabPage4.Controls.Add(this.btnSetOwner);
             this.tabPage4.Controls.Add(this.btnUnSetOwner);
             this.tabPage4.Controls.Add(this.btnShowOwner);
             this.tabPage4.Location = new System.Drawing.Point(4, 22);
@@ -626,6 +636,27 @@ namespace MujinAGVDemo
             this.toolTip.SetToolTip(this.btnShowOwner, "AGVの所有者を表示します。");
             this.btnShowOwner.UseVisualStyleBackColor = true;
             this.btnShowOwner.Click += new System.EventHandler(this.btnShowOwner_Click);
+            // 
+            // tabPage5
+            // 
+            this.tabPage5.Controls.Add(this.btnShowPodDetail);
+            this.tabPage5.Location = new System.Drawing.Point(4, 22);
+            this.tabPage5.Name = "tabPage5";
+            this.tabPage5.Padding = new System.Windows.Forms.Padding(3);
+            this.tabPage5.Size = new System.Drawing.Size(475, 191);
+            this.tabPage5.TabIndex = 4;
+            this.tabPage5.Text = "棚情報確認";
+            this.tabPage5.UseVisualStyleBackColor = true;
+            // 
+            // btnShowPodDetail
+            // 
+            this.btnShowPodDetail.Location = new System.Drawing.Point(6, 40);
+            this.btnShowPodDetail.Name = "btnShowPodDetail";
+            this.btnShowPodDetail.Size = new System.Drawing.Size(75, 23);
+            this.btnShowPodDetail.TabIndex = 0;
+            this.btnShowPodDetail.Text = "棚情報確認";
+            this.btnShowPodDetail.UseVisualStyleBackColor = true;
+            this.btnShowPodDetail.Click += new System.EventHandler(this.btnShowPodDetail_Click);
             // 
             // label13
             // 
@@ -683,6 +714,43 @@ namespace MujinAGVDemo
             this.label21.TabIndex = 46;
             this.label21.Text = "設定ファイルを選択します。\r\n\r\n";
             // 
+            // menuStrip1
+            // 
+            this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.ファイルToolStripMenuItem});
+            this.menuStrip1.Location = new System.Drawing.Point(0, 0);
+            this.menuStrip1.Name = "menuStrip1";
+            this.menuStrip1.Size = new System.Drawing.Size(637, 24);
+            this.menuStrip1.TabIndex = 47;
+            this.menuStrip1.Text = "menuStrip1";
+            // 
+            // ファイルToolStripMenuItem
+            // 
+            this.ファイルToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.mnuOpenLogDir});
+            this.ファイルToolStripMenuItem.Name = "ファイルToolStripMenuItem";
+            this.ファイルToolStripMenuItem.Size = new System.Drawing.Size(53, 20);
+            this.ファイルToolStripMenuItem.Text = "ファイル";
+            // 
+            // mnuOpenLogDir
+            // 
+            this.mnuOpenLogDir.Name = "mnuOpenLogDir";
+            this.mnuOpenLogDir.Size = new System.Drawing.Size(154, 22);
+            this.mnuOpenLogDir.Text = "ログの場所を開く";
+            this.mnuOpenLogDir.Click += new System.EventHandler(this.mnuOpenLogDir_Click);
+            // 
+            // btnSetOwner
+            // 
+            this.btnSetOwner.Location = new System.Drawing.Point(5, 149);
+            this.btnSetOwner.Margin = new System.Windows.Forms.Padding(2);
+            this.btnSetOwner.Name = "btnSetOwner";
+            this.btnSetOwner.Size = new System.Drawing.Size(234, 18);
+            this.btnSetOwner.TabIndex = 15;
+            this.btnSetOwner.Text = "SetOwner";
+            this.toolTip.SetToolTip(this.btnSetOwner, "AGVのSetOwnerを解除します。");
+            this.btnSetOwner.UseVisualStyleBackColor = true;
+            this.btnSetOwner.Click += new System.EventHandler(this.btnSetOwner_Click);
+            // 
             // frmMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
@@ -697,6 +765,7 @@ namespace MujinAGVDemo
             this.Controls.Add(this.tabControl1);
             this.Controls.Add(this.btnSaveSetting);
             this.Controls.Add(this.statusStrip1);
+            this.Controls.Add(this.menuStrip1);
             this.Controls.Add(this.checkBoxIsStop);
             this.Controls.Add(this.label8);
             this.Controls.Add(this.textBoxRobotID);
@@ -710,6 +779,7 @@ namespace MujinAGVDemo
             this.Controls.Add(this.textBoxLayoutID);
             this.Controls.Add(this.textBoxWarehouseID);
             this.Controls.Add(this.textBoxServerIP);
+            this.MainMenuStrip = this.menuStrip1;
             this.Name = "frmMain";
             this.Text = "AGVデモソフト";
             this.Load += new System.EventHandler(this.frmMain_Load);
@@ -724,6 +794,9 @@ namespace MujinAGVDemo
             this.tabPage3.ResumeLayout(false);
             this.tabPage3.PerformLayout();
             this.tabPage4.ResumeLayout(false);
+            this.tabPage5.ResumeLayout(false);
+            this.menuStrip1.ResumeLayout(false);
+            this.menuStrip1.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -790,6 +863,12 @@ namespace MujinAGVDemo
         private System.Windows.Forms.ToolTip toolTip;
         private System.Windows.Forms.Button btnOpenParamSettings;
         private System.Windows.Forms.Label label21;
+        private System.Windows.Forms.TabPage tabPage5;
+        private System.Windows.Forms.Button btnShowPodDetail;
+        private System.Windows.Forms.MenuStrip menuStrip1;
+        private System.Windows.Forms.ToolStripMenuItem ファイルToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem mnuOpenLogDir;
+        private System.Windows.Forms.Button btnSetOwner;
     }
 }
 
