@@ -22,7 +22,7 @@ namespace MujinAGVDemo
         /// <summary>
         /// 設定ファイルのパス
         /// </summary>
-        string settingPath = "ParamSetting.xml";
+        string settingPath = @"Setting/ParamSetting.xml";
 
         private const string logDirPath = @"logs";
         int directionIndex = 4;
@@ -279,50 +279,50 @@ namespace MujinAGVDemo
                     turnMode = OFF;
                 }
                 var moveTask = new Task(() =>
-                   {
-                       var movePodParam = new MovePodParam(
-                               robotID,
-                               podID,
-                               DestinationModes.StorageID,
-                               nodeID,
-                               isEndWait: true,
-                               turnMode: turnMode,
-                               unload: unload
-                               );
+                {
+                    var movePodParam = new MovePodParam(
+                            robotID,
+                            podID,
+                            DestinationModes.StorageID,
+                            nodeID,
+                            isEndWait: true,
+                            turnMode: turnMode,
+                            unload: unload
+                            );
 
-                       //switch (listBoxDirection.SelectedIndex)
-                       switch(directionIndex)
-                       {
-                           case 0:
-                               movePodParam.RobotFace = Direction.North;
-                               break;
-                           case 1:
-                               movePodParam.RobotFace = Direction.East;
-                               break;
-                           case 2:
-                               movePodParam.RobotFace = Direction.South;
-                               break;
-                           case 3:
-                               movePodParam.RobotFace = Direction.West;
-                               break;
-                           case 4:
-                               movePodParam.RobotFace = Direction.NoSelect;
-                               break;
-                       }
+                    //switch (listBoxDirection.SelectedIndex)
+                    switch (directionIndex)
+                    {
+                        case 0:
+                            movePodParam.RobotFace = Direction.North;
+                            break;
+                        case 1:
+                            movePodParam.RobotFace = Direction.East;
+                            break;
+                        case 2:
+                            movePodParam.RobotFace = Direction.South;
+                            break;
+                        case 3:
+                            movePodParam.RobotFace = Direction.West;
+                            break;
+                        case 4:
+                            movePodParam.RobotFace = Direction.NoSelect;
+                            break;
+                    }
 
-                       var movePodResult = (MovePodReturnMessage)factory.Create(movePodParam).DoAction();
+                    var movePodResult = (MovePodReturnMessage)factory.Create(movePodParam).DoAction();
 
-                       
-                       string logMessage = $"ロボットID {robotID},棚 {podID},移動先 {nodeID}";
-                       logger.Info(logMessage);
-                       logger.Info($"msg[{movePodResult.ReturnMsg}]returnCode[{movePodResult.ReturnCode}]");
 
-                       //logger.Info(movePodResult.ReturnMsg);
-                       this.Invoke((MethodInvoker)(() =>
-                       {
-                           lblCurrentLineProcess.Text = logMessage;
-                       }));
-                   }, cancelToken);
+                    string logMessage = $"ロボットID {robotID},棚 {podID},移動先 {nodeID}";
+                    logger.Info(logMessage);
+                    logger.Info($"msg[{movePodResult.ReturnMsg}]returnCode[{movePodResult.ReturnCode}]");
+
+                    //logger.Info(movePodResult.ReturnMsg);
+                    this.Invoke((MethodInvoker)(() =>
+                    {
+                        lblCurrentLineProcess.Text = logMessage;
+                    }));
+                }, cancelToken);
                 moveTask.Start();
                 await moveTask.ConfigureAwait(true);
             }
@@ -429,7 +429,7 @@ namespace MujinAGVDemo
                             );
 
                     //switch (listBoxDirection.SelectedIndex)
-                    switch(directionIndex)
+                    switch (directionIndex)
                     {
                         case 0:
                             moveRobotParam.RobotFace = Direction.North;
@@ -617,7 +617,7 @@ namespace MujinAGVDemo
                 showErrorMessageBox(message);
                 return true;
             }
-            
+
             return false;
         }
         private bool haveTask(string robotID)
@@ -688,7 +688,7 @@ namespace MujinAGVDemo
             logger.Info($"{task.ToString()}");
 
             var detail = task.Data.Detail;
-            
+
             var message = string.Empty;
             message = $"タスクID：{detail.TaskID}　状態：{detail.Status}　失敗理由：{detail.ErrorReason} エラーコード：{detail.ErrorCode}";
             //message = $"タスクID：{detail.TaskID}　状態：{detail.Status}　失敗理由：{GetJapaneseErrorMsg(task.ReturnCode)}";
@@ -813,7 +813,7 @@ namespace MujinAGVDemo
             {
                 settingPath = openFileDialog.FileName;
 
-                if(tryLoadSetting())
+                if (tryLoadSetting())
                 {
                     updateControl();
                     updateParam();

@@ -80,7 +80,7 @@ namespace MujinAGVDemo
             NodeID = "162634055515651";
             PodID = "1942";
             RobotID = "105";
-            StationListPath = "エミュレータ用移動テスト.csv";
+            StationListPath = @"CSVSample/エミュレータ用移動テスト.csv";
             
 
             DestinationMode = DestinationModes.StorageID;
