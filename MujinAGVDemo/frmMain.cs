@@ -61,6 +61,7 @@ namespace MujinAGVDemo
 
         private void frmMain_Load(object sender, EventArgs e)
         {
+            this.Text = $"AGVデモソフト {Application.ProductVersion}";
             if (!tryLoadSetting())
             {
                 return;
@@ -172,7 +173,17 @@ namespace MujinAGVDemo
 
         private async void btnRotationMove_Click(object sender, EventArgs e)
         {
+            var stationListPath = param.StationListPath;
+            var paramSetting = this.param;
+            var robotID = param.RobotID;
+            var podID = param.PodID;
             updateParam();
+            await movePodRotate(stationListPath, paramSetting, robotID, podID);
+
+        }
+
+        private async Task movePodRotate(string stationListPath, ParamSettings paramSetting, string robotID, string podID)
+        {
             if (isHetuUsed())
             {
                 return;
@@ -180,18 +191,17 @@ namespace MujinAGVDemo
             cancelTokenSource = new CancellationTokenSource();
             var token = cancelTokenSource.Token;
 
-            var stationListPath = param.StationListPath;
-
-            if (!fileIO.TryGetAllLines(stationListPath, out var nodeList))
+            if (!fileIO.TryGetAllLines(stationListPath, out var orderList))
             {
                 showErrorMessageBox("CSVファイルの読込に失敗しました。");
                 return;
             }
             // ヘッダー行を取り除く処理
-            nodeList.RemoveAt(0);
-            await movePodRotate(param, nodeList, token);
-
+            orderList.RemoveAt(0);
+            await movePodRotate(paramSetting, orderList, token, robotID, podID);
         }
+
+
         private void checkBoxIsStop_CheckedChanged(object sender, EventArgs e)
         {
             var serverIP =
@@ -265,6 +275,8 @@ namespace MujinAGVDemo
         private async Task movePod(string serverIP, string warehouseID, string podID
             , string nodeID, string robotID, int turnMode, int unload, CancellationToken cancelToken)
         {
+            if (cancelToken.IsCancellationRequested)
+                return;
             var factory = new CommandFactory(serverIP, warehouseID);
             if (!factory.IsConnectedTESServer())
             {
@@ -323,6 +335,9 @@ namespace MujinAGVDemo
                         lblCurrentLineProcess.Text = logMessage;
                     }));
                 }, cancelToken);
+                if (cancelToken.IsCancellationRequested)
+                    return;
+
                 moveTask.Start();
                 await moveTask.ConfigureAwait(true);
             }
@@ -339,16 +354,44 @@ namespace MujinAGVDemo
         private async Task movePodRotate(ParamSettings param, List<string> allLines
             , CancellationToken cancelToken)
         {
-
+            var robotID = param.RobotID;
+            var podID = param.PodID;
+            await movePodRotate(param, allLines, cancelToken, robotID, podID);
+        }
+        private async Task movePodRotate(ParamSettings param, List<string> allLines
+            , CancellationToken cancelToken, string robotID, string podID)
+        {
             int nowCount = 1;
+            bool isInfinityLoop = param.RepeatCount == 0;
+            bool isRunning =
+                //無限ループモードまたは実行回数が繰り返し回数未満
+                (isInfinityLoop || nowCount < param.RepeatCount)
+                //かつキャンセルされていない
+                && !cancelToken.IsCancellationRequested;
+
+
 
             do
             {
-                bool isInfinityLoop = param.RepeatCount == 0;
-
+                if (cancelToken.IsCancellationRequested)
+                {
+                    lblCurrentLineProcess.Text = "連続動作完了";
+                    showInfoMessageBox("連続動作完了");
+                    return;
+                }
                 if (!isInfinityLoop)
-                    prgRepeartCount.Value = (int)((double)nowCount / (double)param.RepeatCount * 100);
+                {
 
+                    var percent = (int)((double)nowCount / (double)param.RepeatCount * 100);
+                    if (percent > 100)
+                    {
+                        prgRepeartCount.Value = 100;
+                    }
+                    else
+                    {
+                        prgRepeartCount.Value = percent;
+                    }
+                }
 
                 lblProgress.Text = $"繰り返し回数 {nowCount}/{param.RepeatCount}";
                 logger.Info(string.Format("{0}回目開始", nowCount));
@@ -370,16 +413,16 @@ namespace MujinAGVDemo
 
                     var nodeID = splitLine[nodeIDIndex];
 
-                    await movePod(param.ServerIP, param.WarehouseID, param.PodID
-                        , nodeID, param.RobotID, turnMode, unload, cancelToken);
+                    await movePod(param.ServerIP, param.WarehouseID, podID
+                        , nodeID, robotID, turnMode, unload, cancelToken);
                 }
 
 
                 if (!isInfinityLoop)
                     nowCount++;
             }
-            while (nowCount != param.RepeatCount && !cancelToken.IsCancellationRequested);
-
+            //while (nowCount != param.RepeatCount && !cancelToken.IsCancellationRequested);
+            while (isRunning);
 
             lblCurrentLineProcess.Text = "連続動作完了";
             showInfoMessageBox("連続動作完了");
@@ -398,23 +441,14 @@ namespace MujinAGVDemo
             {
                 var moveTask = new Task(() =>
                 {
-                    var moveRobotResult = new MoveRobotReturnMessage();
 
-                    var unsetOwnerResult = factory.Create(new UnsetOwnerParam(robotID)).DoAction();
-
-                    if (unsetOwnerResult.ReturnMsg != "succ")
-                    {
-                        showUnsetOwnerErrorDialog(unsetOwnerResult.ReturnMsg);
-                        logger.Error($"{Messages.UnsetOwnerError}:AGV{param.RobotID}{unsetOwnerResult.ReturnMsg}");
-                        //return;
-                    }
-                    logger.Info($"AGV{robotID}に対してUnsetOwnerが成功しました。");
+                    unsetOwner(robotID);
 
                     var setOwnerResult = factory.Create(new SetOwnerParam(robotID)).DoAction();
 
                     if (setOwnerResult.ReturnMsg != "succ")
                     {
-                        showUnsetOwnerErrorDialog(unsetOwnerResult.ReturnMsg);
+                        showUnsetOwnerErrorDialog(setOwnerResult.ReturnMsg);
                         logger.Error($"{Messages.SetOwnerError}:AGV{param.RobotID}{setOwnerResult.ReturnMsg}");
                         return;
                     }
@@ -447,7 +481,7 @@ namespace MujinAGVDemo
                             moveRobotParam.RobotFace = Direction.NoSelect;
                             break;
                     }
-                    moveRobotResult = (MoveRobotReturnMessage)factory.Create(moveRobotParam).DoAction();
+                    var moveRobotResult = (MoveRobotReturnMessage)factory.Create(moveRobotParam).DoAction();
 
                     string logMessage = $"ロボットID {robotID},移動先 {nodeID}";
                     logger.Info(logMessage);
@@ -700,11 +734,22 @@ namespace MujinAGVDemo
             var taskID = textBoxTaskID.Text;
             getTaskDetailParam(taskID);
         }
-
-        private void unsetOwner()
+        private void unsetOwner(string robotID)
         {
-            var robotID = param.RobotID;
             var factory = new CommandFactory(param.ServerIP, param.WarehouseID);
+
+            var robotList = (GetRobotListFromDBReturnMessage)factory.Create(new GetRobotListFromDBParam()).DoAction();
+            var rb = robotList.Data.RobotList.Where(x => x.RobotID == robotID).FirstOrDefault();
+            if (rb == null)
+            {
+                logger.Info($"{robotID}が見つからないためunsetOwnerは行いません。");
+                return;
+            }
+            if (rb.Owner == "TES")
+            {
+                logger.Info($"{robotID}の所有者はTESのためunsetOwnerは行いません。");
+                return;
+            }
 
             var unsetOwnerResult = factory.Create(new UnsetOwnerParam(robotID)).DoAction();
 
@@ -715,6 +760,12 @@ namespace MujinAGVDemo
                 //return;
             }
             logger.Info($"AGV{robotID}に対してUnsetOwnerが成功しました。");
+        }
+        private void unsetOwner()
+        {
+            var robotID = param.RobotID;
+            unsetOwner(robotID);
+
         }
         private void setOwner()
         {
@@ -773,30 +824,6 @@ namespace MujinAGVDemo
 
         }
 
-        private double getDirection()
-        {
-            var direction = Direction.NoSelect;
-            switch (listBoxDirection.SelectedIndex)
-            {
-                case 0:
-                    direction = Direction.North;
-                    break;
-                case 1:
-                    direction = Direction.East;
-                    break;
-                case 2:
-                    direction = Direction.South;
-                    break;
-                case 3:
-                    direction = Direction.West;
-                    break;
-                case 4:
-                    direction = Direction.NoSelect;
-                    break;
-            }
-
-            return direction;
-        }
 
         private void btnOpenParamSettings_Click(object sender, EventArgs e)
         {
@@ -826,12 +853,7 @@ namespace MujinAGVDemo
             }
             openFileDialog.Dispose();
         }
-        public string GetJapaneseErrorMsg(int errCode)
-        {
-            var RMT = new ReturnMessageTranslator("JapaneseErrorCode.csv");
-            //Debug.WriteLine(RMT.ToJapaneseMessage(errCode));
-            return $"{RMT.ToJapaneseMessage(errCode)}:{RMT.ToJapaneseExplanation(errCode)}";
-        }
+
 
         private void btnShowPodDetail_Click(object sender, EventArgs e)
         {
@@ -847,16 +869,7 @@ namespace MujinAGVDemo
                 foreach (var pod in podList)
                 {
                     var podMessage = $"podID[{pod.PodID}]positionType[{pod.PositionType}]strageID[{pod.StorageID}]robotID[{pod.RobotID}]";
-                    logger.Info(podMessage);
-                    //if (pod.StorageID==string.Empty)
-                    //{
-                    //    continue;
-                    //}
-                    //var getNodeListAns = (GetNodeDetailReturnMessage)factory.Create(new GetNodeDetailParam(pod.StorageID)).DoAction();
-                    //logger.Info(getNodeListAns.ToString());
-
-
-
+                    logger.Info(podMessage);                    
                 }
             }
             catch (Exception ex)
@@ -878,6 +891,46 @@ namespace MujinAGVDemo
         private void btnSetOwner_Click(object sender, EventArgs e)
         {
             setOwner();
+        }
+
+        private void btnCharge_Click(object sender, EventArgs e)
+        {
+            var zoneID = textBoxChargeAreaID.Text;
+            var factory = new CommandFactory(param.ServerIP, param.WarehouseID);
+            var chargeReturnMessage = (ChargeRobotReturnMessage)factory.Create(new ChargeRobotParam(param.RobotID, zoneID)).DoAction();
+            logger.Info(chargeReturnMessage.ReturnMsg);
+        }
+
+        private async void mnuMoveRobotDefault_Click(object sender, EventArgs e)
+        {
+            var factory = new CommandFactory(param.ServerIP, param.WarehouseID);
+            if (isHetuUsed())
+            {
+                return;
+            }
+            var serverIP = param.ServerIP;
+            var warehouseID = param.WarehouseID;
+            var nodeID = "161095107535";
+            var robotID = "104";
+
+            //showInfoMessageBox($"AGV移動指示を作成しました。{Environment.NewLine}AGV:{robotID},移動先:{nodeID}");
+            await moveRobot(serverIP, warehouseID, "104", "161095107535");
+            unsetOwner("104");
+
+            //showInfoMessageBox($"AGV移動指示を作成しました。{Environment.NewLine}AGV:{robotID},移動先:{nodeID}");
+            await moveRobot(serverIP, warehouseID, "39", "161095107566");
+            unsetOwner("39");
+
+            unsetOwner("102");
+        }
+
+        private async void mnuOldAGVMove_Click(object sender, EventArgs e)
+        {
+            var orderFilePath = @"CSVSample/棚をポイント2と往復.csv";
+            var paramSetting = param;
+            var robotID = "102";
+            var podID = "1137";
+            await movePodRotate(orderFilePath, param, robotID, podID);
         }
     }
 }

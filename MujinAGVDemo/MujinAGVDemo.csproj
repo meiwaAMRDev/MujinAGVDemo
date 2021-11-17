@@ -175,10 +175,19 @@
     <None Include="CSVSample\安川電機向け移動テスト.csv">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Include="CSVSample\棚をポイント2と往復.csv">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="CSVSample\棚をポイント3へ運ぶ.csv">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="CSVSample\棚をポイント2へ運ぶ.csv">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="JapaneseErrorCode.csv">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="CSVSample\社内用移動テスト.csv">
+    <None Include="CSVSample\棚を初期位置へ運ぶ.csv">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="NLog.xsd">
