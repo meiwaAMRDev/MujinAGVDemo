@@ -631,7 +631,10 @@ namespace MujinAGVDemo
 
             var factory = new CommandFactory(param.ServerIP, param.WarehouseID, clientCode);
             if (!factory.IsConnectedTESServer())
-                logger.Error(Messages.NotConnectMsg);
+            {
+                logger.Error($"{Messages.NotConnectMsg}[{param.ServerIP}][{param.WarehouseID}]");
+            }
+                
 
             var getRobotRetMsg = (GetRobotListFromDBReturnMessage)factory.Create(new GetRobotListFromDBParam()).DoAction();
 
@@ -862,15 +865,14 @@ namespace MujinAGVDemo
             {
                 var getPodListAns = (GetPodListReturnMessage)factory.Create(new GetPodListParam()).DoAction();
 
-
-
                 var podList = getPodListAns.Data.PodList.ToList();
                 logger.Info($"棚の位置を表示します");
                 foreach (var pod in podList)
                 {
                     var podMessage = $"podID[{pod.PodID}]positionType[{pod.PositionType}]strageID[{pod.StorageID}]robotID[{pod.RobotID}]";
-                    logger.Info(podMessage);                    
+                    logger.Info(podMessage);
                 }
+
             }
             catch (Exception ex)
             {
@@ -931,6 +933,59 @@ namespace MujinAGVDemo
             var robotID = "102";
             var podID = "1137";
             await movePodRotate(orderFilePath, param, robotID, podID);
+        }
+        private async Task liftDownRobot(CommandFactory factory, string robotID)
+        {
+            var getRobotListFromDBReturnMessage = (GetRobotListFromDBReturnMessage)factory.Create(new GetRobotListFromDBParam(true)).DoAction();
+            var rb = getRobotListFromDBReturnMessage.Data.RobotList.Where(x => x.RobotID == robotID).FirstOrDefault();
+            if (rb == null)
+            {
+                logger.Info($"AGV{robotID} not found");
+                return;
+            }
+
+
+            if (rb.PodID == string.Empty)
+            {
+                logger.Info($"AGV have not pod");
+                return;
+            }
+            logger.Info(rb.ToString());
+
+            var cancelToken = cancelTokenSource.Token;
+
+            await movePod(param.ServerIP, param.WarehouseID, rb.PodID, rb.CurNodeID, robotID, OFF, ON, cancelToken);
+
+        }
+
+        private void btnLiftDown_Click(object sender, EventArgs e)
+        {
+            updateParam();
+            var result = Command.MapCommands.LiftDownRobot(param.ServerIP, param.WarehouseID, param.RobotID);
+
+            if (!result.isSuccess)
+            {
+                showErrorMessageBox(result.messages);
+            }
+            else
+            {
+                showInfoMessageBox(result.messages);
+            }
+        }
+
+        private void btnLiftUp_Click(object sender, EventArgs e)
+        {
+            updateParam();
+            var result = Command.MapCommands.LiftUpRobot(param.ServerIP, param.WarehouseID, param.RobotID);
+
+            if (!result.isSuccess)
+            {
+                showErrorMessageBox(result.messages);
+            }
+            else
+            {
+                showInfoMessageBox(result.messages);
+            }
         }
     }
 }

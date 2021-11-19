@@ -125,6 +125,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Command\MapCommands.cs" />
     <Compile Include="FileIO.cs" />
     <Compile Include="frmMain.cs">
       <SubType>Form</SubType>
