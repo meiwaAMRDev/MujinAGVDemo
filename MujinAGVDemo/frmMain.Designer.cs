@@ -62,7 +62,6 @@ namespace MujinAGVDemo
             this.label12 = new System.Windows.Forms.Label();
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabPage1 = new System.Windows.Forms.TabPage();
-            this.btnLiftDown = new System.Windows.Forms.Button();
             this.textBoxChargeAreaID = new System.Windows.Forms.TextBox();
             this.label22 = new System.Windows.Forms.Label();
             this.btnCharge = new System.Windows.Forms.Button();
@@ -90,6 +89,9 @@ namespace MujinAGVDemo
             this.btnRemovePod = new System.Windows.Forms.Button();
             this.label10 = new System.Windows.Forms.Label();
             this.label9 = new System.Windows.Forms.Label();
+            this.tabPage7 = new System.Windows.Forms.TabPage();
+            this.btnLiftUp = new System.Windows.Forms.Button();
+            this.btnLiftDown = new System.Windows.Forms.Button();
             this.label13 = new System.Windows.Forms.Label();
             this.label14 = new System.Windows.Forms.Label();
             this.label16 = new System.Windows.Forms.Label();
@@ -103,8 +105,7 @@ namespace MujinAGVDemo
             this.デバッグToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.mnuMoveRobotDefault = new System.Windows.Forms.ToolStripMenuItem();
             this.mnuOldAGVMove = new System.Windows.Forms.ToolStripMenuItem();
-            this.tabPage7 = new System.Windows.Forms.TabPage();
-            this.btnLiftUp = new System.Windows.Forms.Button();
+            this.btnShowAGVPosition = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.numRepeatCount)).BeginInit();
             this.statusStrip1.SuspendLayout();
             this.tabControl1.SuspendLayout();
@@ -114,8 +115,8 @@ namespace MujinAGVDemo
             this.tabPage4.SuspendLayout();
             this.tabPage5.SuspendLayout();
             this.tabPage6.SuspendLayout();
-            this.menuStrip1.SuspendLayout();
             this.tabPage7.SuspendLayout();
+            this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
             // textBoxServerIP
@@ -429,16 +430,6 @@ namespace MujinAGVDemo
             this.tabPage1.Text = "各個";
             this.tabPage1.UseVisualStyleBackColor = true;
             // 
-            // btnLiftDown
-            // 
-            this.btnLiftDown.Location = new System.Drawing.Point(6, 43);
-            this.btnLiftDown.Name = "btnLiftDown";
-            this.btnLiftDown.Size = new System.Drawing.Size(131, 23);
-            this.btnLiftDown.TabIndex = 49;
-            this.btnLiftDown.Text = "その場で棚を下ろす";
-            this.btnLiftDown.UseVisualStyleBackColor = true;
-            this.btnLiftDown.Click += new System.EventHandler(this.btnLiftDown_Click);
-            // 
             // textBoxChargeAreaID
             // 
             this.textBoxChargeAreaID.Location = new System.Drawing.Point(156, 165);
@@ -663,6 +654,7 @@ namespace MujinAGVDemo
             // 
             // tabPage5
             // 
+            this.tabPage5.Controls.Add(this.btnShowAGVPosition);
             this.tabPage5.Controls.Add(this.btnShowPodDetail);
             this.tabPage5.Location = new System.Drawing.Point(4, 22);
             this.tabPage5.Name = "tabPage5";
@@ -705,6 +697,7 @@ namespace MujinAGVDemo
             this.btnAddPod.TabIndex = 38;
             this.btnAddPod.Text = "棚追加";
             this.btnAddPod.UseVisualStyleBackColor = true;
+            this.btnAddPod.Click += new System.EventHandler(this.btnAddPod_Click);
             // 
             // btnRemovePod
             // 
@@ -714,6 +707,7 @@ namespace MujinAGVDemo
             this.btnRemovePod.TabIndex = 39;
             this.btnRemovePod.Text = "棚削除";
             this.btnRemovePod.UseVisualStyleBackColor = true;
+            this.btnRemovePod.Click += new System.EventHandler(this.btnRemovePod_Click);
             // 
             // label10
             // 
@@ -732,6 +726,38 @@ namespace MujinAGVDemo
             this.label9.Size = new System.Drawing.Size(287, 12);
             this.label9.TabIndex = 40;
             this.label9.Text = "nodeIDで指定した地点にpodIDで指定した棚を作成します。\r\n";
+            // 
+            // tabPage7
+            // 
+            this.tabPage7.Controls.Add(this.btnLiftUp);
+            this.tabPage7.Controls.Add(this.btnLiftDown);
+            this.tabPage7.Location = new System.Drawing.Point(4, 22);
+            this.tabPage7.Name = "tabPage7";
+            this.tabPage7.Padding = new System.Windows.Forms.Padding(3);
+            this.tabPage7.Size = new System.Drawing.Size(475, 191);
+            this.tabPage7.TabIndex = 6;
+            this.tabPage7.Text = "その場動作";
+            this.tabPage7.UseVisualStyleBackColor = true;
+            // 
+            // btnLiftUp
+            // 
+            this.btnLiftUp.Location = new System.Drawing.Point(6, 72);
+            this.btnLiftUp.Name = "btnLiftUp";
+            this.btnLiftUp.Size = new System.Drawing.Size(131, 23);
+            this.btnLiftUp.TabIndex = 50;
+            this.btnLiftUp.Text = "その場で棚を持ち上げる";
+            this.btnLiftUp.UseVisualStyleBackColor = true;
+            this.btnLiftUp.Click += new System.EventHandler(this.btnLiftUp_Click);
+            // 
+            // btnLiftDown
+            // 
+            this.btnLiftDown.Location = new System.Drawing.Point(6, 43);
+            this.btnLiftDown.Name = "btnLiftDown";
+            this.btnLiftDown.Size = new System.Drawing.Size(131, 23);
+            this.btnLiftDown.TabIndex = 49;
+            this.btnLiftDown.Text = "その場で棚を下ろす";
+            this.btnLiftDown.UseVisualStyleBackColor = true;
+            this.btnLiftDown.Click += new System.EventHandler(this.btnLiftDown_Click);
             // 
             // label13
             // 
@@ -840,27 +866,15 @@ namespace MujinAGVDemo
             this.mnuOldAGVMove.Text = "旧型AGV連続";
             this.mnuOldAGVMove.Click += new System.EventHandler(this.mnuOldAGVMove_Click);
             // 
-            // tabPage7
+            // btnShowAGVPosition
             // 
-            this.tabPage7.Controls.Add(this.btnLiftUp);
-            this.tabPage7.Controls.Add(this.btnLiftDown);
-            this.tabPage7.Location = new System.Drawing.Point(4, 22);
-            this.tabPage7.Name = "tabPage7";
-            this.tabPage7.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage7.Size = new System.Drawing.Size(475, 191);
-            this.tabPage7.TabIndex = 6;
-            this.tabPage7.Text = "その場動作";
-            this.tabPage7.UseVisualStyleBackColor = true;
-            // 
-            // btnLiftUp
-            // 
-            this.btnLiftUp.Location = new System.Drawing.Point(6, 72);
-            this.btnLiftUp.Name = "btnLiftUp";
-            this.btnLiftUp.Size = new System.Drawing.Size(131, 23);
-            this.btnLiftUp.TabIndex = 50;
-            this.btnLiftUp.Text = "その場で棚を持ち上げる";
-            this.btnLiftUp.UseVisualStyleBackColor = true;
-            this.btnLiftUp.Click += new System.EventHandler(this.btnLiftUp_Click);
+            this.btnShowAGVPosition.Location = new System.Drawing.Point(6, 85);
+            this.btnShowAGVPosition.Name = "btnShowAGVPosition";
+            this.btnShowAGVPosition.Size = new System.Drawing.Size(75, 23);
+            this.btnShowAGVPosition.TabIndex = 1;
+            this.btnShowAGVPosition.Text = "AGV位置";
+            this.btnShowAGVPosition.UseVisualStyleBackColor = true;
+            this.btnShowAGVPosition.Click += new System.EventHandler(this.btnShowAGVPosition_Click);
             // 
             // frmMain
             // 
@@ -908,9 +922,9 @@ namespace MujinAGVDemo
             this.tabPage5.ResumeLayout(false);
             this.tabPage6.ResumeLayout(false);
             this.tabPage6.PerformLayout();
+            this.tabPage7.ResumeLayout(false);
             this.menuStrip1.ResumeLayout(false);
             this.menuStrip1.PerformLayout();
-            this.tabPage7.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -992,6 +1006,7 @@ namespace MujinAGVDemo
         private System.Windows.Forms.Button btnLiftDown;
         private System.Windows.Forms.TabPage tabPage7;
         private System.Windows.Forms.Button btnLiftUp;
+        private System.Windows.Forms.Button btnShowAGVPosition;
     }
 }
 

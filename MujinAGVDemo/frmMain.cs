@@ -74,9 +74,10 @@ namespace MujinAGVDemo
             textBoxTaskID.Text = string.Empty;
         }
 
-
-
-        private void btnAddPod_Click(object sender, EventArgs e)
+        /// <summary>
+        /// 棚を追加します
+        /// </summary>
+        private void addPod()
         {
             updateParam();
             var serverIP = param.ServerIP;
@@ -115,9 +116,10 @@ namespace MujinAGVDemo
             }
         }
 
-
-
-        private void btnRemovePod_Click(object sender, EventArgs e)
+        /// <summary>
+        /// 棚を削除します
+        /// </summary>
+        private void removePod()
         {
             updateParam();
             var serverIP = param.ServerIP;
@@ -132,7 +134,7 @@ namespace MujinAGVDemo
                 showRemovePodErrorDialog(Messages.NotConnectMsg);
                 return;
             }
-
+            logger.Info($"棚[{podID}]を削除します。IP[{serverIP}]warehouseID[{warehouseID}]");
             try
             {
                 var removePodResult = factory.Create(new RemovePodParam(podID)).DoAction();
@@ -634,7 +636,7 @@ namespace MujinAGVDemo
             {
                 logger.Error($"{Messages.NotConnectMsg}[{param.ServerIP}][{param.WarehouseID}]");
             }
-                
+
 
             var getRobotRetMsg = (GetRobotListFromDBReturnMessage)factory.Create(new GetRobotListFromDBParam()).DoAction();
 
@@ -820,7 +822,7 @@ namespace MujinAGVDemo
             messageList.Add(message);
             showInfoMessageBox(message);
 
-            haveTask(rb.RobotID);
+            //haveTask(rb.RobotID);
             //}
 
 
@@ -985,6 +987,36 @@ namespace MujinAGVDemo
             else
             {
                 showInfoMessageBox(result.messages);
+            }
+        }
+
+        private void btnAddPod_Click(object sender, EventArgs e)
+        {
+            addPod();
+        }
+
+        private void btnRemovePod_Click(object sender, EventArgs e)
+        {
+            removePod();
+        }
+
+        private void btnShowAGVPosition_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                var factory = new CommandFactory(param.ServerIP, param.WarehouseID);
+                var getRobotListAns = (GetRobotListReturnMessage)factory.Create(new GetRobotListParam()).DoAction();
+                var robotList = getRobotListAns.Data.RobotList;
+                robotList.ForEach(rb =>
+                {
+                    var text = $"AGV[{rb.RobotID}] Node[{rb.CurNodeID}] X[{rb.CurX}] Y[{rb.CurY}] Owner[{rb.Owner}] Status[{rb.WorkStatus}] TaskID[{rb.TaskID}]";
+                    logger.Info(text);
+                });
+            }
+            catch(Exception ex)
+            {
+                logger.Error(ex.ToString());
+                showErrorMessageBox(ex.Message);
             }
         }
     }
