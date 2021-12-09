@@ -252,25 +252,25 @@ namespace MujinAGVDemo.Command
             var factory = new CommandFactory(hetuIP, warehouseID);
             if (!factory.IsConnectedTESServer())
             {
-                return (false, faultConnectoToHetuServer,podID);
+                return (false, faultConnectoToHetuServer, podID);
             }
 
             var getPodListReturnMessage = (GetPodListFromDBReturnMessage)factory.Create(new GetPodListFromDBParam()).DoAction();
             if (getPodListReturnMessage.ReturnCode != successCode)
             {
-                return (false, $"棚のリスト取得に失敗しました。[{getPodListReturnMessage.ReturnMsg}][{getPodListReturnMessage.ReturnCode}]",podID);
+                return (false, $"棚のリスト取得に失敗しました。[{getPodListReturnMessage.ReturnMsg}][{getPodListReturnMessage.ReturnCode}]", podID);
             }
             //「StorageID」はAGVに持ち上げられていない場合のみ持っているパラメータ
             //AGVに持ち上げられている場合はかわりに「RobotID」に号機が入る
             var pod = getPodListReturnMessage.Data.PodList.Where(x => x.StorageID == nodeID).FirstOrDefault();
             if (pod == null)
             {
-                return (false, $"nodeID[{nodeID}]に棚は存在しません。",podID);
+                return (false, $"nodeID[{nodeID}]に棚は存在しません。", podID);
             }
             else
             {
                 podID = pod.PodID;
-                return (true, $"nodeID[{nodeID}]に棚[{pod.PodID}]が存在します。",podID);
+                return (true, $"nodeID[{nodeID}]に棚[{pod.PodID}]が存在します。", podID);
             }
         }
         /// <summary>
@@ -280,7 +280,7 @@ namespace MujinAGVDemo.Command
         /// <param name="warehouseID">マップのID</param>
         /// <param name="robotID">AGVの番号</param>
         /// <returns>isSuccess=成功=true 失敗=false,　messages=Hetuの応答メッセージ</returns>
-        public static (bool isSuccess, string messages) LiftDownRobot(string hetuIP, string warehouseID,string robotID)
+        public static (bool isSuccess, string messages) LiftDownRobot(string hetuIP, string warehouseID, string robotID)
         {
             var factory = new CommandFactory(hetuIP, warehouseID);
             var getRobotListFromDBReturnMessage = (GetRobotListFromDBReturnMessage)factory.Create(new GetRobotListFromDBParam()).DoAction();
@@ -291,8 +291,12 @@ namespace MujinAGVDemo.Command
                 //logger.Info();
                 return (false, $"AGV[{robotID}]が見つかりません。");
             }
+            var getPodListFromDBReturnMessage = (GetPodListFromDBReturnMessage)factory.Create(new GetPodListFromDBParam()).DoAction();
+            var podList = getPodListFromDBReturnMessage.Data.PodList;
+            //サーバーに棚が残っているのでFirstOrDefaultだとマップ上に無い棚が選択されることがある。
+            var pod = podList.Where(x => x.RobotID == robotID).LastOrDefault();
 
-            var podID = rb.PodID;
+            var podID = pod.PodID;
             var nodeID = rb.CurNodeID;
             var unload = ON;
             //持っている棚がない場合はここで終了
@@ -301,7 +305,7 @@ namespace MujinAGVDemo.Command
                 //logger.Info();
                 return (true, $"AGV[{robotID}]が持っている棚はありません。");
             }
-                        
+
             var movePodResult = (MovePodReturnMessage)factory.Create(new MovePodParam(
                 robotID,
                 podID,
@@ -338,7 +342,7 @@ namespace MujinAGVDemo.Command
                 returnMessage = $"AGV[{robotID}]が見つかりません。";
                 return (false, returnMessage);
             }
-            
+
             var nodeID = rb.CurNodeID;
             var unload = OFF;
 
@@ -350,7 +354,7 @@ namespace MujinAGVDemo.Command
                 return (false, returnMessage);
             }
 
-            var podID = getPodResult.podID;            
+            var podID = getPodResult.podID;
             var movePodResult = (MovePodReturnMessage)factory.Create(new MovePodParam(
                 robotID,
                 podID,
@@ -367,6 +371,26 @@ namespace MujinAGVDemo.Command
 
             return (movePodResult.ReturnCode == successCode, returnMessage);
         }
+        /// <summary>
+        /// 棚の位置をシステム的に変更する
+        /// </summary>
+        /// <param name="hetuIP">HetuサーバーのIP</param>
+        /// <param name="warehouseID">マップのID</param>
+        /// <param name="podID">棚ID</param>
+        /// <param name="nodeID">ノードID</param>
+        /// <returns>isSuccess=成功=true 失敗=false,　messages=応答メッセージ</returns>
+        public static (bool isSuccess, string message) SetPodPosition(string hetuIP, string warehouseID, string podID, string nodeID)
+        {
+            var factory = new CommandFactory(hetuIP, warehouseID);
+            if (!factory.IsConnectedTESServer())
+            {
+                return (false, faultConnectoToHetuServer);
+            }
+            var retMessage = (SetPodPosReturnMessage)factory.Create(new SetPodPosParam(podID, nodeID)).DoAction();
+            var message = $"棚位置セット 結果[{retMessage.ReturnMsg}]棚[{podID}] ノード[{nodeID}]";
+            return (retMessage.ReturnCode == successCode, message);
+        }
+
         #region TaskCancel
 
         /// <summary>指定されたAGV_IDの充電タスクをキャンセルするコマンドを実行する。</summary>

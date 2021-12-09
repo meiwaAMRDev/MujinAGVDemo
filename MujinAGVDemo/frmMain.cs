@@ -697,6 +697,17 @@ namespace MujinAGVDemo
         {
             MessageBox.Show(message, "Info", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
+        private void showMessageBox(bool isSuccess,string message)
+        {
+            if (!isSuccess)
+            {
+                showErrorMessageBox(message);
+            }
+            else
+            {
+                showInfoMessageBox(message);
+            }
+        }
         /// <summary>
         /// サンプルCSVファイルの場所を開く
         /// </summary>
@@ -867,7 +878,7 @@ namespace MujinAGVDemo
             {
                 var getPodListAns = (GetPodListReturnMessage)factory.Create(new GetPodListParam()).DoAction();
 
-                var podList = getPodListAns.Data.PodList.ToList();
+                var podList = getPodListAns.Data.PodList.Where(x => x.RobotID == param.RobotID).ToList();
                 logger.Info($"棚の位置を表示します");
                 foreach (var pod in podList)
                 {
@@ -1013,11 +1024,19 @@ namespace MujinAGVDemo
                     logger.Info(text);
                 });
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 logger.Error(ex.ToString());
                 showErrorMessageBox(ex.Message);
             }
+        }
+
+        private void btnSetPodPos_Click(object sender, EventArgs e)
+        {
+            updateParam();
+            var result = Command.MapCommands.SetPodPosition(param.ServerIP, param.WarehouseID, param.PodID, param.NodeID);
+
+            showMessageBox(result.isSuccess, result.message);
         }
     }
 }
