@@ -128,7 +128,6 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AGVDetail.cs" />
     <Compile Include="Command\MapCommands.cs" />
     <Compile Include="FileIO.cs" />
     <Compile Include="frmMain.cs">
