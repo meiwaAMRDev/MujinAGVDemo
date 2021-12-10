@@ -5,6 +5,7 @@ using Hetu20dotnet.Parameters;
 using Hetu20dotnet.ReturnMsgs;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -390,15 +391,44 @@ namespace MujinAGVDemo.Command
             var message = $"棚位置セット 結果[{retMessage.ReturnMsg}]棚[{podID}] ノード[{nodeID}]";
             return (retMessage.ReturnCode == successCode, message);
         }
+        /// <summary>
+        /// AGV情報テーブルを取得します
+        /// </summary>
+        /// <param name="hetuIP">HetuサーバーのIP</param>
+        /// <param name="warehouseID">マップのID</param>
+        /// <returns>AGV情報が入ったデータテーブル</returns>
+        public static DataTable GetAgvDetailTable(string hetuIP, string warehouseID)
+        {
+            var table = new DataTable();
+            
+            var factory = new CommandFactory(hetuIP, warehouseID);
+            if (!factory.IsConnectedTESServer())
+                return table;
 
-        #region TaskCancel
+            var getRobotListAns = (GetRobotListReturnMessage)factory.Create(new GetRobotListParam()).DoAction();
+            table.Columns.Add("号機");
+            table.Columns.Add("状態");
+            table.Columns.Add("所有者");
+            table.Columns.Add("エラー");
+            table.Columns.Add("電池");
+            table.Columns.Add("タスク");
+            table.Columns.Add("ノード");
+            table.Columns.Add("X");
+            table.Columns.Add("Y");
+            getRobotListAns.Data.RobotList.ForEach(rb =>
+            {
+                table.Rows.Add(rb.RobotID, rb.WorkStatus, rb.Owner, rb.ErrorState, $"{rb.UcPower}", rb.CurNodeID, rb.CurX, rb.CurY, rb.TaskID);
+            });
+            return table;
+        }
+            #region TaskCancel
 
-        /// <summary>指定されたAGV_IDの充電タスクをキャンセルするコマンドを実行する。</summary>
-        /// <param name="hetuIP">接続するHetuサーバーのIPアドレス</param>
-        /// <param name="warehouseID">倉庫ID</param>
-        /// <param name="robotID">充電タスクをキャンセルするAGV_ID</param>
-        /// <returns>（タスクキャンセル動作kの結果（True：キャンセル成功、False：キャンセル失敗）、タスクキャンセル動作の結果メッセージ）</returns>
-        public static (bool isSuccess, string message) CancelRobotChargingTask(string hetuIP, string warehouseID, string robotID)
+            /// <summary>指定されたAGV_IDの充電タスクをキャンセルするコマンドを実行する。</summary>
+            /// <param name="hetuIP">接続するHetuサーバーのIPアドレス</param>
+            /// <param name="warehouseID">倉庫ID</param>
+            /// <param name="robotID">充電タスクをキャンセルするAGV_ID</param>
+            /// <returns>（タスクキャンセル動作kの結果（True：キャンセル成功、False：キャンセル失敗）、タスクキャンセル動作の結果メッセージ）</returns>
+            public static (bool isSuccess, string message) CancelRobotChargingTask(string hetuIP, string warehouseID, string robotID)
         {
             var factory = new CommandFactory(hetuIP, warehouseID);
             if (!factory.IsConnectedTESServer())

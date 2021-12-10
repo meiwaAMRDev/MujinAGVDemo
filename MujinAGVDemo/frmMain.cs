@@ -22,7 +22,7 @@ namespace MujinAGVDemo
         /// <summary>
         /// 設定ファイルのパス
         /// </summary>
-        string settingPath = @"Setting/ParamSetting.xml";
+        string settingPath = @"Setting/ParamSetting_denso.xml";
 
         private const string logDirPath = @"logs";
         int directionIndex = 4;
@@ -50,6 +50,10 @@ namespace MujinAGVDemo
         FileIO fileIO = new FileIO();
         CancellationTokenSource cancelTokenSource = new CancellationTokenSource();
         Logger logger = LogManager.GetLogger("ProgramLogger");
+        //DataTable table = new DataTable();
+
+        /// <summary>AGV名と電池残量を持つラベル</summary>
+        private List<ToolStripLabel> agvIdBatteryLevelList = new List<ToolStripLabel>();
         #endregion Property
 
         public frmMain()
@@ -72,6 +76,8 @@ namespace MujinAGVDemo
             directionIndex = listBoxDirection.SelectedIndex;
             checkBoxIsStop.Checked = isStop;
             textBoxTaskID.Text = string.Empty;
+            var table = Command.MapCommands.GetAgvDetailTable(param.ServerIP, param.WarehouseID);
+            dgvAGVDetail.DataSource = table;
         }
 
         /// <summary>
@@ -697,7 +703,7 @@ namespace MujinAGVDemo
         {
             MessageBox.Show(message, "Info", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
-        private void showMessageBox(bool isSuccess,string message)
+        private void showMessageBox(bool isSuccess, string message)
         {
             if (!isSuccess)
             {
@@ -1018,11 +1024,19 @@ namespace MujinAGVDemo
                 var factory = new CommandFactory(param.ServerIP, param.WarehouseID);
                 var getRobotListAns = (GetRobotListReturnMessage)factory.Create(new GetRobotListParam()).DoAction();
                 var robotList = getRobotListAns.Data.RobotList;
+
+                var textList = new List<string>();
+                //tableReset();
                 robotList.ForEach(rb =>
                 {
                     var text = $"AGV[{rb.RobotID}] Node[{rb.CurNodeID}] X[{rb.CurX}] Y[{rb.CurY}] Owner[{rb.Owner}] Status[{rb.WorkStatus}] TaskID[{rb.TaskID}]";
                     logger.Info(text);
+                    textList.Add(text);
+
+                    //table.Rows.Add(rb.RobotID, rb.WorkStatus, rb.Owner, rb.ErrorState, $"{rb.UcPower}", rb.CurNodeID, rb.CurX, rb.CurY, rb.TaskID);
                 });
+                var table=Command.MapCommands.GetAgvDetailTable(param.ServerIP, param.WarehouseID);
+                dgvAGVDetail.DataSource = table;
             }
             catch (Exception ex)
             {
