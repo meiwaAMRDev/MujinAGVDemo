@@ -56,6 +56,12 @@ namespace MujinAGVDemo
         private List<ToolStripLabel> agvIdBatteryLevelList = new List<ToolStripLabel>();
         #endregion Property
 
+        #region Deligate
+
+        delegate void ChangeDgvDelegate();
+
+        #endregion Deligate
+
         public frmMain()
         {
             InitializeComponent();
@@ -70,15 +76,19 @@ namespace MujinAGVDemo
             {
                 return;
             }
-            btnLoadSetting.BackColor = Color.LightGray;
-            updateControl();
-            listBoxDirection.SelectedIndex = 4;
-            directionIndex = listBoxDirection.SelectedIndex;
-            checkBoxIsStop.Checked = isStop;
-            textBoxTaskID.Text = string.Empty;
-            var table = Command.MapCommands.GetAgvDetailTable(param.ServerIP, param.WarehouseID);
-            dgvAGVDetail.DataSource = table;
-            tmrAGVInfoUpdate.Start();
+            try
+            {
+                btnLoadSetting.BackColor = Color.LightGray;
+                updateControl();
+                listBoxDirection.SelectedIndex = 4;
+                directionIndex = listBoxDirection.SelectedIndex;
+                checkBoxIsStop.Checked = isStop;
+                textBoxTaskID.Text = string.Empty;
+            }
+            catch(Exception ex)
+            {
+                logger.Error(ex.ToString());
+            }
         }
 
         /// <summary>
@@ -234,8 +244,8 @@ namespace MujinAGVDemo
                 //AGV停止指示
                 factory.Create(new PauseRobotParam(robotID)).DoAction();
                 //ボタン表示の変更
-                checkBoxIsStop.Text = "AGV再開";
-                checkBoxIsStop.BackColor = Color.Green;
+                checkBoxIsStop.Text = "AGV運行";
+                checkBoxIsStop.BackColor = Color.GreenYellow;
             }
             //AGVを運航させる
             else
@@ -695,6 +705,7 @@ namespace MujinAGVDemo
         private void showErrorMessageBox(string message)
         {
             MessageBox.Show(message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            logger.Error(message);
         }
         /// <summary>
         /// エラーではないメッセージを表示する
@@ -703,6 +714,7 @@ namespace MujinAGVDemo
         private void showInfoMessageBox(string message)
         {
             MessageBox.Show(message, "Info", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            logger.Info(message);
         }
         private void showMessageBox(bool isSuccess, string message)
         {
@@ -839,12 +851,6 @@ namespace MujinAGVDemo
             logger.Info(message);
             messageList.Add(message);
             showInfoMessageBox(message);
-
-            //haveTask(rb.RobotID);
-            //}
-
-
-
         }
 
 
@@ -1036,7 +1042,7 @@ namespace MujinAGVDemo
 
                     //table.Rows.Add(rb.RobotID, rb.WorkStatus, rb.Owner, rb.ErrorState, $"{rb.UcPower}", rb.CurNodeID, rb.CurX, rb.CurY, rb.TaskID);
                 });
-                var table=Command.MapCommands.GetAgvDetailTable(param.ServerIP, param.WarehouseID);
+                var table = Command.MapCommands.GetAgvDetailTable(param.ServerIP, param.WarehouseID);
                 dgvAGVDetail.DataSource = table;
             }
             catch (Exception ex)
@@ -1054,9 +1060,17 @@ namespace MujinAGVDemo
             showMessageBox(result.isSuccess, result.message);
         }
 
-        private void tmrAGVInfoUpdate_Tick(object sender, EventArgs e)
+        private async void tmrAGVInfoUpdate_Tick(object sender, EventArgs e)
+        {
+            await Task.Run(() =>
+            {
+                Invoke(new ChangeDgvDelegate(ChangeDgv));
+            });
+        }
+        void ChangeDgv()
         {
             var table = Command.MapCommands.GetAgvDetailTable(param.ServerIP, param.WarehouseID);
+
             dgvAGVDetail.DataSource = table;
         }
 
@@ -1068,6 +1082,23 @@ namespace MujinAGVDemo
         private void dgvAGVDetail_DataSourceChanged(object sender, EventArgs e)
         {
             lblUpdateTime.Text = $"更新日時:[{DateTime.Now}]";
+        }
+
+        private void checkBoxTimerRun_CheckedChanged(object sender, EventArgs e)
+        {
+            logger.Info($"AGV状態[{checkBoxTimerRun.Text}]");
+            if (!tmrAGVInfoUpdate.Enabled)
+            {
+                checkBoxTimerRun.Text = "監視停止";
+                checkBoxTimerRun.BackColor = Color.Red;
+                tmrAGVInfoUpdate.Start();
+            }
+            else
+            {
+                checkBoxTimerRun.Text = "監視開始";
+                checkBoxTimerRun.BackColor = Color.GreenYellow;
+                tmrAGVInfoUpdate.Stop();
+            }
         }
     }
 }
