@@ -78,6 +78,7 @@ namespace MujinAGVDemo
             textBoxTaskID.Text = string.Empty;
             var table = Command.MapCommands.GetAgvDetailTable(param.ServerIP, param.WarehouseID);
             dgvAGVDetail.DataSource = table;
+            tmrAGVInfoUpdate.Start();
         }
 
         /// <summary>
@@ -1051,6 +1052,22 @@ namespace MujinAGVDemo
             var result = Command.MapCommands.SetPodPosition(param.ServerIP, param.WarehouseID, param.PodID, param.NodeID);
 
             showMessageBox(result.isSuccess, result.message);
+        }
+
+        private void tmrAGVInfoUpdate_Tick(object sender, EventArgs e)
+        {
+            var table = Command.MapCommands.GetAgvDetailTable(param.ServerIP, param.WarehouseID);
+            dgvAGVDetail.DataSource = table;
+        }
+
+        private void frmMain_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            tmrAGVInfoUpdate.Stop();
+        }
+
+        private void dgvAGVDetail_DataSourceChanged(object sender, EventArgs e)
+        {
+            lblUpdateTime.Text = $"更新日時:[{DateTime.Now}]";
         }
     }
 }

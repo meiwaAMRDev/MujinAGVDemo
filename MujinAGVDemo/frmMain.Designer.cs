@@ -110,6 +110,8 @@ namespace MujinAGVDemo
             this.mnuMoveRobotDefault = new System.Windows.Forms.ToolStripMenuItem();
             this.mnuOldAGVMove = new System.Windows.Forms.ToolStripMenuItem();
             this.sTに連続して入るToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.tmrAGVInfoUpdate = new System.Windows.Forms.Timer(this.components);
+            this.lblUpdateTime = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.numRepeatCount)).BeginInit();
             this.statusStrip1.SuspendLayout();
             this.tabControl1.SuspendLayout();
@@ -369,7 +371,7 @@ namespace MujinAGVDemo
             this.lblRunLineIndex,
             this.lblCurrentLineProcess,
             this.prgRepeartCount});
-            this.statusStrip1.Location = new System.Drawing.Point(0, 516);
+            this.statusStrip1.Location = new System.Drawing.Point(0, 593);
             this.statusStrip1.Name = "statusStrip1";
             this.statusStrip1.Padding = new System.Windows.Forms.Padding(1, 0, 13, 0);
             this.statusStrip1.Size = new System.Drawing.Size(849, 26);
@@ -425,6 +427,9 @@ namespace MujinAGVDemo
             // 
             // tabControl1
             // 
+            this.tabControl1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.tabControl1.Controls.Add(this.tabPage1);
             this.tabControl1.Controls.Add(this.tabPage2);
             this.tabControl1.Controls.Add(this.tabPage3);
@@ -433,11 +438,11 @@ namespace MujinAGVDemo
             this.tabControl1.Controls.Add(this.tabPage6);
             this.tabControl1.Controls.Add(this.tabPage7);
             this.tabControl1.Controls.Add(this.tabPage8);
-            this.tabControl1.Location = new System.Drawing.Point(31, 239);
+            this.tabControl1.Location = new System.Drawing.Point(0, 239);
             this.tabControl1.Margin = new System.Windows.Forms.Padding(4);
             this.tabControl1.Name = "tabControl1";
             this.tabControl1.SelectedIndex = 0;
-            this.tabControl1.Size = new System.Drawing.Size(794, 271);
+            this.tabControl1.Size = new System.Drawing.Size(849, 350);
             this.tabControl1.TabIndex = 40;
             // 
             // tabPage1
@@ -457,7 +462,7 @@ namespace MujinAGVDemo
             this.tabPage1.Margin = new System.Windows.Forms.Padding(4);
             this.tabPage1.Name = "tabPage1";
             this.tabPage1.Padding = new System.Windows.Forms.Padding(4);
-            this.tabPage1.Size = new System.Drawing.Size(786, 242);
+            this.tabPage1.Size = new System.Drawing.Size(786, 261);
             this.tabPage1.TabIndex = 0;
             this.tabPage1.Text = "各個";
             this.tabPage1.UseVisualStyleBackColor = true;
@@ -535,7 +540,7 @@ namespace MujinAGVDemo
             this.tabPage2.Margin = new System.Windows.Forms.Padding(4);
             this.tabPage2.Name = "tabPage2";
             this.tabPage2.Padding = new System.Windows.Forms.Padding(4);
-            this.tabPage2.Size = new System.Drawing.Size(786, 242);
+            this.tabPage2.Size = new System.Drawing.Size(786, 261);
             this.tabPage2.TabIndex = 1;
             this.tabPage2.Text = "連続";
             this.tabPage2.UseVisualStyleBackColor = true;
@@ -611,7 +616,7 @@ namespace MujinAGVDemo
             this.tabPage3.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.tabPage3.Name = "tabPage3";
             this.tabPage3.Padding = new System.Windows.Forms.Padding(3, 2, 3, 2);
-            this.tabPage3.Size = new System.Drawing.Size(786, 242);
+            this.tabPage3.Size = new System.Drawing.Size(786, 261);
             this.tabPage3.TabIndex = 2;
             this.tabPage3.Text = "タスク";
             this.tabPage3.UseVisualStyleBackColor = true;
@@ -657,7 +662,7 @@ namespace MujinAGVDemo
             this.tabPage4.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.tabPage4.Name = "tabPage4";
             this.tabPage4.Padding = new System.Windows.Forms.Padding(3, 2, 3, 2);
-            this.tabPage4.Size = new System.Drawing.Size(786, 242);
+            this.tabPage4.Size = new System.Drawing.Size(786, 261);
             this.tabPage4.TabIndex = 3;
             this.tabPage4.Text = "所有者";
             this.tabPage4.UseVisualStyleBackColor = true;
@@ -706,7 +711,7 @@ namespace MujinAGVDemo
             this.tabPage5.Margin = new System.Windows.Forms.Padding(4);
             this.tabPage5.Name = "tabPage5";
             this.tabPage5.Padding = new System.Windows.Forms.Padding(4);
-            this.tabPage5.Size = new System.Drawing.Size(786, 242);
+            this.tabPage5.Size = new System.Drawing.Size(786, 261);
             this.tabPage5.TabIndex = 4;
             this.tabPage5.Text = "棚情報確認";
             this.tabPage5.UseVisualStyleBackColor = true;
@@ -744,7 +749,7 @@ namespace MujinAGVDemo
             this.tabPage6.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.tabPage6.Name = "tabPage6";
             this.tabPage6.Padding = new System.Windows.Forms.Padding(3, 2, 3, 2);
-            this.tabPage6.Size = new System.Drawing.Size(786, 242);
+            this.tabPage6.Size = new System.Drawing.Size(786, 261);
             this.tabPage6.TabIndex = 5;
             this.tabPage6.Text = "棚の追加と削除";
             this.tabPage6.UseVisualStyleBackColor = true;
@@ -809,7 +814,7 @@ namespace MujinAGVDemo
             this.tabPage7.Margin = new System.Windows.Forms.Padding(4);
             this.tabPage7.Name = "tabPage7";
             this.tabPage7.Padding = new System.Windows.Forms.Padding(4);
-            this.tabPage7.Size = new System.Drawing.Size(786, 242);
+            this.tabPage7.Size = new System.Drawing.Size(841, 321);
             this.tabPage7.TabIndex = 6;
             this.tabPage7.Text = "その場動作";
             this.tabPage7.UseVisualStyleBackColor = true;
@@ -838,11 +843,12 @@ namespace MujinAGVDemo
             // 
             // tabPage8
             // 
+            this.tabPage8.Controls.Add(this.lblUpdateTime);
             this.tabPage8.Controls.Add(this.dgvAGVDetail);
             this.tabPage8.Location = new System.Drawing.Point(4, 25);
             this.tabPage8.Name = "tabPage8";
             this.tabPage8.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage8.Size = new System.Drawing.Size(786, 242);
+            this.tabPage8.Size = new System.Drawing.Size(841, 321);
             this.tabPage8.TabIndex = 7;
             this.tabPage8.Text = "AGV情報";
             this.tabPage8.UseVisualStyleBackColor = true;
@@ -850,16 +856,19 @@ namespace MujinAGVDemo
             // dgvAGVDetail
             // 
             this.dgvAGVDetail.AllowUserToDeleteRows = false;
+            this.dgvAGVDetail.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.dgvAGVDetail.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.AllCells;
             this.dgvAGVDetail.AutoSizeRowsMode = System.Windows.Forms.DataGridViewAutoSizeRowsMode.AllCells;
             this.dgvAGVDetail.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.dgvAGVDetail.Dock = System.Windows.Forms.DockStyle.Top;
-            this.dgvAGVDetail.Location = new System.Drawing.Point(3, 3);
+            this.dgvAGVDetail.Location = new System.Drawing.Point(30, 30);
             this.dgvAGVDetail.Name = "dgvAGVDetail";
             this.dgvAGVDetail.RowHeadersWidth = 51;
             this.dgvAGVDetail.RowTemplate.Height = 24;
-            this.dgvAGVDetail.Size = new System.Drawing.Size(780, 236);
+            this.dgvAGVDetail.Size = new System.Drawing.Size(780, 288);
             this.dgvAGVDetail.TabIndex = 1;
+            this.dgvAGVDetail.DataSourceChanged += new System.EventHandler(this.dgvAGVDetail_DataSourceChanged);
             // 
             // label13
             // 
@@ -932,7 +941,7 @@ namespace MujinAGVDemo
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
             this.menuStrip1.Padding = new System.Windows.Forms.Padding(5, 2, 0, 2);
-            this.menuStrip1.Size = new System.Drawing.Size(849, 28);
+            this.menuStrip1.Size = new System.Drawing.Size(849, 30);
             this.menuStrip1.TabIndex = 47;
             this.menuStrip1.Text = "menuStrip1";
             // 
@@ -981,11 +990,25 @@ namespace MujinAGVDemo
             this.sTに連続して入るToolStripMenuItem.Size = new System.Drawing.Size(205, 26);
             this.sTに連続して入るToolStripMenuItem.Text = "2STに連続して入る";
             // 
+            // tmrAGVInfoUpdate
+            // 
+            this.tmrAGVInfoUpdate.Interval = 5000;
+            this.tmrAGVInfoUpdate.Tick += new System.EventHandler(this.tmrAGVInfoUpdate_Tick);
+            // 
+            // lblUpdateTime
+            // 
+            this.lblUpdateTime.AutoSize = true;
+            this.lblUpdateTime.Location = new System.Drawing.Point(7, 3);
+            this.lblUpdateTime.Name = "lblUpdateTime";
+            this.lblUpdateTime.Size = new System.Drawing.Size(67, 15);
+            this.lblUpdateTime.TabIndex = 2;
+            this.lblUpdateTime.Text = "更新日時";
+            // 
             // frmMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(849, 542);
+            this.ClientSize = new System.Drawing.Size(849, 619);
             this.Controls.Add(this.label21);
             this.Controls.Add(this.btnOpenParamSettings);
             this.Controls.Add(this.label16);
@@ -1013,6 +1036,7 @@ namespace MujinAGVDemo
             this.Margin = new System.Windows.Forms.Padding(4);
             this.Name = "frmMain";
             this.Text = "AGVデモソフト";
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.frmMain_FormClosing);
             this.Load += new System.EventHandler(this.frmMain_Load);
             ((System.ComponentModel.ISupportInitialize)(this.numRepeatCount)).EndInit();
             this.statusStrip1.ResumeLayout(false);
@@ -1030,6 +1054,7 @@ namespace MujinAGVDemo
             this.tabPage6.PerformLayout();
             this.tabPage7.ResumeLayout(false);
             this.tabPage8.ResumeLayout(false);
+            this.tabPage8.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dgvAGVDetail)).EndInit();
             this.menuStrip1.ResumeLayout(false);
             this.menuStrip1.PerformLayout();
@@ -1119,6 +1144,8 @@ namespace MujinAGVDemo
         private System.Windows.Forms.ToolStripMenuItem sTに連続して入るToolStripMenuItem;
         private System.Windows.Forms.TabPage tabPage8;
         private System.Windows.Forms.DataGridView dgvAGVDetail;
+        private System.Windows.Forms.Timer tmrAGVInfoUpdate;
+        private System.Windows.Forms.Label lblUpdateTime;
     }
 }
 

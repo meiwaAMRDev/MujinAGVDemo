@@ -141,7 +141,6 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Messages.cs" />
     <Content Include="AGV.ico" />
-    <Content Include="Icon\AGV - コピー.ico" />
     <Content Include="Icon\AGV.ico">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
@@ -179,6 +178,9 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <None Include="CSVSample\サンプル.csv">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="CSVSample\デンソー向け往復テスト.csv">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="CSVSample\安川電機向け移動テスト.csv">
