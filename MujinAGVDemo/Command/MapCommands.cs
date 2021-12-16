@@ -410,11 +410,11 @@ namespace MujinAGVDemo.Command
             table.Columns.Add("状態");
             table.Columns.Add("所有者");
             table.Columns.Add("エラー");
-            table.Columns.Add("電池");
-            table.Columns.Add("タスク");
-            table.Columns.Add("ノード");
-            table.Columns.Add("X");
-            table.Columns.Add("Y");
+            table.Columns.Add("電池残量");            
+            table.Columns.Add("ノードID");
+            table.Columns.Add("X座標");
+            table.Columns.Add("Y座標");
+            table.Columns.Add("タスクID");
             getRobotListAns.Data.RobotList.ForEach(rb =>
             {
                 table.Rows.Add(rb.RobotID, rb.WorkStatus, rb.Owner, rb.ErrorState, $"{rb.UcPower}", rb.CurNodeID, rb.CurX, rb.CurY, rb.TaskID);
