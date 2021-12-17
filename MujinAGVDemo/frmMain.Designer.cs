@@ -30,6 +30,7 @@ namespace MujinAGVDemo
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(frmMain));
             this.textBoxServerIP = new System.Windows.Forms.TextBox();
             this.textBoxWarehouseID = new System.Windows.Forms.TextBox();
             this.textBoxLayoutID = new System.Windows.Forms.TextBox();
@@ -95,6 +96,7 @@ namespace MujinAGVDemo
             this.btnLiftUp = new System.Windows.Forms.Button();
             this.btnLiftDown = new System.Windows.Forms.Button();
             this.tabPage8 = new System.Windows.Forms.TabPage();
+            this.checkBoxTimerRun = new System.Windows.Forms.CheckBox();
             this.lblUpdateTime = new System.Windows.Forms.Label();
             this.dgvAGVDetail = new System.Windows.Forms.DataGridView();
             this.label13 = new System.Windows.Forms.Label();
@@ -112,7 +114,6 @@ namespace MujinAGVDemo
             this.mnuOldAGVMove = new System.Windows.Forms.ToolStripMenuItem();
             this.sTに連続して入るToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.tmrAGVInfoUpdate = new System.Windows.Forms.Timer(this.components);
-            this.checkBoxTimerRun = new System.Windows.Forms.CheckBox();
             ((System.ComponentModel.ISupportInitialize)(this.numRepeatCount)).BeginInit();
             this.statusStrip1.SuspendLayout();
             this.tabControl1.SuspendLayout();
@@ -216,7 +217,7 @@ namespace MujinAGVDemo
             this.label4.Size = new System.Drawing.Size(34, 12);
             this.label4.TabIndex = 12;
             this.label4.Text = "podID";
-            this.toolTip.SetToolTip(this.label4, "棚のQRコード番号です。");
+            this.toolTip.SetToolTip(this.label4, "棚のQRコード番号です。\r\n連続動作の際に空白にすると、AGVのみで移動します。");
             // 
             // label5
             // 
@@ -249,7 +250,7 @@ namespace MujinAGVDemo
             // btnRotationMove
             // 
             this.btnRotationMove.Location = new System.Drawing.Point(308, 115);
-            this.btnRotationMove.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.btnRotationMove.Margin = new System.Windows.Forms.Padding(2);
             this.btnRotationMove.Name = "btnRotationMove";
             this.btnRotationMove.Size = new System.Drawing.Size(147, 38);
             this.btnRotationMove.TabIndex = 24;
@@ -320,7 +321,7 @@ namespace MujinAGVDemo
             // numRepeatCount
             // 
             this.numRepeatCount.Location = new System.Drawing.Point(309, 13);
-            this.numRepeatCount.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.numRepeatCount.Margin = new System.Windows.Forms.Padding(2);
             this.numRepeatCount.Name = "numRepeatCount";
             this.numRepeatCount.Size = new System.Drawing.Size(90, 19);
             this.numRepeatCount.TabIndex = 31;
@@ -437,7 +438,7 @@ namespace MujinAGVDemo
             this.tabPage1.Controls.Add(this.btnMoveAGV);
             this.tabPage1.Location = new System.Drawing.Point(4, 22);
             this.tabPage1.Name = "tabPage1";
-            this.tabPage1.Padding = new System.Windows.Forms.Padding(3, 3, 3, 3);
+            this.tabPage1.Padding = new System.Windows.Forms.Padding(3);
             this.tabPage1.Size = new System.Drawing.Size(722, 254);
             this.tabPage1.TabIndex = 0;
             this.tabPage1.Text = "各個";
@@ -509,8 +510,8 @@ namespace MujinAGVDemo
             this.tabPage2.Controls.Add(this.numRepeatCount);
             this.tabPage2.Location = new System.Drawing.Point(4, 22);
             this.tabPage2.Name = "tabPage2";
-            this.tabPage2.Padding = new System.Windows.Forms.Padding(3, 3, 3, 3);
-            this.tabPage2.Size = new System.Drawing.Size(684, 254);
+            this.tabPage2.Padding = new System.Windows.Forms.Padding(3);
+            this.tabPage2.Size = new System.Drawing.Size(722, 254);
             this.tabPage2.TabIndex = 1;
             this.tabPage2.Text = "連続";
             this.tabPage2.UseVisualStyleBackColor = true;
@@ -577,10 +578,10 @@ namespace MujinAGVDemo
             this.tabPage3.Controls.Add(this.label19);
             this.tabPage3.Controls.Add(this.textBoxTaskID);
             this.tabPage3.Location = new System.Drawing.Point(4, 22);
-            this.tabPage3.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.tabPage3.Margin = new System.Windows.Forms.Padding(2);
             this.tabPage3.Name = "tabPage3";
-            this.tabPage3.Padding = new System.Windows.Forms.Padding(2, 2, 2, 2);
-            this.tabPage3.Size = new System.Drawing.Size(684, 254);
+            this.tabPage3.Padding = new System.Windows.Forms.Padding(2);
+            this.tabPage3.Size = new System.Drawing.Size(722, 254);
             this.tabPage3.TabIndex = 2;
             this.tabPage3.Text = "タスク";
             this.tabPage3.UseVisualStyleBackColor = true;
@@ -588,7 +589,7 @@ namespace MujinAGVDemo
             // btnGetTaskDetail
             // 
             this.btnGetTaskDetail.Location = new System.Drawing.Point(21, 54);
-            this.btnGetTaskDetail.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.btnGetTaskDetail.Margin = new System.Windows.Forms.Padding(2);
             this.btnGetTaskDetail.Name = "btnGetTaskDetail";
             this.btnGetTaskDetail.Size = new System.Drawing.Size(234, 18);
             this.btnGetTaskDetail.TabIndex = 12;
@@ -621,10 +622,10 @@ namespace MujinAGVDemo
             this.tabPage4.Controls.Add(this.btnUnSetOwner);
             this.tabPage4.Controls.Add(this.btnShowOwner);
             this.tabPage4.Location = new System.Drawing.Point(4, 22);
-            this.tabPage4.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.tabPage4.Margin = new System.Windows.Forms.Padding(2);
             this.tabPage4.Name = "tabPage4";
-            this.tabPage4.Padding = new System.Windows.Forms.Padding(2, 2, 2, 2);
-            this.tabPage4.Size = new System.Drawing.Size(684, 254);
+            this.tabPage4.Padding = new System.Windows.Forms.Padding(2);
+            this.tabPage4.Size = new System.Drawing.Size(722, 254);
             this.tabPage4.TabIndex = 3;
             this.tabPage4.Text = "所有者";
             this.tabPage4.UseVisualStyleBackColor = true;
@@ -632,7 +633,7 @@ namespace MujinAGVDemo
             // btnSetOwner
             // 
             this.btnSetOwner.Location = new System.Drawing.Point(5, 149);
-            this.btnSetOwner.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.btnSetOwner.Margin = new System.Windows.Forms.Padding(2);
             this.btnSetOwner.Name = "btnSetOwner";
             this.btnSetOwner.Size = new System.Drawing.Size(234, 18);
             this.btnSetOwner.TabIndex = 15;
@@ -644,7 +645,7 @@ namespace MujinAGVDemo
             // btnUnSetOwner
             // 
             this.btnUnSetOwner.Location = new System.Drawing.Point(4, 126);
-            this.btnUnSetOwner.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.btnUnSetOwner.Margin = new System.Windows.Forms.Padding(2);
             this.btnUnSetOwner.Name = "btnUnSetOwner";
             this.btnUnSetOwner.Size = new System.Drawing.Size(234, 18);
             this.btnUnSetOwner.TabIndex = 14;
@@ -656,7 +657,7 @@ namespace MujinAGVDemo
             // btnShowOwner
             // 
             this.btnShowOwner.Location = new System.Drawing.Point(4, 89);
-            this.btnShowOwner.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.btnShowOwner.Margin = new System.Windows.Forms.Padding(2);
             this.btnShowOwner.Name = "btnShowOwner";
             this.btnShowOwner.Size = new System.Drawing.Size(234, 18);
             this.btnShowOwner.TabIndex = 13;
@@ -671,8 +672,8 @@ namespace MujinAGVDemo
             this.tabPage5.Controls.Add(this.btnShowPodDetail);
             this.tabPage5.Location = new System.Drawing.Point(4, 22);
             this.tabPage5.Name = "tabPage5";
-            this.tabPage5.Padding = new System.Windows.Forms.Padding(3, 3, 3, 3);
-            this.tabPage5.Size = new System.Drawing.Size(684, 254);
+            this.tabPage5.Padding = new System.Windows.Forms.Padding(3);
+            this.tabPage5.Size = new System.Drawing.Size(722, 254);
             this.tabPage5.TabIndex = 4;
             this.tabPage5.Text = "棚情報確認";
             this.tabPage5.UseVisualStyleBackColor = true;
@@ -705,10 +706,10 @@ namespace MujinAGVDemo
             this.tabPage6.Controls.Add(this.label10);
             this.tabPage6.Controls.Add(this.label9);
             this.tabPage6.Location = new System.Drawing.Point(4, 22);
-            this.tabPage6.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.tabPage6.Margin = new System.Windows.Forms.Padding(2);
             this.tabPage6.Name = "tabPage6";
-            this.tabPage6.Padding = new System.Windows.Forms.Padding(2, 2, 2, 2);
-            this.tabPage6.Size = new System.Drawing.Size(684, 254);
+            this.tabPage6.Padding = new System.Windows.Forms.Padding(2);
+            this.tabPage6.Size = new System.Drawing.Size(722, 254);
             this.tabPage6.TabIndex = 5;
             this.tabPage6.Text = "棚の追加と削除";
             this.tabPage6.UseVisualStyleBackColor = true;
@@ -716,7 +717,7 @@ namespace MujinAGVDemo
             // btnSetPodPos
             // 
             this.btnSetPodPos.Location = new System.Drawing.Point(381, 102);
-            this.btnSetPodPos.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.btnSetPodPos.Margin = new System.Windows.Forms.Padding(2);
             this.btnSetPodPos.Name = "btnSetPodPos";
             this.btnSetPodPos.Size = new System.Drawing.Size(74, 35);
             this.btnSetPodPos.TabIndex = 42;
@@ -768,8 +769,8 @@ namespace MujinAGVDemo
             this.tabPage7.Controls.Add(this.btnLiftDown);
             this.tabPage7.Location = new System.Drawing.Point(4, 22);
             this.tabPage7.Name = "tabPage7";
-            this.tabPage7.Padding = new System.Windows.Forms.Padding(3, 3, 3, 3);
-            this.tabPage7.Size = new System.Drawing.Size(684, 254);
+            this.tabPage7.Padding = new System.Windows.Forms.Padding(3);
+            this.tabPage7.Size = new System.Drawing.Size(722, 254);
             this.tabPage7.TabIndex = 6;
             this.tabPage7.Text = "その場動作";
             this.tabPage7.UseVisualStyleBackColor = true;
@@ -800,13 +801,26 @@ namespace MujinAGVDemo
             this.tabPage8.Controls.Add(this.lblUpdateTime);
             this.tabPage8.Controls.Add(this.dgvAGVDetail);
             this.tabPage8.Location = new System.Drawing.Point(4, 22);
-            this.tabPage8.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.tabPage8.Margin = new System.Windows.Forms.Padding(2);
             this.tabPage8.Name = "tabPage8";
-            this.tabPage8.Padding = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.tabPage8.Padding = new System.Windows.Forms.Padding(2);
             this.tabPage8.Size = new System.Drawing.Size(722, 254);
             this.tabPage8.TabIndex = 7;
             this.tabPage8.Text = "AGV情報";
             this.tabPage8.UseVisualStyleBackColor = true;
+            // 
+            // checkBoxTimerRun
+            // 
+            this.checkBoxTimerRun.Appearance = System.Windows.Forms.Appearance.Button;
+            this.checkBoxTimerRun.AutoSize = true;
+            this.checkBoxTimerRun.BackColor = System.Drawing.Color.GreenYellow;
+            this.checkBoxTimerRun.Location = new System.Drawing.Point(544, 0);
+            this.checkBoxTimerRun.Name = "checkBoxTimerRun";
+            this.checkBoxTimerRun.Size = new System.Drawing.Size(63, 22);
+            this.checkBoxTimerRun.TabIndex = 3;
+            this.checkBoxTimerRun.Text = "監視開始";
+            this.checkBoxTimerRun.UseVisualStyleBackColor = false;
+            this.checkBoxTimerRun.CheckedChanged += new System.EventHandler(this.checkBoxTimerRun_CheckedChanged);
             // 
             // lblUpdateTime
             // 
@@ -828,7 +842,7 @@ namespace MujinAGVDemo
             this.dgvAGVDetail.AutoSizeRowsMode = System.Windows.Forms.DataGridViewAutoSizeRowsMode.AllCells;
             this.dgvAGVDetail.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.dgvAGVDetail.Location = new System.Drawing.Point(2, 24);
-            this.dgvAGVDetail.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.dgvAGVDetail.Margin = new System.Windows.Forms.Padding(2);
             this.dgvAGVDetail.Name = "dgvAGVDetail";
             this.dgvAGVDetail.RowHeadersWidth = 51;
             this.dgvAGVDetail.RowTemplate.Height = 24;
@@ -955,19 +969,6 @@ namespace MujinAGVDemo
             this.tmrAGVInfoUpdate.Interval = 5000;
             this.tmrAGVInfoUpdate.Tick += new System.EventHandler(this.tmrAGVInfoUpdate_Tick);
             // 
-            // checkBoxTimerRun
-            // 
-            this.checkBoxTimerRun.Appearance = System.Windows.Forms.Appearance.Button;
-            this.checkBoxTimerRun.AutoSize = true;
-            this.checkBoxTimerRun.BackColor = System.Drawing.Color.GreenYellow;
-            this.checkBoxTimerRun.Location = new System.Drawing.Point(544, 0);
-            this.checkBoxTimerRun.Name = "checkBoxTimerRun";
-            this.checkBoxTimerRun.Size = new System.Drawing.Size(63, 22);
-            this.checkBoxTimerRun.TabIndex = 3;
-            this.checkBoxTimerRun.Text = "監視開始";
-            this.checkBoxTimerRun.UseVisualStyleBackColor = false;
-            this.checkBoxTimerRun.CheckedChanged += new System.EventHandler(this.checkBoxTimerRun_CheckedChanged);
-            // 
             // frmMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
@@ -996,6 +997,7 @@ namespace MujinAGVDemo
             this.Controls.Add(this.textBoxLayoutID);
             this.Controls.Add(this.textBoxWarehouseID);
             this.Controls.Add(this.textBoxServerIP);
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MainMenuStrip = this.menuStrip1;
             this.Name = "frmMain";
             this.Text = "AGVデモソフト";

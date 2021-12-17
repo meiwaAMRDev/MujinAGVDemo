@@ -400,7 +400,7 @@ namespace MujinAGVDemo.Command
         public static DataTable GetAgvDetailTable(string hetuIP, string warehouseID)
         {
             var table = new DataTable();
-            
+
             var factory = new CommandFactory(hetuIP, warehouseID);
             if (!factory.IsConnectedTESServer())
                 return table;
@@ -411,25 +411,25 @@ namespace MujinAGVDemo.Command
             table.Columns.Add("所有者");
             table.Columns.Add("エラー");
             table.Columns.Add("電池残量");
-            
             table.Columns.Add("ノードID");
             table.Columns.Add("X座標");
             table.Columns.Add("Y座標");
             table.Columns.Add("タスクID");
+            table.Columns.Add("タスクタイプ");
             getRobotListAns.Data.RobotList.ForEach(rb =>
             {
-                table.Rows.Add(rb.RobotID, rb.WorkStatus, rb.Owner, rb.ErrorState, $"{rb.UcPower}", rb.CurNodeID, rb.CurX, rb.CurY, rb.TaskID);
+                table.Rows.Add(rb.RobotID, rb.WorkStatus, rb.Owner, rb.ErrorState, $"{rb.UcPower}", rb.CurNodeID, rb.CurX, rb.CurY, rb.TaskID, rb.TaskType);
             });
             return table;
         }
-            #region TaskCancel
+        #region TaskCancel
 
-            /// <summary>指定されたAGV_IDの充電タスクをキャンセルするコマンドを実行する。</summary>
-            /// <param name="hetuIP">接続するHetuサーバーのIPアドレス</param>
-            /// <param name="warehouseID">倉庫ID</param>
-            /// <param name="robotID">充電タスクをキャンセルするAGV_ID</param>
-            /// <returns>（タスクキャンセル動作kの結果（True：キャンセル成功、False：キャンセル失敗）、タスクキャンセル動作の結果メッセージ）</returns>
-            public static (bool isSuccess, string message) CancelRobotChargingTask(string hetuIP, string warehouseID, string robotID)
+        /// <summary>指定されたAGV_IDの充電タスクをキャンセルするコマンドを実行する。</summary>
+        /// <param name="hetuIP">接続するHetuサーバーのIPアドレス</param>
+        /// <param name="warehouseID">倉庫ID</param>
+        /// <param name="robotID">充電タスクをキャンセルするAGV_ID</param>
+        /// <returns>（タスクキャンセル動作kの結果（True：キャンセル成功、False：キャンセル失敗）、タスクキャンセル動作の結果メッセージ）</returns>
+        public static (bool isSuccess, string message) CancelRobotChargingTask(string hetuIP, string warehouseID, string robotID)
         {
             var factory = new CommandFactory(hetuIP, warehouseID);
             if (!factory.IsConnectedTESServer())
