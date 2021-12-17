@@ -45,8 +45,8 @@
     <Reference Include="Google.Protobuf, Version=3.15.8.0, Culture=neutral, PublicKeyToken=a7d26565bac4d604, processorArchitecture=MSIL">
       <HintPath>..\packages\Google.Protobuf.3.15.8\lib\net45\Google.Protobuf.dll</HintPath>
     </Reference>
-    <Reference Include="Hetu20dotnet, Version=1.0.10.2, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Hetu20dotnet.1.0.10.2\lib\net472\Hetu20dotnet.dll</HintPath>
+    <Reference Include="Hetu20dotnet, Version=1.0.10.5, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Hetu20dotnet.1.0.10.5\lib\net472\Hetu20dotnet.dll</HintPath>
     </Reference>
     <Reference Include="K4os.Compression.LZ4, Version=1.1.11.0, Culture=neutral, PublicKeyToken=2186fa9121ef231d, processorArchitecture=MSIL">
       <HintPath>..\packages\K4os.Compression.LZ4.1.1.11\lib\net46\K4os.Compression.LZ4.dll</HintPath>
@@ -183,22 +183,7 @@
     <None Include="CSVSample\デンソー向け往復テスト.csv">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="CSVSample\安川電機向け移動テスト.csv">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="CSVSample\棚をポイント2と往復.csv">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="CSVSample\棚をポイント3へ運ぶ.csv">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="CSVSample\棚をポイント2へ運ぶ.csv">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
     <None Include="JapaneseErrorCode.csv">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="CSVSample\棚を初期位置へ運ぶ.csv">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="NLog.xsd">

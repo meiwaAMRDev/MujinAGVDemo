@@ -6,9 +6,9 @@
   <ServerIP>39.107.238.55</ServerIP>
   <WarehouseID>373862339402792973</WarehouseID>
   <LayoutID>c1629264762498</LayoutID>
-  <NodeID>161095107535</NodeID>
-  <PodID>1120</PodID>
-  <RobotID>104</RobotID>
+  <NodeID>162918439278</NodeID>
+  <PodID />
+  <RobotID>115</RobotID>
   <DestinationMode>StorageID</DestinationMode>
   <StationListPath>C:\MEIWA\MujinAGVDemo\MujinAGVDemo\社内デモエリア用移動テスト.csv</StationListPath>
 </ParamSettings>

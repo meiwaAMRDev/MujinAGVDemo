@@ -110,9 +110,6 @@ namespace MujinAGVDemo
             this.ファイルToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.mnuOpenLogDir = new System.Windows.Forms.ToolStripMenuItem();
             this.デバッグToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.mnuMoveRobotDefault = new System.Windows.Forms.ToolStripMenuItem();
-            this.mnuOldAGVMove = new System.Windows.Forms.ToolStripMenuItem();
-            this.sTに連続して入るToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.tmrAGVInfoUpdate = new System.Windows.Forms.Timer(this.components);
             ((System.ComponentModel.ISupportInitialize)(this.numRepeatCount)).BeginInit();
             this.statusStrip1.SuspendLayout();
@@ -936,33 +933,9 @@ namespace MujinAGVDemo
             // 
             // デバッグToolStripMenuItem
             // 
-            this.デバッグToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.mnuMoveRobotDefault,
-            this.mnuOldAGVMove,
-            this.sTに連続して入るToolStripMenuItem});
             this.デバッグToolStripMenuItem.Name = "デバッグToolStripMenuItem";
             this.デバッグToolStripMenuItem.Size = new System.Drawing.Size(55, 20);
             this.デバッグToolStripMenuItem.Text = "デバッグ";
-            // 
-            // mnuMoveRobotDefault
-            // 
-            this.mnuMoveRobotDefault.Name = "mnuMoveRobotDefault";
-            this.mnuMoveRobotDefault.Size = new System.Drawing.Size(163, 22);
-            this.mnuMoveRobotDefault.Text = "初期状態に戻す";
-            this.mnuMoveRobotDefault.Click += new System.EventHandler(this.mnuMoveRobotDefault_Click);
-            // 
-            // mnuOldAGVMove
-            // 
-            this.mnuOldAGVMove.Name = "mnuOldAGVMove";
-            this.mnuOldAGVMove.Size = new System.Drawing.Size(163, 22);
-            this.mnuOldAGVMove.Text = "旧型AGV連続";
-            this.mnuOldAGVMove.Click += new System.EventHandler(this.mnuOldAGVMove_Click);
-            // 
-            // sTに連続して入るToolStripMenuItem
-            // 
-            this.sTに連続して入るToolStripMenuItem.Name = "sTに連続して入るToolStripMenuItem";
-            this.sTに連続して入るToolStripMenuItem.Size = new System.Drawing.Size(163, 22);
-            this.sTに連続して入るToolStripMenuItem.Text = "2STに連続して入る";
             // 
             // tmrAGVInfoUpdate
             // 
@@ -1099,14 +1072,11 @@ namespace MujinAGVDemo
         private System.Windows.Forms.Label label9;
         private System.Windows.Forms.TextBox textBoxChargeAreaID;
         private System.Windows.Forms.ToolStripMenuItem デバッグToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem mnuMoveRobotDefault;
-        private System.Windows.Forms.ToolStripMenuItem mnuOldAGVMove;
         private System.Windows.Forms.Button btnLiftDown;
         private System.Windows.Forms.TabPage tabPage7;
         private System.Windows.Forms.Button btnLiftUp;
         private System.Windows.Forms.Button btnShowAGVPosition;
         private System.Windows.Forms.Button btnSetPodPos;
-        private System.Windows.Forms.ToolStripMenuItem sTに連続して入るToolStripMenuItem;
         private System.Windows.Forms.TabPage tabPage8;
         private System.Windows.Forms.DataGridView dgvAGVDetail;
         private System.Windows.Forms.Timer tmrAGVInfoUpdate;

@@ -18,40 +18,53 @@ namespace MujinAGVDemo
 {
     public partial class frmMain : Form
     {
-        #region Const
-        /// <summary>
-        /// 設定ファイルのパス
-        /// </summary>
-        string settingPath = @"Setting/ParamSetting_denso.xml";
+        #region Constructor
 
+        public frmMain()
+        {
+            InitializeComponent();
+        }
+
+        #endregion Constructor
+
+        #region Const
+        
+        /// <summary>
+        /// ログディレクトリのパス
+        /// </summary>
         private const string logDirPath = @"logs";
-        int directionIndex = 4;
+        
         /// <summary>
         /// CSVファイルの中のnodeIDのインデックス
         /// </summary>
-        const int nodeIDIndex = 0;
+        private const int nodeIDIndex = 0;
         /// <summary>
         /// CSVファイルの中のturnModeのインデックス
         /// </summary>
-        const int turnModeIndex = 1;
+        private const int turnModeIndex = 1;
         /// <summary>
         /// CSVファイルの中のunloadのインデックス
         /// </summary>
-        const int unloadModeIndex = 2;
-        const int ON = 1;
-        const int OFF = 0;
+        private const int unloadModeIndex = 2;
+        private const int ON = 1;
+        private const int OFF = 0;
 
         #endregion Const
 
         #region Property
-
+        /// <summary>
+        /// AGVの方向を表すインデックス
+        /// </summary>
+        int directionIndex = 4;
+        /// <summary>
+        /// 設定ファイルのパス
+        /// </summary>
+        string settingPath = @"Setting/ParamSetting_denso.xml";
         ParamSettings param;
         bool isStop = false;
         FileIO fileIO = new FileIO();
         CancellationTokenSource cancelTokenSource = new CancellationTokenSource();
         Logger logger = LogManager.GetLogger("ProgramLogger");
-        //DataTable table = new DataTable();
-
         /// <summary>AGV名と電池残量を持つラベル</summary>
         private List<ToolStripLabel> agvIdBatteryLevelList = new List<ToolStripLabel>();
         #endregion Property
@@ -61,12 +74,7 @@ namespace MujinAGVDemo
         delegate void ChangeDgvDelegate();
 
         #endregion Deligate
-
-        public frmMain()
-        {
-            InitializeComponent();
-        }
-
+        
         #region Event
 
         private void frmMain_Load(object sender, EventArgs e)
@@ -91,89 +99,7 @@ namespace MujinAGVDemo
             }
         }
 
-        /// <summary>
-        /// 棚を追加します
-        /// </summary>
-        private void addPod()
-        {
-            updateParam();
-            var serverIP = param.ServerIP;
-            var warehouseID = param.WarehouseID;
-            var layoutID = param.LayoutID;
-            var podID = param.PodID;
-            var nodeID = param.NodeID;
-
-            var factory = new CommandFactory(serverIP, warehouseID);
-            if (!factory.IsConnectedTESServer())
-            {
-                logger.Error(Messages.NotConnectMsg);
-                showAddPodErrorDialog(Messages.NotConnectMsg);
-                return;
-            }
-            try
-            {
-                var addPodResult = factory.Create(new AddPodParam(podID, nodeID, layoutID)).DoAction();
-                string logMessage = $"棚 {podID},作成位置 {nodeID}";
-                logger.Info(logMessage);
-                logger.Info(addPodResult.ReturnMsg);
-                lblCurrentLineProcess.Text = logMessage;
-                var resultMessage =
-                    addPodResult.ReturnMsg == "succ" ? "成功" : "失敗";
-                showInfoMessageBox($"棚作成に{resultMessage}しました。{Environment.NewLine}棚 {podID},作成位置 {nodeID}");
-            }
-            catch (EmergencyException ee)
-            {
-                logger.Error(ee);
-                showAddPodErrorDialog(ee.Message);
-            }
-            catch (Exception ex)
-            {
-                logger.Error(ex);
-                showAddPodErrorDialog(ex.Message);
-            }
-        }
-
-        /// <summary>
-        /// 棚を削除します
-        /// </summary>
-        private void removePod()
-        {
-            updateParam();
-            var serverIP = param.ServerIP;
-            var warehouseID = param.WarehouseID;
-            var podID = param.PodID;
-
-
-            var factory = new CommandFactory(serverIP, warehouseID);
-            if (!factory.IsConnectedTESServer())
-            {
-                logger.Error(Messages.NotConnectMsg);
-                showRemovePodErrorDialog(Messages.NotConnectMsg);
-                return;
-            }
-            logger.Info($"棚[{podID}]を削除します。IP[{serverIP}]warehouseID[{warehouseID}]");
-            try
-            {
-                var removePodResult = factory.Create(new RemovePodParam(podID)).DoAction();
-                string logMessage = $"棚 {podID}";
-                logger.Info(logMessage);
-                logger.Info(removePodResult.ReturnMsg);
-                lblCurrentLineProcess.Text = logMessage;
-                var resultMessage =
-                    removePodResult.ReturnMsg == "succ" ? "成功" : "失敗";
-                showInfoMessageBox($"棚削除に{resultMessage}しました。{Environment.NewLine}棚 {podID}");
-            }
-            catch (EmergencyException ee)
-            {
-                logger.Error(ee.Message);
-                showRemovePodErrorDialog(ee.Message);
-            }
-            catch (Exception ex)
-            {
-                logger.Error(ex);
-                showRemovePodErrorDialog(ex.Message);
-            }
-        }
+        
 
         private async void btnMovePod_Click(object sender, EventArgs e)
         {
@@ -287,7 +213,276 @@ namespace MujinAGVDemo
             fileIO.SaveSetting(settingPath, param);
             showInfoMessageBox($"設定ファイルを保存しました。{Environment.NewLine}保存先:{Path.GetFullPath(settingPath)}");
         }
+        private void btnUnSetOwner_Click(object sender, EventArgs e)
+        {
+            unsetOwner();
+        }
 
+        private void btnShowOwner_Click(object sender, EventArgs e)
+        {
+            updateParam();
+
+            var clientCode = "biz_test";
+            var factory = new CommandFactory(param.ServerIP, param.WarehouseID, clientCode);
+            if (!factory.IsConnectedTESServer())
+                logger.Error(Messages.NotConnectMsg);
+
+            var getRobotRetMsg = (GetRobotListFromDBReturnMessage)factory.Create(new GetRobotListFromDBParam()).DoAction();
+            var robotList = getRobotRetMsg.Data.RobotList.ToList();
+            var messageList = new List<string>();
+
+            var rb = getRobotRetMsg.Data.RobotList.Where(x => x.RobotID == param.RobotID).FirstOrDefault();
+            //foreach(var rb in robotList)
+            //{
+            var message = string.Empty;
+            if (rb == null)
+            {
+                message = $"AGV[{param.RobotID}]が存在しません。";
+                logger.Error(message);
+                showErrorMessageBox(message);
+                return;
+            }
+            message = $"AGV{rb.RobotID}の所有者は{rb.Owner}です。";
+            logger.Info(message);
+            messageList.Add(message);
+            showInfoMessageBox(message);
+        }
+
+
+        private void btnOpenParamSettings_Click(object sender, EventArgs e)
+        {
+            var openFileDialog = new OpenFileDialog
+            {
+                Title = "設定ファイルを選択",
+                InitialDirectory = Path.GetDirectoryName(settingPath),
+                Filter = "XMLファイル|*.xml"
+            };
+
+            if (openFileDialog.ShowDialog() == DialogResult.OK)
+            {
+                settingPath = openFileDialog.FileName;
+
+                if (tryLoadSetting())
+                {
+                    updateControl();
+                    updateParam();
+                    logger.Info($"設定ファイルを選択しました。[{openFileDialog.FileName}]");
+                }
+            }
+            else
+            {
+                logger.Info("設定ファイルの選択がキャンセルされました。");
+            }
+            openFileDialog.Dispose();
+        }
+
+
+        private void btnShowPodDetail_Click(object sender, EventArgs e)
+        {
+            var factory = new CommandFactory(param.ServerIP, param.WarehouseID);
+            try
+            {
+                var getPodListAns = (GetPodListReturnMessage)factory.Create(new GetPodListParam()).DoAction();
+
+                var podList = getPodListAns.Data.PodList.Where(x => x.RobotID == param.RobotID).ToList();
+                logger.Info($"棚の位置を表示します");
+                foreach (var pod in podList)
+                {
+                    var podMessage = $"podID[{pod.PodID}]positionType[{pod.PositionType}]strageID[{pod.StorageID}]robotID[{pod.RobotID}]";
+                    logger.Info(podMessage);
+                }
+
+            }
+            catch (Exception ex)
+            {
+                logger.Error(ex);
+            }
+        }
+
+        private void mnuOpenLogDir_Click(object sender, EventArgs e)
+        {
+            if (!Directory.Exists(logDirPath))
+            {
+                showErrorMessageBox(($"{Path.GetFullPath(logDirPath)}が見つかりません。"));
+                return;
+            }
+            System.Diagnostics.Process.Start("EXPLORER.EXE", logDirPath);
+        }
+
+        private void btnSetOwner_Click(object sender, EventArgs e)
+        {
+            setOwner();
+        }
+
+        private void btnCharge_Click(object sender, EventArgs e)
+        {
+            var zoneID = textBoxChargeAreaID.Text;
+            var factory = new CommandFactory(param.ServerIP, param.WarehouseID);
+            var chargeReturnMessage = (ChargeRobotReturnMessage)factory.Create(new ChargeRobotParam(param.RobotID, zoneID)).DoAction();
+            logger.Info(chargeReturnMessage.ReturnMsg);
+        }
+
+        private void btnLiftDown_Click(object sender, EventArgs e)
+        {
+            updateParam();
+            var result = Command.MapCommands.LiftDownRobot(param.ServerIP, param.WarehouseID, param.RobotID);
+
+            if (!result.isSuccess)
+            {
+                showErrorMessageBox(result.messages);
+            }
+            else
+            {
+                showInfoMessageBox(result.messages);
+            }
+        }
+
+        private void btnLiftUp_Click(object sender, EventArgs e)
+        {
+            updateParam();
+            var result = Command.MapCommands.LiftUpRobot(param.ServerIP, param.WarehouseID, param.RobotID);
+
+            if (!result.isSuccess)
+            {
+                showErrorMessageBox(result.messages);
+            }
+            else
+            {
+                showInfoMessageBox(result.messages);
+            }
+        }
+
+        private void btnAddPod_Click(object sender, EventArgs e)
+        {
+            addPod();
+        }
+
+        private void btnRemovePod_Click(object sender, EventArgs e)
+        {
+            removePod();
+        }
+
+        private void btnShowAGVPosition_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                var factory = new CommandFactory(param.ServerIP, param.WarehouseID);
+                var getRobotListAns = (GetRobotListReturnMessage)factory.Create(new GetRobotListParam()).DoAction();
+                var robotList = getRobotListAns.Data.RobotList;
+
+                var textList = new List<string>();
+                //tableReset();
+                robotList.ForEach(rb =>
+                {
+                    var text = $"AGV[{rb.RobotID}] Node[{rb.CurNodeID}] X[{rb.CurX}] Y[{rb.CurY}] Owner[{rb.Owner}] Status[{rb.WorkStatus}] TaskID[{rb.TaskID}]";
+                    logger.Info(text);
+                    textList.Add(text);
+
+                    //table.Rows.Add(rb.RobotID, rb.WorkStatus, rb.Owner, rb.ErrorState, $"{rb.UcPower}", rb.CurNodeID, rb.CurX, rb.CurY, rb.TaskID);
+                });
+                var table = Command.MapCommands.GetAgvDetailTable(param.ServerIP, param.WarehouseID);
+                dgvAGVDetail.DataSource = table;
+            }
+            catch (Exception ex)
+            {
+                logger.Error(ex.ToString());
+                showErrorMessageBox(ex.Message);
+            }
+        }
+
+        private void btnSetPodPos_Click(object sender, EventArgs e)
+        {
+            updateParam();
+            var result = Command.MapCommands.SetPodPosition(param.ServerIP, param.WarehouseID, param.PodID, param.NodeID);
+
+            showMessageBox(result.isSuccess, result.message);
+        }
+
+        private async void tmrAGVInfoUpdate_Tick(object sender, EventArgs e)
+        {
+            await Task.Run(() =>
+            {
+                Invoke(new ChangeDgvDelegate(changeDgv));
+            });
+        }
+
+        private void btnLoadSetting_Click(object sender, EventArgs e)
+        {
+            if (!tryLoadSetting())
+            {
+                btnLoadSetting.BackColor = Color.Red;
+                return;
+            }
+            var message =
+                $"設定ファイルの読込に成功しました。{Path.GetFullPath(settingPath)}";
+            logger.Info(message);
+            btnLoadSetting.BackColor = Color.Green;
+            showInfoMessageBox(message);
+            updateControl();
+        }
+
+        private void btnSelectCSV_Click(object sender, EventArgs e)
+        {
+            var openFileDialog = new OpenFileDialog
+            {
+                Title = "CSVファイルを選択",
+                InitialDirectory = Environment.CurrentDirectory,
+                Filter = "CSVファイル|*.csv"
+            };
+
+            if (openFileDialog.ShowDialog() == DialogResult.OK)
+            {
+                textBoxStationListPath.Text = openFileDialog.FileName;
+                logger.Info(openFileDialog.FileName);
+                param.StationListPath = openFileDialog.FileName;
+            }
+            else
+            {
+                logger.Info("CSVファイルの選択がキャンセルされました。");
+            }
+            openFileDialog.Dispose();
+        }
+
+        private void btnCancel_Click(object sender, EventArgs e)
+        {
+            cancelTokenSource.Cancel();
+            logger.Info("連続動作キャンセルをクリックしました。");
+        }
+        private void btnSaveSampleCSV_Click(object sender, EventArgs e)
+        {
+            openSampleCSVDir();
+        }
+        private void btnGetTaskDetail_Click(object sender, EventArgs e)
+        {
+            var taskID = textBoxTaskID.Text;
+            showTaskDetailParam(taskID);
+        }
+        private void frmMain_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            tmrAGVInfoUpdate.Stop();
+        }
+
+        private void dgvAGVDetail_DataSourceChanged(object sender, EventArgs e)
+        {
+            lblUpdateTime.Text = $"更新日時:[{DateTime.Now}]";
+        }
+
+        private void checkBoxTimerRun_CheckedChanged(object sender, EventArgs e)
+        {
+            logger.Info($"AGV状態[{checkBoxTimerRun.Text}]");
+            if (!tmrAGVInfoUpdate.Enabled)
+            {
+                checkBoxTimerRun.Text = "監視停止";
+                checkBoxTimerRun.BackColor = Color.Red;
+                tmrAGVInfoUpdate.Start();
+            }
+            else
+            {
+                checkBoxTimerRun.Text = "監視開始";
+                checkBoxTimerRun.BackColor = Color.GreenYellow;
+                tmrAGVInfoUpdate.Stop();
+            }
+        }
         #endregion Event
 
         #region Task
@@ -550,6 +745,88 @@ namespace MujinAGVDemo
         #endregion Task
 
         #region Method
+        /// <summary>
+        /// 棚を追加します
+        /// </summary>
+        private void addPod()
+        {
+            updateParam();
+            var serverIP = param.ServerIP;
+            var warehouseID = param.WarehouseID;
+            var layoutID = param.LayoutID;
+            var podID = param.PodID;
+            var nodeID = param.NodeID;
+
+            var factory = new CommandFactory(serverIP, warehouseID);
+            if (!factory.IsConnectedTESServer())
+            {
+                logger.Error(Messages.NotConnectMsg);
+                showAddPodErrorDialog(Messages.NotConnectMsg);
+                return;
+            }
+            try
+            {
+                var addPodResult = factory.Create(new AddPodParam(podID, nodeID, layoutID)).DoAction();
+                string logMessage = $"棚 {podID},作成位置 {nodeID}";
+                logger.Info(logMessage);
+                logger.Info(addPodResult.ReturnMsg);
+                lblCurrentLineProcess.Text = logMessage;
+                var resultMessage =
+                    addPodResult.ReturnMsg == "succ" ? "成功" : "失敗";
+                showInfoMessageBox($"棚作成に{resultMessage}しました。{Environment.NewLine}棚 {podID},作成位置 {nodeID}");
+            }
+            catch (EmergencyException ee)
+            {
+                logger.Error(ee);
+                showAddPodErrorDialog(ee.Message);
+            }
+            catch (Exception ex)
+            {
+                logger.Error(ex);
+                showAddPodErrorDialog(ex.Message);
+            }
+        }
+        /// <summary>
+        /// 棚を削除します
+        /// </summary>
+        private void removePod()
+        {
+            updateParam();
+            var serverIP = param.ServerIP;
+            var warehouseID = param.WarehouseID;
+            var podID = param.PodID;
+
+
+            var factory = new CommandFactory(serverIP, warehouseID);
+            if (!factory.IsConnectedTESServer())
+            {
+                logger.Error(Messages.NotConnectMsg);
+                showRemovePodErrorDialog(Messages.NotConnectMsg);
+                return;
+            }
+            logger.Info($"棚[{podID}]を削除します。IP[{serverIP}]warehouseID[{warehouseID}]");
+            try
+            {
+                var removePodResult = factory.Create(new RemovePodParam(podID)).DoAction();
+                string logMessage = $"棚 {podID}";
+                logger.Info(logMessage);
+                logger.Info(removePodResult.ReturnMsg);
+                lblCurrentLineProcess.Text = logMessage;
+                var resultMessage =
+                    removePodResult.ReturnMsg == "succ" ? "成功" : "失敗";
+                showInfoMessageBox($"棚削除に{resultMessage}しました。{Environment.NewLine}棚 {podID}");
+            }
+            catch (EmergencyException ee)
+            {
+                logger.Error(ee.Message);
+                showRemovePodErrorDialog(ee.Message);
+            }
+            catch (Exception ex)
+            {
+                logger.Error(ex);
+                showRemovePodErrorDialog(ex.Message);
+            }
+        }
         private void showAddPodErrorDialog(string errorMessage)
         {
             showErrorMessageBox($"棚作成に失敗しました。{Environment.NewLine}{errorMessage}");
@@ -570,6 +847,10 @@ namespace MujinAGVDemo
         {
             showErrorMessageBox($"UnsetOwnerに失敗しました。{Environment.NewLine}{errorMessage}");
         }
+        /// <summary>
+        /// 設定ファイルを読み込みます
+        /// </summary>
+        /// <returns>読込に成功したらtrue</returns>
         private bool tryLoadSetting()
         {
             var result = fileIO.TryLoadSetting(settingPath, out param);
@@ -617,50 +898,6 @@ namespace MujinAGVDemo
             param.TurnMode = checkBoxSynchroTurn.Checked ? ON : OFF;
             param.Unload = checkBoxUnload.Checked ? ON : OFF;
         }
-        #endregion Method
-
-        private void btnLoadSetting_Click(object sender, EventArgs e)
-        {
-            if (!tryLoadSetting())
-            {
-                btnLoadSetting.BackColor = Color.Red;
-                return;
-            }
-            var message =
-                $"設定ファイルの読込に成功しました。{Path.GetFullPath(settingPath)}";
-            logger.Info(message);
-            btnLoadSetting.BackColor = Color.Green;
-            showInfoMessageBox(message);
-            updateControl();
-        }
-
-        private void btnSelectCSV_Click(object sender, EventArgs e)
-        {
-            var openFileDialog = new OpenFileDialog
-            {
-                Title = "CSVファイルを選択",
-                InitialDirectory = Environment.CurrentDirectory,
-                Filter = "CSVファイル|*.csv"
-            };
-
-            if (openFileDialog.ShowDialog() == DialogResult.OK)
-            {
-                textBoxStationListPath.Text = openFileDialog.FileName;
-                logger.Info(openFileDialog.FileName);
-                param.StationListPath = openFileDialog.FileName;
-            }
-            else
-            {
-                logger.Info("CSVファイルの選択がキャンセルされました。");
-            }
-            openFileDialog.Dispose();
-        }
-
-        private void btnCancel_Click(object sender, EventArgs e)
-        {
-            cancelTokenSource.Cancel();
-            logger.Info("連続動作キャンセルをクリックしました。");
-        }
         /// <summary>
         /// Hetuで占有されていないかを調べる
         /// </summary>
@@ -697,28 +934,7 @@ namespace MujinAGVDemo
 
             return false;
         }
-        private bool haveTask(string robotID)
-        {
-            var factory = new CommandFactory(param.ServerIP, param.WarehouseID);
-            if (!factory.IsConnectedTESServer())
-                logger.Error(Messages.NotConnectMsg);
 
-            var getRobotRetMsg = (GetRobotListFromDBReturnMessage)factory.Create(new GetRobotListFromDBParam()).DoAction();
-
-            var rb = getRobotRetMsg.Data.RobotList.Where(x => x.RobotID == robotID).FirstOrDefault();
-            if (rb == null)
-            {
-                var message = $"AGV[{param.RobotID}]が存在しません。";
-                logger.Error(message);
-                showErrorMessageBox(message);
-                return false;
-            }
-
-            var taskMessage = $"AGV[{rb.RobotID}]taskID[{rb.TaskID}]taskStatus[{rb.TaskStatus}]";
-            logger.Info(taskMessage);
-            showInfoMessageBox(taskMessage);
-            return false;
-        }
         /// <summary>
         /// エラーメッセージを表示する
         /// </summary>
@@ -735,7 +951,8 @@ namespace MujinAGVDemo
         private void showInfoMessageBox(string message)
         {
             MessageBox.Show(message, "Info", MessageBoxButtons.OK, MessageBoxIcon.Information);
-            logger.Info(message);
+            //ログ表示の際に改行文字を空白に置き換える
+            logger.Info(message.Replace(Environment.NewLine, string.Empty));
         }
         private void showMessageBox(bool isSuccess, string message)
         {
@@ -763,11 +980,11 @@ namespace MujinAGVDemo
             param.StationListPath = sampleCSVPath;
         }
 
-        private void btnSaveSampleCSV_Click(object sender, EventArgs e)
-        {
-            openSampleCSVDir();
-        }
-        private void getTaskDetailParam(string taskID)
+        /// <summary>
+        /// タスク詳細を表示します
+        /// </summary>
+        /// <param name="taskID">タスクID</param>
+        private void showTaskDetailParam(string taskID)
         {
             var clientCode = "biz_test";
             var factory = new CommandFactory(param.ServerIP, param.WarehouseID, clientCode);
@@ -783,12 +1000,10 @@ namespace MujinAGVDemo
             message = $"タスクID：{detail.TaskID}　状態：{detail.Status}　失敗理由：{detail.ErrorReason} エラーコード：{detail.ErrorCode}";
             showInfoMessageBox(message);
         }
-
-        private void btnGetTaskDetail_Click(object sender, EventArgs e)
-        {
-            var taskID = textBoxTaskID.Text;
-            getTaskDetailParam(taskID);
-        }
+        /// <summary>
+        /// AGVの占有状態を解除します
+        /// </summary>
+        /// <param name="robotID">AGVの号機</param>
         private void unsetOwner(string robotID)
         {
             var factory = new CommandFactory(param.ServerIP, param.WarehouseID);
@@ -816,12 +1031,18 @@ namespace MujinAGVDemo
             }
             logger.Info($"AGV[{robotID}]に対してUnsetOwnerが成功しました。");
         }
+        /// <summary>
+        /// AGVの占有状態を解除します
+        /// </summary>
         private void unsetOwner()
         {
             var robotID = param.RobotID;
             unsetOwner(robotID);
 
         }
+        /// <summary>
+        /// AGVを占有します
+        /// </summary>
         private void setOwner()
         {
             var robotID = param.RobotID;
@@ -838,265 +1059,15 @@ namespace MujinAGVDemo
             logger.Info($"AGV[{robotID}]に対してsetOwnerが成功しました。");
         }
 
-        private void btnUnSetOwner_Click(object sender, EventArgs e)
-        {
-            unsetOwner();
-        }
-
-        private void btnShowOwner_Click(object sender, EventArgs e)
-        {
-            updateParam();
-
-            var clientCode = "biz_test";
-            var factory = new CommandFactory(param.ServerIP, param.WarehouseID, clientCode);
-            if (!factory.IsConnectedTESServer())
-                logger.Error(Messages.NotConnectMsg);
-
-            var getRobotRetMsg = (GetRobotListFromDBReturnMessage)factory.Create(new GetRobotListFromDBParam()).DoAction();
-            var robotList = getRobotRetMsg.Data.RobotList.ToList();
-            var messageList = new List<string>();
-
-            var rb = getRobotRetMsg.Data.RobotList.Where(x => x.RobotID == param.RobotID).FirstOrDefault();
-            //foreach(var rb in robotList)
-            //{
-            var message = string.Empty;
-            if (rb == null)
-            {
-                message = $"AGV[{param.RobotID}]が存在しません。";
-                logger.Error(message);
-                showErrorMessageBox(message);
-                return;
-            }
-            message = $"AGV{rb.RobotID}の所有者は{rb.Owner}です。";
-            logger.Info(message);
-            messageList.Add(message);
-            showInfoMessageBox(message);
-        }
-
-
-        private void btnOpenParamSettings_Click(object sender, EventArgs e)
-        {
-            //System.Diagnostics.Process.Start(settingPath);
-
-            var openFileDialog = new OpenFileDialog
-            {
-                Title = "設定ファイルを選択",
-                InitialDirectory = Path.GetDirectoryName(settingPath),
-                Filter = "XMLファイル|*.xml"
-            };
-
-            if (openFileDialog.ShowDialog() == DialogResult.OK)
-            {
-                settingPath = openFileDialog.FileName;
-
-                if (tryLoadSetting())
-                {
-                    updateControl();
-                    updateParam();
-                }
-                logger.Info(openFileDialog.FileName);
-            }
-            else
-            {
-                logger.Info("設定ファイルの選択がキャンセルされました。");
-            }
-            openFileDialog.Dispose();
-        }
-
-
-        private void btnShowPodDetail_Click(object sender, EventArgs e)
-        {
-            var factory = new CommandFactory(param.ServerIP, param.WarehouseID);
-            try
-            {
-                var getPodListAns = (GetPodListReturnMessage)factory.Create(new GetPodListParam()).DoAction();
-
-                var podList = getPodListAns.Data.PodList.Where(x => x.RobotID == param.RobotID).ToList();
-                logger.Info($"棚の位置を表示します");
-                foreach (var pod in podList)
-                {
-                    var podMessage = $"podID[{pod.PodID}]positionType[{pod.PositionType}]strageID[{pod.StorageID}]robotID[{pod.RobotID}]";
-                    logger.Info(podMessage);
-                }
-
-            }
-            catch (Exception ex)
-            {
-                logger.Error(ex);
-            }
-        }
-
-        private void mnuOpenLogDir_Click(object sender, EventArgs e)
-        {
-            if (!Directory.Exists(logDirPath))
-            {
-                showErrorMessageBox(($"{Path.GetFullPath(logDirPath)}が見つかりません。"));
-                return;
-            }
-            System.Diagnostics.Process.Start("EXPLORER.EXE", logDirPath);
-        }
-
-        private void btnSetOwner_Click(object sender, EventArgs e)
-        {
-            setOwner();
-        }
-
-        private void btnCharge_Click(object sender, EventArgs e)
-        {
-            var zoneID = textBoxChargeAreaID.Text;
-            var factory = new CommandFactory(param.ServerIP, param.WarehouseID);
-            var chargeReturnMessage = (ChargeRobotReturnMessage)factory.Create(new ChargeRobotParam(param.RobotID, zoneID)).DoAction();
-            logger.Info(chargeReturnMessage.ReturnMsg);
-        }
-
-        private async void mnuMoveRobotDefault_Click(object sender, EventArgs e)
-        {
-            var factory = new CommandFactory(param.ServerIP, param.WarehouseID);
-            if (isHetuUsed())
-            {
-                return;
-            }
-            var serverIP = param.ServerIP;
-            var warehouseID = param.WarehouseID;
-            var nodeID = "161095107535";
-            var robotID = "104";
-            var token = cancelTokenSource.Token;
-            //showInfoMessageBox($"AGV移動指示を作成しました。{Environment.NewLine}AGV:{robotID},移動先:{nodeID}");
-            await moveRobot(serverIP, warehouseID, "104", "161095107535", token);
-            unsetOwner("104");
-
-            //showInfoMessageBox($"AGV移動指示を作成しました。{Environment.NewLine}AGV:{robotID},移動先:{nodeID}");
-            await moveRobot(serverIP, warehouseID, "39", "161095107566", token);
-            unsetOwner("39");
-
-            unsetOwner("102");
-        }
-
-        private async void mnuOldAGVMove_Click(object sender, EventArgs e)
-        {
-            var orderFilePath = @"CSVSample/棚をポイント2と往復.csv";
-            var paramSetting = param;
-            var robotID = "102";
-            var podID = "1137";
-            await movePodRotate(orderFilePath, param, robotID, podID);
-        }
-        
-
-        private void btnLiftDown_Click(object sender, EventArgs e)
-        {
-            updateParam();
-            var result = Command.MapCommands.LiftDownRobot(param.ServerIP, param.WarehouseID, param.RobotID);
-
-            if (!result.isSuccess)
-            {
-                showErrorMessageBox(result.messages);
-            }
-            else
-            {
-                showInfoMessageBox(result.messages);
-            }
-        }
-
-        private void btnLiftUp_Click(object sender, EventArgs e)
-        {
-            updateParam();
-            var result = Command.MapCommands.LiftUpRobot(param.ServerIP, param.WarehouseID, param.RobotID);
-
-            if (!result.isSuccess)
-            {
-                showErrorMessageBox(result.messages);
-            }
-            else
-            {
-                showInfoMessageBox(result.messages);
-            }
-        }
-
-        private void btnAddPod_Click(object sender, EventArgs e)
-        {
-            addPod();
-        }
-
-        private void btnRemovePod_Click(object sender, EventArgs e)
-        {
-            removePod();
-        }
-
-        private void btnShowAGVPosition_Click(object sender, EventArgs e)
-        {
-            try
-            {
-                var factory = new CommandFactory(param.ServerIP, param.WarehouseID);
-                var getRobotListAns = (GetRobotListReturnMessage)factory.Create(new GetRobotListParam()).DoAction();
-                var robotList = getRobotListAns.Data.RobotList;
-
-                var textList = new List<string>();
-                //tableReset();
-                robotList.ForEach(rb =>
-                {
-                    var text = $"AGV[{rb.RobotID}] Node[{rb.CurNodeID}] X[{rb.CurX}] Y[{rb.CurY}] Owner[{rb.Owner}] Status[{rb.WorkStatus}] TaskID[{rb.TaskID}]";
-                    logger.Info(text);
-                    textList.Add(text);
-
-                    //table.Rows.Add(rb.RobotID, rb.WorkStatus, rb.Owner, rb.ErrorState, $"{rb.UcPower}", rb.CurNodeID, rb.CurX, rb.CurY, rb.TaskID);
-                });
-                var table = Command.MapCommands.GetAgvDetailTable(param.ServerIP, param.WarehouseID);
-                dgvAGVDetail.DataSource = table;
-            }
-            catch (Exception ex)
-            {
-                logger.Error(ex.ToString());
-                showErrorMessageBox(ex.Message);
-            }
-        }
-
-        private void btnSetPodPos_Click(object sender, EventArgs e)
-        {
-            updateParam();
-            var result = Command.MapCommands.SetPodPosition(param.ServerIP, param.WarehouseID, param.PodID, param.NodeID);
-
-            showMessageBox(result.isSuccess, result.message);
-        }
-
-        private async void tmrAGVInfoUpdate_Tick(object sender, EventArgs e)
-        {
-            await Task.Run(() =>
-            {
-                Invoke(new ChangeDgvDelegate(ChangeDgv));
-            });
-        }
-        void ChangeDgv()
+        /// <summary>
+        /// AGV情報タブのデータを更新します
+        /// </summary>
+        private void changeDgv()
         {
             var table = Command.MapCommands.GetAgvDetailTable(param.ServerIP, param.WarehouseID);
 
             dgvAGVDetail.DataSource = table;
         }
-
-        private void frmMain_FormClosing(object sender, FormClosingEventArgs e)
-        {
-            tmrAGVInfoUpdate.Stop();
-        }
-
-        private void dgvAGVDetail_DataSourceChanged(object sender, EventArgs e)
-        {
-            lblUpdateTime.Text = $"更新日時:[{DateTime.Now}]";
-        }
-
-        private void checkBoxTimerRun_CheckedChanged(object sender, EventArgs e)
-        {
-            logger.Info($"AGV状態[{checkBoxTimerRun.Text}]");
-            if (!tmrAGVInfoUpdate.Enabled)
-            {
-                checkBoxTimerRun.Text = "監視停止";
-                checkBoxTimerRun.BackColor = Color.Red;
-                tmrAGVInfoUpdate.Start();
-            }
-            else
-            {
-                checkBoxTimerRun.Text = "監視開始";
-                checkBoxTimerRun.BackColor = Color.GreenYellow;
-                tmrAGVInfoUpdate.Stop();
-            }
-        }
+        #endregion Method
     }
 }
