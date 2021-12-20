@@ -114,6 +114,7 @@ namespace MujinAGVDemo
 
             await movePod(param.ServerIP, param.WarehouseID, param.PodID
                 , param.NodeID, param.RobotID, param.TurnMode, param.Unload, token);
+            unsetOwner();
         }
 
         private async void btnRotationMove_Click(object sender, EventArgs e)
@@ -124,7 +125,7 @@ namespace MujinAGVDemo
             var podID = param.PodID;
             updateParam();
             await movePodRotate(stationListPath, paramSetting, robotID, podID);
-
+            unsetOwner(robotID);
         }
 
         private async Task movePodRotate(string stationListPath, ParamSettings paramSetting, string robotID, string podID)
@@ -199,6 +200,7 @@ namespace MujinAGVDemo
             var token = cancelTokenSource.Token;
             showInfoMessageBox($"AGV移動指示を作成しました。{Environment.NewLine}AGV:{robotID},移動先:{nodeID}");
             await moveRobot(serverIP, warehouseID, robotID, nodeID, token);
+            unsetOwner();
         }
 
         private void numRepeatCount_ValueChanged(object sender, EventArgs e)
@@ -643,7 +645,11 @@ namespace MujinAGVDemo
 
 
                 if (!isInfinityLoop)
+                {
                     nowCount++;
+                    if (nowCount > param.RepeatCount)
+                        isRunning = false;
+                }
             }
             //while (nowCount != param.RepeatCount && !cancelToken.IsCancellationRequested);
             while (isRunning);
@@ -678,11 +684,11 @@ namespace MujinAGVDemo
 
                     if (setOwnerResult.ReturnMsg != "succ")
                     {
-                        showUnsetOwnerErrorDialog(setOwnerResult.ReturnMsg);
-                        logger.Error($"{Messages.SetOwnerError}:AGV{param.RobotID}{setOwnerResult.ReturnMsg}");
+                        showSetOwnerErrorDialog(setOwnerResult.ReturnMsg);
+                        logger.Error($"{Messages.SetOwnerError}:AGV[{param.RobotID}][{setOwnerResult.ReturnMsg}]");
                         return;
                     }
-                    logger.Info($"AGV{robotID}に対してSetOwnerが成功しました。");
+                    logger.Info($"AGV[{robotID}]に対してSetOwnerが成功しました。");
 
                     var moveRobotParam = new MoveRobotParam(
                             robotID,
