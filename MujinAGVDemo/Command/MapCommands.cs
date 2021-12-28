@@ -283,6 +283,19 @@ namespace MujinAGVDemo.Command
         /// <returns>isSuccess=成功=true 失敗=false,　messages=Hetuの応答メッセージ</returns>
         public static (bool isSuccess, string messages) LiftDownRobot(string hetuIP, string warehouseID, string robotID)
         {
+            //棚の向きを指定しない
+            return LiftDownRobot(hetuIP, warehouseID, robotID, 4);
+        }
+        /// <summary>
+        /// AGVを指定してその場で棚を下ろす
+        /// </summary>
+        /// <param name="hetuIP">HetuサーバーのIP</param>
+        /// <param name="warehouseID">マップのID</param>
+        /// <param name="robotID">AGVの番号</param>
+        /// <param name="podDirectionIndex">下す際の棚の向き（0:北　1:東　2:南　3:西　4:指定しない）</param>
+        /// <returns>isSuccess=成功=true 失敗=false,　messages=Hetuの応答メッセージ</returns>
+        public static (bool isSuccess, string messages) LiftDownRobot(string hetuIP, string warehouseID, string robotID,int podDirectionIndex)
+        {
             var factory = new CommandFactory(hetuIP, warehouseID);
             var getRobotListFromDBReturnMessage = (GetRobotListFromDBReturnMessage)factory.Create(new GetRobotListFromDBParam()).DoAction();
             var rb = getRobotListFromDBReturnMessage.Data.RobotList.Where(x => x.RobotID == robotID).FirstOrDefault();
@@ -306,15 +319,35 @@ namespace MujinAGVDemo.Command
                 //logger.Info();
                 return (true, $"AGV[{robotID}]が持っている棚はありません。");
             }
-
-            var movePodResult = (MovePodReturnMessage)factory.Create(new MovePodParam(
+            var movePodParam = new MovePodParam(
                 robotID,
                 podID,
                 DestinationModes.StorageID,
                 nodeID,
                 isEndWait: true,
                 unload: unload
-                )).DoAction();
+                );
+
+            switch (podDirectionIndex)
+            {
+                case 0:
+                    movePodParam.PodFace = Direction.North;
+                    break;
+                case 1:
+                    movePodParam.PodFace = Direction.East;
+                    break;
+                case 2:
+                    movePodParam.PodFace = Direction.South;
+                    break;
+                case 3:
+                    movePodParam.PodFace = Direction.West;
+                    break;
+                case 4:
+                    movePodParam.PodFace = Direction.NoSelect;
+                    break;
+            }
+
+            var movePodResult = (MovePodReturnMessage)factory.Create(movePodParam).DoAction();
 
             if (movePodResult.ReturnMsg == null)
             {

@@ -28,12 +28,12 @@ namespace MujinAGVDemo
         #endregion Constructor
 
         #region Const
-        
+
         /// <summary>
         /// ログディレクトリのパス
         /// </summary>
         private const string logDirPath = @"logs";
-        
+
         /// <summary>
         /// CSVファイルの中のnodeIDのインデックス
         /// </summary>
@@ -59,7 +59,7 @@ namespace MujinAGVDemo
         /// <summary>
         /// 設定ファイルのパス
         /// </summary>
-        string settingPath = @"Setting/ParamSetting_denso.xml";
+        string settingPath = @"Setting/ParamSetting.xml";
         ParamSettings param;
         bool isStop = false;
         FileIO fileIO = new FileIO();
@@ -74,7 +74,7 @@ namespace MujinAGVDemo
         delegate void ChangeDgvDelegate();
 
         #endregion Deligate
-        
+
         #region Event
 
         private void frmMain_Load(object sender, EventArgs e)
@@ -88,7 +88,10 @@ namespace MujinAGVDemo
             {
                 btnLoadSetting.BackColor = Color.LightGray;
                 updateControl();
+                //AGVの向きを指定しない
                 listBoxDirection.SelectedIndex = 4;
+                //棚の向きを指定しない
+                listBoxPodDirection.SelectedIndex = 4;
                 directionIndex = listBoxDirection.SelectedIndex;
                 checkBoxIsStop.Checked = isStop;
                 textBoxTaskID.Text = string.Empty;
@@ -99,7 +102,7 @@ namespace MujinAGVDemo
             }
         }
 
-        
+
 
         private async void btnMovePod_Click(object sender, EventArgs e)
         {
@@ -327,7 +330,8 @@ namespace MujinAGVDemo
         private void btnLiftDown_Click(object sender, EventArgs e)
         {
             updateParam();
-            var result = Command.MapCommands.LiftDownRobot(param.ServerIP, param.WarehouseID, param.RobotID);
+            var podDir = listBoxPodDirection.SelectedIndex;
+            var result = Command.MapCommands.LiftDownRobot(param.ServerIP, param.WarehouseID, param.RobotID, podDir);
 
             if (!result.isSuccess)
             {
@@ -469,7 +473,7 @@ namespace MujinAGVDemo
             lblUpdateTime.Text = $"更新日時:[{DateTime.Now}]";
         }
 
-        private void checkBoxTimerRun_CheckedChanged(object sender, EventArgs e)
+        private async void checkBoxTimerRun_CheckedChanged(object sender, EventArgs e)
         {
             logger.Info($"AGV状態[{checkBoxTimerRun.Text}]");
             if (!tmrAGVInfoUpdate.Enabled)
@@ -477,6 +481,10 @@ namespace MujinAGVDemo
                 checkBoxTimerRun.Text = "監視停止";
                 checkBoxTimerRun.BackColor = Color.Red;
                 tmrAGVInfoUpdate.Start();
+                await Task.Run(() =>
+                {
+                    Invoke(new ChangeDgvDelegate(changeDgv));
+                });
             }
             else
             {
@@ -727,7 +735,7 @@ namespace MujinAGVDemo
                     {
                         lblCurrentLineProcess.Text = logMessage;
                     }));
-                },token);
+                }, token);
                 if (token.IsCancellationRequested)
                 {
                     return;
