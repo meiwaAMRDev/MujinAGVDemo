@@ -331,30 +331,30 @@ namespace MujinAGVDemo
         {
             updateParam();
             var podDir = listBoxPodDirection.SelectedIndex;
-            var result = Command.MapCommands.LiftDownRobot(param.ServerIP, param.WarehouseID, param.RobotID, podDir);
+            var (isSuccess, messages) = Command.MapCommands.LiftDownRobot(param.ServerIP, param.WarehouseID, param.RobotID, podDir);
 
-            if (!result.isSuccess)
+            if (!isSuccess)
             {
-                showErrorMessageBox(result.messages);
+                showErrorMessageBox(messages);
             }
             else
             {
-                showInfoMessageBox(result.messages);
+                showInfoMessageBox(messages);
             }
         }
 
         private void btnLiftUp_Click(object sender, EventArgs e)
         {
             updateParam();
-            var result = Command.MapCommands.LiftUpRobot(param.ServerIP, param.WarehouseID, param.RobotID);
+            var (isSuccess, messages) = Command.MapCommands.LiftUpRobot(param.ServerIP, param.WarehouseID, param.RobotID);
 
-            if (!result.isSuccess)
+            if (!isSuccess)
             {
-                showErrorMessageBox(result.messages);
+                showErrorMessageBox(messages);
             }
             else
             {
-                showInfoMessageBox(result.messages);
+                showInfoMessageBox(messages);
             }
         }
 
@@ -399,9 +399,9 @@ namespace MujinAGVDemo
         private void btnSetPodPos_Click(object sender, EventArgs e)
         {
             updateParam();
-            var result = Command.MapCommands.SetPodPosition(param.ServerIP, param.WarehouseID, param.PodID, param.NodeID);
+            var (isSuccess, message) = Command.MapCommands.SetPodPosition(param.ServerIP, param.WarehouseID, param.PodID, param.NodeID);
 
-            showMessageBox(result.isSuccess, result.message);
+            showMessageBox(isSuccess, message);
         }
 
         private async void tmrAGVInfoUpdate_Tick(object sender, EventArgs e)
@@ -550,7 +550,7 @@ namespace MujinAGVDemo
                     var movePodResult = (MovePodReturnMessage)factory.Create(movePodParam).DoAction();
 
 
-                    string logMessage = $"ロボットID {robotID},棚 {podID},移動先 {nodeID}";
+                    var logMessage = $"ロボットID {robotID},棚 {podID},移動先 {nodeID}";
                     logger.Info(logMessage);
                     logger.Info($"msg[{movePodResult.ReturnMsg}]returnCode[{movePodResult.ReturnCode}]");
 
@@ -594,9 +594,6 @@ namespace MujinAGVDemo
                 (isInfinityLoop || nowCount < param.RepeatCount)
                 //かつキャンセルされていない
                 && !cancelToken.IsCancellationRequested;
-
-
-
             do
             {
                 if (cancelToken.IsCancellationRequested)
@@ -609,14 +606,7 @@ namespace MujinAGVDemo
                 {
 
                     var percent = (int)((double)nowCount / (double)param.RepeatCount * 100);
-                    if (percent > 100)
-                    {
-                        prgRepeartCount.Value = 100;
-                    }
-                    else
-                    {
-                        prgRepeartCount.Value = percent;
-                    }
+                    prgRepeartCount.Value = percent > 100 ? 100 : percent;
                 }
 
                 lblProgress.Text = $"繰り返し回数 {nowCount}/{param.RepeatCount}";
@@ -868,11 +858,10 @@ namespace MujinAGVDemo
         private bool tryLoadSetting()
         {
             var result = fileIO.TryLoadSetting(settingPath, out param);
-            var message = string.Empty;
             if (!result)
             {
-                message =
-                    $"設定ファイルの読込に失敗しました。{Path.GetFullPath(settingPath)}";
+                var message =
+        $"設定ファイルの読込に失敗しました。{Path.GetFullPath(settingPath)}";
                 logger.Error(message);
                 showErrorMessageBox(message);
                 return result;
@@ -1009,9 +998,7 @@ namespace MujinAGVDemo
             logger.Info($"{task.ToString()}");
 
             var detail = task.Data.Detail;
-
-            var message = string.Empty;
-            message = $"タスクID：{detail.TaskID}　状態：{detail.Status}　失敗理由：{detail.ErrorReason} エラーコード：{detail.ErrorCode}";
+            var message = $"タスクID：{detail.TaskID}　状態：{detail.Status}　失敗理由：{detail.ErrorReason} エラーコード：{detail.ErrorCode}";
             showInfoMessageBox(message);
         }
         /// <summary>

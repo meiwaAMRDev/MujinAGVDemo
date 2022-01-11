@@ -124,18 +124,18 @@ namespace MujinAGVDemo.Command
 
             factory.Create(new UnsetOwnerParam(robotID)).DoAction();
 
-            var moveRobotResult = (MoveRobotReturnMessage)(factory.Create(new MoveRobotParam(
+            var moveRobotResult = (MoveRobotReturnMessage)factory.Create(new MoveRobotParam(
                      robotID,
                      DestinationModes.NodeID,
                      destinationPoint,
                      isEndWait: true,
                      ownerRegist: true
-                 )).DoAction());
+                 )).DoAction();
 
             if (string.IsNullOrWhiteSpace(moveRobotResult.Data.TaskID))
                 return (false, getTaskFaultResultMessage(TaskTypes.MoveRobot, robotID, moveRobotResult.ReturnMsg, moveRobotResult.ReturnCode));
 
-            var taskDetail = (GetTaskDetailReturnMessage)(factory.Create(new GetTaskDetailParam(moveRobotResult.Data.TaskID))).DoAction();
+            var taskDetail = (GetTaskDetailReturnMessage)factory.Create(new GetTaskDetailParam(moveRobotResult.Data.TaskID)).DoAction();
 
             factory.Create(new UnsetOwnerParam(robotID)).DoAction();
 
@@ -192,13 +192,13 @@ namespace MujinAGVDemo.Command
 
             factory.Create(new UnsetOwnerParam(robotID)).DoAction();
 
-            var chargeRobotResult = (ChargeRobotReturnMessage)(factory.Create(new ChargeRobotParam(robotID, chargingZone)).DoAction());
+            var chargeRobotResult = (ChargeRobotReturnMessage)factory.Create(new ChargeRobotParam(robotID, chargingZone)).DoAction();
             var taskID = chargeRobotResult.Data?.TaskID;
 
             if (string.IsNullOrWhiteSpace(taskID))
                 return (false, getTaskFaultResultMessage(TaskTypes.Charge, robotID, chargeRobotResult.ReturnMsg, chargeRobotResult.ReturnCode));
 
-            var taskDetail = (GetTaskDetailReturnMessage)(factory.Create(new GetTaskDetailParam(taskID))).DoAction();
+            var taskDetail = (GetTaskDetailReturnMessage)factory.Create(new GetTaskDetailParam(taskID)).DoAction();
 
             return (chargeRobotResult.ReturnCode == successCode,//充電コマンドを実行する　taskDetail.Data.Detail.StatusがReadyになります。
                 getTaskResultMessage(taskID,
@@ -495,10 +495,9 @@ namespace MujinAGVDemo.Command
             var taskToBeCancelled = ((GetAllTaskSelectStatusFromDBReturnMessage)factory.Create(new GetAllTaskSelectStatusFromDBParam(taskStatusList)).DoAction())
                 .GetAllTaskSelectStatusList.Where(task => task.RobotID == robotID).ToList();
 
-            if (taskToBeCancelled.Count == 0)
-                return new List<(bool, string)> { (true, $"このロボットにはキャンセルするタスクが存在しません。対象AGV_ID：{robotID}") };
-
-            return CancelTasks(factory, taskToBeCancelled);
+            return taskToBeCancelled.Count == 0
+                ? new List<(bool, string)> { (true, $"このロボットにはキャンセルするタスクが存在しません。対象AGV_ID：{robotID}") }
+                : CancelTasks(factory, taskToBeCancelled);
         }
 
         /// <summary>渡されたタスクをキャンセルするコマンドを実行する。</summary>
@@ -565,7 +564,7 @@ namespace MujinAGVDemo.Command
         /// <param name="errorCode">エラーコード</param>
         /// <returns>作成された文字列</returns>
         private static string getTaskResultMessage(string taskID, TaskTypes taskType, string robotID, TaskStatuses status, int errorCode) =>
-            $"タスクID:{taskID}、タスク型：{taskType}、対象AGV_ID：{robotID}、結果: { status}、コード: { errorCode.ToString()}";
+            $"タスクID:{taskID}、タスク型：{taskType}、対象AGV_ID：{robotID}、結果: { status}、コード: { errorCode}";
 
         /// <summary>
         /// タスク失敗時の文字列を取得します
@@ -576,7 +575,7 @@ namespace MujinAGVDemo.Command
         /// <param name="errorCode">エラーコード</param>
         /// <returns>作成された文字列</returns>
         private static string getTaskFaultResultMessage(TaskTypes taskType, string robotID, string returnMessage, int errorCode) =>
-            $"タスク実行失敗しました。タスク型：{taskType}、対象AGV_ID：{robotID}、{result}: { returnMessage}、コード: { errorCode.ToString()}";
+            $"タスク実行失敗しました。タスク型：{taskType}、対象AGV_ID：{robotID}、{result}: { returnMessage}、コード: { errorCode}";
 
         #endregion
     }
