@@ -294,11 +294,25 @@ namespace MujinAGVDemo.Command
         /// <param name="robotID">AGVの番号</param>
         /// <param name="podDirectionIndex">下す際の棚の向き（0:北　1:東　2:南　3:西　4:指定しない）</param>
         /// <returns>isSuccess=成功=true 失敗=false,　messages=Hetuの応答メッセージ</returns>
-        public static (bool isSuccess, string messages) LiftDownRobot(string hetuIP, string warehouseID, string robotID,int podDirectionIndex)
+        public static (bool isSuccess, string messages) LiftDownRobot(string hetuIP, string warehouseID, string robotID, int podDirectionIndex)
         {
             var factory = new CommandFactory(hetuIP, warehouseID);
+            return LiftDownRobot(factory, robotID, podDirectionIndex);
+        }
+        /// <summary>
+        /// AGVを指定してその場で棚を下ろす
+        /// </summary>
+        /// <param name="factory">ファクトリ</param>
+        /// <param name="robotID">AGVの番号</param>
+        /// <param name="podDirectionIndex">下す際の棚の向き（0:北　1:東　2:南　3:西　4:指定しない）</param>
+        /// <returns>isSuccess=成功=true 失敗=false,　messages=Hetuの応答メッセージ</returns>
+        public static (bool isSuccess, string messages) LiftDownRobot(CommandFactory factory, string robotID, int podDirectionIndex = 4)
+        {
+            //var factory = new CommandFactory(hetuIP, warehouseID);
             var getRobotListFromDBReturnMessage = (GetRobotListFromDBReturnMessage)factory.Create(new GetRobotListFromDBParam()).DoAction();
-            var rb = getRobotListFromDBReturnMessage.Data.RobotList.Where(x => x.RobotID == robotID).FirstOrDefault();
+            var rb = getRobotListFromDBReturnMessage.Data.RobotList
+                .Where(x => x.RobotID == robotID)
+                .FirstOrDefault();
             //指定したAGVが見つからない場合はここで終了
             if (rb == null)
             {
@@ -348,7 +362,7 @@ namespace MujinAGVDemo.Command
             }
 
             var movePodResult = (MovePodReturnMessage)factory.Create(movePodParam).DoAction();
-
+            factory.Create(new UnsetOwnerParam(robotID)).DoAction();
             if (movePodResult.ReturnMsg == null)
             {
                 return (false, $"リフトダウン結果が取得できませんでした。AGV[{robotID}] ノード[{rb.CurNodeID}] 棚[{podID}]");
@@ -547,7 +561,47 @@ namespace MujinAGVDemo.Command
 
             return returnBattery;
         }
+        /// <summary>
+        /// AGVの占有状態を解除します
+        /// </summary>
+        /// <param name="hetuIP">接続するHetuサーバーのIPアドレス</param>
+        /// <param name="warehouseID">倉庫ID</param>
+        /// <param name="robotID">AGVの号機</param>
+        /// <returns>isSuccess=成功=true 失敗=false,　messages=応答メッセージ</returns>
+        public static (bool isSuccess, string message) UnsetOwner(string hetuIP, string warehouseID, string robotID)
+        {
+            var factory = new CommandFactory(hetuIP, warehouseID);
+            return UnsetOwner(factory, robotID);
+        }
+        /// <summary>
+        /// AGVの占有状態を解除します
+        /// </summary>
+        /// <param name="factory">ファクトリ</param>
+        /// <param name="robotID">AGVの号機</param>
+        /// <returns>isSuccess=成功=true 失敗=false,　messages=応答メッセージ</returns>
+        public static (bool isSuccess, string message) UnsetOwner(CommandFactory factory, string robotID)
+        {
+            //var factory = new CommandFactory(param.ServerIP, param.WarehouseID);
 
+            var robotList = (GetRobotListFromDBReturnMessage)factory.Create(new GetRobotListFromDBParam()).DoAction();
+            var rb = robotList.Data.RobotList.Where(x => x.RobotID == robotID).FirstOrDefault();
+            if (rb == null)
+            {
+                return (true, $"AGV[{robotID}]が見つからないためunsetOwnerは行いません。");
+            }
+            if (rb.Owner == "TES")
+            {
+                return (true, $"AGV[{robotID}]の所有者はTESのためunsetOwnerは行いません。");
+            }
+
+            var unsetOwnerResult = factory.Create(new UnsetOwnerParam(robotID)).DoAction();
+
+            if (unsetOwnerResult.ReturnMsg != "succ")
+            {
+                return (false, $"{Messages.UnsetOwnerError}:AGV{robotID}{unsetOwnerResult.ReturnMsg}");
+            }
+            return (true, $"AGV[{robotID}]に対してUnsetOwnerが成功しました。");
+        }
         #endregion
 
         #endregion
