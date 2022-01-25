@@ -443,31 +443,39 @@ namespace MujinAGVDemo.Command
         /// </summary>
         /// <param name="hetuIP">HetuサーバーのIP</param>
         /// <param name="warehouseID">マップのID</param>
-        /// <returns>AGV情報が入ったデータテーブル</returns>
-        public static DataTable GetAgvDetailTable(string hetuIP, string warehouseID)
+        /// <returns>isSuccess:取得成功ならtrue,table:AGV情報が入ったデータテーブル</returns>
+        public static (bool isSuccess, DataTable table) GetAgvDetailTable(string hetuIP, string warehouseID)
         {
             var table = new DataTable();
 
             var factory = new CommandFactory(hetuIP, warehouseID);
             if (!factory.IsConnectedTESServer())
-                return table;
-
-            var getRobotListAns = (GetRobotListReturnMessage)factory.Create(new GetRobotListParam()).DoAction();
-            table.Columns.Add("号機");
-            table.Columns.Add("状態");
-            table.Columns.Add("所有者");
-            table.Columns.Add("エラー");
-            table.Columns.Add("電池残量");
-            table.Columns.Add("ノードID");
-            table.Columns.Add("X座標");
-            table.Columns.Add("Y座標");
-            table.Columns.Add("タスクID");
-            table.Columns.Add("タスクタイプ");
-            getRobotListAns.Data.RobotList.ForEach(rb =>
+                return (false,table);
+            try
             {
-                table.Rows.Add(rb.RobotID, rb.WorkStatus, rb.Owner, rb.ErrorState, $"{rb.UcPower}", rb.CurNodeID, rb.CurX, rb.CurY, rb.TaskID, rb.TaskType);
-            });
-            return table;
+                var getRobotListAns = (GetRobotListReturnMessage)factory.Create(new GetRobotListParam()).DoAction();
+                table.Columns.Add("号機");
+                table.Columns.Add("状態");
+                table.Columns.Add("所有者");
+                table.Columns.Add("エラー");
+                table.Columns.Add("電池残量");
+                table.Columns.Add("ノードID");
+                table.Columns.Add("X座標");
+                table.Columns.Add("Y座標");
+                table.Columns.Add("タスクID");
+                table.Columns.Add("タスクタイプ");
+                getRobotListAns.Data.RobotList.ForEach(rb =>
+                {
+                    table.Rows.Add(rb.RobotID, rb.WorkStatus, rb.Owner, rb.ErrorState, $"{rb.UcPower}", rb.CurNodeID, rb.CurX, rb.CurY, rb.TaskID, rb.TaskType);
+                });
+            }
+            catch(Exception ex)
+            {
+                table.Rows.Add(ex);
+                return (false, table);
+            }
+            
+            return (true,table);
         }
         #region TaskCancel
 

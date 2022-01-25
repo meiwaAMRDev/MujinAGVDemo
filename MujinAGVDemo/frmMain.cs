@@ -386,8 +386,14 @@ namespace MujinAGVDemo
 
                     //table.Rows.Add(rb.RobotID, rb.WorkStatus, rb.Owner, rb.ErrorState, $"{rb.UcPower}", rb.CurNodeID, rb.CurX, rb.CurY, rb.TaskID);
                 });
-                var table = Command.MapCommands.GetAgvDetailTable(param.ServerIP, param.WarehouseID);
-                dgvAGVDetail.DataSource = table;
+                var (isSuccess, table) = Command.MapCommands.GetAgvDetailTable(param.ServerIP, param.WarehouseID);
+                if (isSuccess)
+                    dgvAGVDetail.DataSource = table;
+                else
+                {
+                    showErrorMessageBox("テーブルの取得に失敗しました。");
+                }
+                    
             }
             catch (Exception ex)
             {
@@ -1065,19 +1071,21 @@ namespace MujinAGVDemo
         /// </summary>
         private void changeDgv()
         {
-            var table = Command.MapCommands.GetAgvDetailTable(param.ServerIP, param.WarehouseID);
-
-            dgvAGVDetail.DataSource = table;
+            var (isSuccess, table) = Command.MapCommands.GetAgvDetailTable(param.ServerIP, param.WarehouseID);
+            if (isSuccess)
+                dgvAGVDetail.DataSource = table;
+            else
+                showErrorMessageBox("テーブルの取得に失敗しました。");
         }
         #endregion Method
 
         private void btnRemovePodAll_Click(object sender, EventArgs e)
         {
             updateParam();
-            var result = Command.MapCommands.RemoveAllShelfs(param.ServerIP, param.WarehouseID);
+            var (isSuccess, messages) = Command.MapCommands.RemoveAllShelfs(param.ServerIP, param.WarehouseID);
             var message = new StringBuilder();
-            result.messages.ToList().ForEach(x => message.Append(x));
-            showMessageBox(result.isSuccess, message.ToString());
+            messages.ToList().ForEach(x => message.Append(x));
+            showMessageBox(isSuccess, message.ToString());
         }
 
         private void btnLiftDownAll_Click(object sender, EventArgs e)
@@ -1088,10 +1096,10 @@ namespace MujinAGVDemo
 
             getRobotListAns.Data.RobotList.ForEach(robot =>
             {
-                Command.MapCommands.LiftDownRobot(factory, robot.RobotID);
-                //Command.MapCommands.UnsetOwner(factory, robot.RobotID);
+                var (isSuccess, messages) = Command.MapCommands.LiftDownRobot(factory, robot.RobotID);
+                showMessageBox(isSuccess, messages);
             });
-            showMessageBox(true, "棚を全て下ろしました。");
+            //showMessageBox(true, "棚を全て下ろしました。");
         }
 
         private void btnUnsetOwnerAll_Click(object sender, EventArgs e)
@@ -1102,10 +1110,10 @@ namespace MujinAGVDemo
 
             getRobotListAns.Data.RobotList.ForEach(robot =>
             {
-                //Command.MapCommands.LiftDownRobot(factory, robot.RobotID);
-                Command.MapCommands.UnsetOwner(factory, robot.RobotID);
+                var (isSuccess, messages) = Command.MapCommands.UnsetOwner(factory, robot.RobotID);
+                showMessageBox(isSuccess, messages);
             });
-            showMessageBox(true, "全てのAGVの所有者を解除しました。");
+            //showMessageBox(true, "全てのAGVの所有者を解除しました。");
         }
     }
 }
