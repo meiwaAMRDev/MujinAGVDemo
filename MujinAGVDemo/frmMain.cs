@@ -1115,7 +1115,11 @@ namespace MujinAGVDemo
             if (isSuccess)
                 dgvAGVDetail.DataSource = table;
             else
-                showErrorMessageBox("テーブルの取得に失敗しました。");
+            {
+                checkBoxTimerRun.Checked = false;
+                showErrorMessageBox("AGV情報の取得に失敗しました。監視を停止します。");
+            }
+                
         }
         #endregion Method
 
