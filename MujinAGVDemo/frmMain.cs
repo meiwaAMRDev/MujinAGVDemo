@@ -48,26 +48,32 @@ namespace MujinAGVDemo
         private const int unloadModeIndex = 2;
         private const int ON = 1;
         private const int OFF = 0;
+        /// <summary>
+        /// 設定ファイルのデフォルトパス
+        /// </summary>
+        const string defaultSettingPath = @"Setting/ParamSetting.xml";
 
         #endregion Const
 
-        #region Property
+        #region Private Parameter
+
         /// <summary>
         /// AGVの方向を表すインデックス
         /// </summary>
-        int directionIndex = 4;
+        private int directionIndex = 4;
         /// <summary>
         /// 設定ファイルのパス
         /// </summary>
-        string settingPath = @"Setting/ParamSetting.xml";
-        ParamSettings param;
-        bool isStop = false;
-        FileIO fileIO = new FileIO();
-        CancellationTokenSource cancelTokenSource = new CancellationTokenSource();
-        Logger logger = LogManager.GetLogger("ProgramLogger");
+        private string settingPath = defaultSettingPath;
+        private ParamSettings param;
+        private bool isStop = false;
+        private FileIO fileIO = new FileIO();
+        private CancellationTokenSource cancelTokenSource = new CancellationTokenSource();
+        private Logger logger = LogManager.GetLogger("ProgramLogger");
         /// <summary>AGV名と電池残量を持つラベル</summary>
         private List<ToolStripLabel> agvIdBatteryLevelList = new List<ToolStripLabel>();
-        #endregion Property
+
+        #endregion Private Parameter
 
         #region Deligate
 
@@ -101,8 +107,6 @@ namespace MujinAGVDemo
                 logger.Error(ex.ToString());
             }
         }
-
-
 
         private async void btnMovePod_Click(object sender, EventArgs e)
         {
@@ -149,7 +153,6 @@ namespace MujinAGVDemo
             orderList.RemoveAt(0);
             await movePodRotate(paramSetting, orderList, token, robotID, podID);
         }
-
 
         private void checkBoxIsStop_CheckedChanged(object sender, EventArgs e)
         {
@@ -211,12 +214,15 @@ namespace MujinAGVDemo
             param.RepeatCount = (int)numRepeatCount.Value;
         }
 
-
         private void btnSaveSetting_Click(object sender, EventArgs e)
         {
             updateParam();
+            if (settingPath != defaultSettingPath)
+            {
+                fileIO.SaveSetting(defaultSettingPath, param);
+            }
             fileIO.SaveSetting(settingPath, param);
-            showInfoMessageBox($"設定ファイルを保存しました。{Environment.NewLine}保存先:{Path.GetFullPath(settingPath)}");
+            showInfoMessageBox($"設定ファイルを保存しました。{Environment.NewLine}保存先:{Path.GetFullPath(settingPath)}");            
         }
         private void btnUnSetOwner_Click(object sender, EventArgs e)
         {
@@ -253,7 +259,6 @@ namespace MujinAGVDemo
             showInfoMessageBox(message);
         }
 
-
         private void btnOpenParamSettings_Click(object sender, EventArgs e)
         {
             var openFileDialog = new OpenFileDialog
@@ -280,7 +285,6 @@ namespace MujinAGVDemo
             }
             openFileDialog.Dispose();
         }
-
 
         private void btnShowPodDetail_Click(object sender, EventArgs e)
         {
@@ -498,6 +502,42 @@ namespace MujinAGVDemo
                 checkBoxTimerRun.BackColor = Color.GreenYellow;
                 tmrAGVInfoUpdate.Stop();
             }
+        }
+        private void btnRemovePodAll_Click(object sender, EventArgs e)
+        {
+            updateParam();
+            var (isSuccess, messages) = Command.MapCommands.RemoveAllShelfs(param.ServerIP, param.WarehouseID);
+            var message = new StringBuilder();
+            messages.ToList().ForEach(x => message.Append(x));
+            showMessageBox(isSuccess, message.ToString());
+        }
+
+        private void btnLiftDownAll_Click(object sender, EventArgs e)
+        {
+            updateParam();
+            var factory = new CommandFactory(param.ServerIP, param.WarehouseID);
+            var getRobotListAns = (GetRobotListReturnMessage)factory.Create(new GetRobotListParam()).DoAction();
+
+            getRobotListAns.Data.RobotList.ForEach(robot =>
+            {
+                var (isSuccess, messages) = Command.MapCommands.LiftDownRobot(factory, robot.RobotID);
+                showMessageBox(isSuccess, messages);
+            });
+            //showMessageBox(true, "棚を全て下ろしました。");
+        }
+
+        private void btnUnsetOwnerAll_Click(object sender, EventArgs e)
+        {
+            updateParam();
+            var factory = new CommandFactory(param.ServerIP, param.WarehouseID);
+            var getRobotListAns = (GetRobotListReturnMessage)factory.Create(new GetRobotListParam()).DoAction();
+
+            getRobotListAns.Data.RobotList.ForEach(robot =>
+            {
+                var (isSuccess, messages) = Command.MapCommands.UnsetOwner(factory, robot.RobotID);
+                showMessageBox(isSuccess, messages);
+            });
+            //showMessageBox(true, "全てのAGVの所有者を解除しました。");
         }
         #endregion Event
 
@@ -1079,41 +1119,6 @@ namespace MujinAGVDemo
         }
         #endregion Method
 
-        private void btnRemovePodAll_Click(object sender, EventArgs e)
-        {
-            updateParam();
-            var (isSuccess, messages) = Command.MapCommands.RemoveAllShelfs(param.ServerIP, param.WarehouseID);
-            var message = new StringBuilder();
-            messages.ToList().ForEach(x => message.Append(x));
-            showMessageBox(isSuccess, message.ToString());
-        }
-
-        private void btnLiftDownAll_Click(object sender, EventArgs e)
-        {
-            updateParam();
-            var factory = new CommandFactory(param.ServerIP, param.WarehouseID);
-            var getRobotListAns = (GetRobotListReturnMessage)factory.Create(new GetRobotListParam()).DoAction();
-
-            getRobotListAns.Data.RobotList.ForEach(robot =>
-            {
-                var (isSuccess, messages) = Command.MapCommands.LiftDownRobot(factory, robot.RobotID);
-                showMessageBox(isSuccess, messages);
-            });
-            //showMessageBox(true, "棚を全て下ろしました。");
-        }
-
-        private void btnUnsetOwnerAll_Click(object sender, EventArgs e)
-        {
-            updateParam();
-            var factory = new CommandFactory(param.ServerIP, param.WarehouseID);
-            var getRobotListAns = (GetRobotListReturnMessage)factory.Create(new GetRobotListParam()).DoAction();
-
-            getRobotListAns.Data.RobotList.ForEach(robot =>
-            {
-                var (isSuccess, messages) = Command.MapCommands.UnsetOwner(factory, robot.RobotID);
-                showMessageBox(isSuccess, messages);
-            });
-            //showMessageBox(true, "全てのAGVの所有者を解除しました。");
-        }
+        
     }
 }
