@@ -67,11 +67,9 @@ namespace MujinAGVDemo
         private string settingPath = defaultSettingPath;
         private ParamSettings param;
         private bool isStop = false;
-        private FileIO fileIO = new FileIO();
+        private readonly FileIO fileIO = new FileIO();
         private CancellationTokenSource cancelTokenSource = new CancellationTokenSource();
-        private Logger logger = LogManager.GetLogger("ProgramLogger");
-        /// <summary>AGV名と電池残量を持つラベル</summary>
-        private List<ToolStripLabel> agvIdBatteryLevelList = new List<ToolStripLabel>();
+        private readonly Logger logger = LogManager.GetLogger("ProgramLogger");
 
         #endregion Private Parameter
 
@@ -222,7 +220,7 @@ namespace MujinAGVDemo
                 fileIO.SaveSetting(defaultSettingPath, param);
             }
             fileIO.SaveSetting(settingPath, param);
-            showInfoMessageBox($"設定ファイルを保存しました。{Environment.NewLine}保存先:{Path.GetFullPath(settingPath)}");            
+            showInfoMessageBox($"設定ファイルを保存しました。{Environment.NewLine}保存先:{Path.GetFullPath(settingPath)}");
         }
         private void btnUnSetOwner_Click(object sender, EventArgs e)
         {
@@ -312,7 +310,7 @@ namespace MujinAGVDemo
         {
             if (!Directory.Exists(logDirPath))
             {
-                showErrorMessageBox(($"{Path.GetFullPath(logDirPath)}が見つかりません。"));
+                showErrorMessageBox($"{Path.GetFullPath(logDirPath)}が見つかりません。");
                 return;
             }
             System.Diagnostics.Process.Start("EXPLORER.EXE", logDirPath);
@@ -392,12 +390,14 @@ namespace MujinAGVDemo
                 });
                 var (isSuccess, table) = Command.MapCommands.GetAgvDetailTable(param.ServerIP, param.WarehouseID);
                 if (isSuccess)
+                {
                     dgvAGVDetail.DataSource = table;
+                }
                 else
                 {
                     showErrorMessageBox("テーブルの取得に失敗しました。");
                 }
-                    
+
             }
             catch (Exception ex)
             {
@@ -622,20 +622,13 @@ namespace MujinAGVDemo
                 logger.Error(ex);
             }
         }
-        private async Task movePodRotate(ParamSettings param, List<string> allLines
-            , CancellationToken cancelToken)
-        {
-            var robotID = param.RobotID;
-            var podID = param.PodID;
-            await movePodRotate(param, allLines, cancelToken, robotID, podID);
-        }
 
         private async Task movePodRotate(ParamSettings param, List<string> allLines
             , CancellationToken cancelToken, string robotID, string podID)
         {
-            int nowCount = 1;
-            bool isInfinityLoop = param.RepeatCount == 0;
-            bool isRunning =
+            var nowCount = 1;
+            var isInfinityLoop = param.RepeatCount == 0;
+            var isRunning =
                 //無限ループモードまたは実行回数が繰り返し回数未満
                 (isInfinityLoop || nowCount < param.RepeatCount)
                 //かつキャンセルされていない
@@ -763,7 +756,7 @@ namespace MujinAGVDemo
                     }
                     var moveRobotResult = (MoveRobotReturnMessage)factory.Create(moveRobotParam).DoAction();
 
-                    string logMessage = $"ロボットID {robotID},移動先 {nodeID}";
+                    var logMessage = $"ロボットID {robotID},移動先 {nodeID}";
                     logger.Info(logMessage);
                     logger.Info(moveRobotResult.ReturnMsg);
 
@@ -817,7 +810,7 @@ namespace MujinAGVDemo
             try
             {
                 var addPodResult = factory.Create(new AddPodParam(podID, nodeID, layoutID)).DoAction();
-                string logMessage = $"棚 {podID},作成位置 {nodeID}";
+                var logMessage = $"棚 {podID},作成位置 {nodeID}";
                 logger.Info(logMessage);
                 logger.Info(addPodResult.ReturnMsg);
                 lblCurrentLineProcess.Text = logMessage;
@@ -858,7 +851,7 @@ namespace MujinAGVDemo
             try
             {
                 var removePodResult = factory.Create(new RemovePodParam(podID)).DoAction();
-                string logMessage = $"棚 {podID}";
+                var logMessage = $"棚 {podID}";
                 logger.Info(logMessage);
                 logger.Info(removePodResult.ReturnMsg);
                 lblCurrentLineProcess.Text = logMessage;
@@ -892,10 +885,6 @@ namespace MujinAGVDemo
         private void showSetOwnerErrorDialog(string errorMessage)
         {
             showErrorMessageBox($"SetOwnerに失敗しました。{Environment.NewLine}{errorMessage}");
-        }
-        private void showUnsetOwnerErrorDialog(string errorMessage)
-        {
-            showErrorMessageBox($"UnsetOwnerに失敗しました。{Environment.NewLine}{errorMessage}");
         }
         /// <summary>
         /// 設定ファイルを読み込みます
@@ -1054,29 +1043,9 @@ namespace MujinAGVDemo
         private void unsetOwner(string robotID)
         {
             var factory = new CommandFactory(param.ServerIP, param.WarehouseID);
+            var (isSuccess, message) = Command.MapCommands.UnsetOwner(factory, robotID);
+            showMessageBox(isSuccess, message);
 
-            var robotList = (GetRobotListFromDBReturnMessage)factory.Create(new GetRobotListFromDBParam()).DoAction();
-            var rb = robotList.Data.RobotList.Where(x => x.RobotID == robotID).FirstOrDefault();
-            if (rb == null)
-            {
-                logger.Info($"AGV[{robotID}]が見つからないためunsetOwnerは行いません。");
-                return;
-            }
-            if (rb.Owner == "TES")
-            {
-                logger.Info($"AGV[{robotID}]の所有者はTESのためunsetOwnerは行いません。");
-                return;
-            }
-
-            var unsetOwnerResult = factory.Create(new UnsetOwnerParam(robotID)).DoAction();
-
-            if (unsetOwnerResult.ReturnMsg != "succ")
-            {
-                showUnsetOwnerErrorDialog(unsetOwnerResult.ReturnMsg);
-                logger.Error($"{Messages.UnsetOwnerError}:AGV{param.RobotID}{unsetOwnerResult.ReturnMsg}");
-                //return;
-            }
-            logger.Info($"AGV[{robotID}]に対してUnsetOwnerが成功しました。");
         }
         /// <summary>
         /// AGVの占有状態を解除します
@@ -1094,16 +1063,8 @@ namespace MujinAGVDemo
         {
             var robotID = param.RobotID;
             var factory = new CommandFactory(param.ServerIP, param.WarehouseID);
-
-            var setOwnerResult = factory.Create(new SetOwnerParam(robotID)).DoAction();
-
-            if (setOwnerResult.ReturnMsg != "succ")
-            {
-                showUnsetOwnerErrorDialog(setOwnerResult.ReturnMsg);
-                logger.Error($"{Messages.SetOwnerError}:AGV{param.RobotID}{setOwnerResult.ReturnMsg}");
-                //return;
-            }
-            logger.Info($"AGV[{robotID}]に対してsetOwnerが成功しました。");
+            var (isSuccess, message) = Command.MapCommands.SetOwner(factory, robotID);
+            showMessageBox(isSuccess, message);
         }
 
         /// <summary>
@@ -1113,16 +1074,18 @@ namespace MujinAGVDemo
         {
             var (isSuccess, table) = Command.MapCommands.GetAgvDetailTable(param.ServerIP, param.WarehouseID);
             if (isSuccess)
+            {
                 dgvAGVDetail.DataSource = table;
+            }
             else
             {
                 checkBoxTimerRun.Checked = false;
                 showErrorMessageBox("AGV情報の取得に失敗しました。監視を停止します。");
             }
-                
+
         }
         #endregion Method
 
-        
+
     }
 }

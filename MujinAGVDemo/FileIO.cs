@@ -18,8 +18,8 @@ namespace MujinAGVDemo
         /// <returns>読込成功ならtrue</returns>
         public bool TryGetAllLines(string filePath, out List<string> allLines)
         {
-            var result = false;
             allLines = new List<string>();
+            bool result;
             try
             {
                 if (!File.Exists(filePath))
@@ -48,19 +48,19 @@ namespace MujinAGVDemo
         /// <param name="savePath">保存先ファイルパス</param>
         /// <param name="allLines">書き込む文字列のリスト</param>
         /// <returns>保存成功ならtrue</returns>
-        public bool TrySaveAllLines(string savePath,List<string> allLines)
+        public bool TrySaveAllLines(string savePath, List<string> allLines)
         {
             try
             {
                 using (var sw = new StreamWriter(savePath, false, Encoding.UTF8))
                 {
-                    foreach(var line in allLines)
+                    foreach (var line in allLines)
                     {
                         sw.WriteLine(line);
                     }
                 }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 Messages.Logger.Error(ex);
                 return false;

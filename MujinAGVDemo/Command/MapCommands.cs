@@ -604,11 +604,46 @@ namespace MujinAGVDemo.Command
 
             var unsetOwnerResult = factory.Create(new UnsetOwnerParam(robotID)).DoAction();
 
-            if (unsetOwnerResult.ReturnMsg != "succ")
+            return unsetOwnerResult.ReturnMsg != "succ"
+                ? (false, $"AGV[{robotID}]に対してUnsetOwnerが失敗しました。{unsetOwnerResult.ReturnMsg}")
+                : (true, $"AGV[{robotID}]に対してUnsetOwnerが成功しました。");
+        }
+        /// <summary>
+        /// AGVをソフトで占有します。
+        /// </summary>
+        /// <param name="hetuIP">接続するHetuサーバーのIPアドレス</param>
+        /// <param name="warehouseID">倉庫ID</param>
+        /// <param name="robotID">AGVの号機</param>
+        /// <returns></returns>
+        public static (bool isSuccess, string message) SetOwner(string hetuIP, string warehouseID, string robotID)
+        {
+            var factory = new CommandFactory(hetuIP, warehouseID);
+            return SetOwner(factory, robotID);
+        }
+        /// <summary>
+        /// AGVをソフトで占有します。
+        /// </summary>
+        /// <param name="factory">ファクトリ</param>
+        /// <param name="robotID">AGVの号機</param>
+        /// <returns></returns>
+        public static (bool isSuccess, string message) SetOwner(CommandFactory factory, string robotID)
+        {
+            var robotList = (GetRobotListFromDBReturnMessage)factory.Create(new GetRobotListFromDBParam()).DoAction();
+            var rb = robotList.Data?.RobotList.Where(x => x.RobotID == robotID).FirstOrDefault();
+            if (rb == null)
             {
-                return (false, $"{Messages.UnsetOwnerError}:AGV{robotID}{unsetOwnerResult.ReturnMsg}");
+                return (true, $"AGV[{robotID}]が見つからないためsetOwnerは行いません。");
             }
-            return (true, $"AGV[{robotID}]に対してUnsetOwnerが成功しました。");
+            if (rb.Owner == "biz_test")
+            {
+                return (true, $"AGV[{robotID}]の所有者はbiz_testのためsetOwnerは行いません。");
+            }
+
+            var setOwnerResult = factory.Create(new SetOwnerParam(robotID)).DoAction();
+
+            return setOwnerResult.ReturnMsg != "succ"
+                ? (false, $"AGV[{robotID}]に対してSetOwnerが失敗しました。{setOwnerResult.ReturnMsg}")
+                : (true, $"AGV[{robotID}]に対してSetOwnerが成功しました。");
         }
         #endregion
 
