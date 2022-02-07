@@ -309,8 +309,8 @@ namespace MujinAGVDemo.Command
         public static (bool isSuccess, string messages) LiftDownRobot(CommandFactory factory, string robotID, int podDirectionIndex = 4)
         {
             //var factory = new CommandFactory(hetuIP, warehouseID);
-            var getRobotListFromDBReturnMessage = (GetRobotListFromDBReturnMessage)factory.Create(new GetRobotListFromDBParam()).DoAction();
-            var rb = getRobotListFromDBReturnMessage.Data.RobotList
+            var getRobotListReturnMessage = (GetRobotListReturnMessage)factory.Create(new GetRobotListParam()).DoAction();
+            var rb = getRobotListReturnMessage.Data.RobotList
                 .Where(x => x.RobotID == robotID)
                 .FirstOrDefault();
             //指定したAGVが見つからない場合はここで終了
@@ -381,8 +381,8 @@ namespace MujinAGVDemo.Command
         public static (bool isSuccess, string messages) LiftUpRobot(string hetuIP, string warehouseID, string robotID)
         {
             var factory = new CommandFactory(hetuIP, warehouseID);
-            var getRobotListFromDBReturnMessage = (GetRobotListFromDBReturnMessage)factory.Create(new GetRobotListFromDBParam()).DoAction();
-            var rb = getRobotListFromDBReturnMessage.Data.RobotList.Where(x => x.RobotID == robotID).FirstOrDefault();
+            var getRobotListReturnMessage = (GetRobotListReturnMessage)factory.Create(new GetRobotListParam()).DoAction();
+            var rb = getRobotListReturnMessage.Data.RobotList.Where(x => x.RobotID == robotID).FirstOrDefault();
             var returnMessage = string.Empty;
             //指定したAGVが見つからない場合はここで終了
             if (rb == null)
@@ -591,7 +591,7 @@ namespace MujinAGVDemo.Command
         {
             //var factory = new CommandFactory(param.ServerIP, param.WarehouseID);
 
-            var robotList = (GetRobotListFromDBReturnMessage)factory.Create(new GetRobotListFromDBParam()).DoAction();
+            var robotList = (GetRobotListReturnMessage)factory.Create(new GetRobotListParam()).DoAction();
             var rb = robotList.Data.RobotList.Where(x => x.RobotID == robotID).FirstOrDefault();
             if (rb == null)
             {
@@ -628,7 +628,8 @@ namespace MujinAGVDemo.Command
         /// <returns></returns>
         public static (bool isSuccess, string message) SetOwner(CommandFactory factory, string robotID)
         {
-            var robotList = (GetRobotListFromDBReturnMessage)factory.Create(new GetRobotListFromDBParam()).DoAction();
+            var robotList =
+                (GetRobotListReturnMessage)factory.Create(new GetRobotListParam()).DoAction();
             var rb = robotList.Data?.RobotList.Where(x => x.RobotID == robotID).FirstOrDefault();
             if (rb == null)
             {

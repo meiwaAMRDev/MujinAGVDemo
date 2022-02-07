@@ -224,6 +224,10 @@ namespace MujinAGVDemo
         }
         private void btnUnSetOwner_Click(object sender, EventArgs e)
         {
+            if (showCheckMessage($"AGV[{param.RobotID}]をロック解除しますか？") != DialogResult.OK)
+            {
+                return;
+            }
             unsetOwner();
         }
 
@@ -236,7 +240,7 @@ namespace MujinAGVDemo
             if (!factory.IsConnectedTESServer())
                 logger.Error(Messages.NotConnectMsg);
 
-            var getRobotRetMsg = (GetRobotListFromDBReturnMessage)factory.Create(new GetRobotListFromDBParam()).DoAction();
+            var getRobotRetMsg = (GetRobotListReturnMessage)factory.Create(new GetRobotListParam()).DoAction();
             var robotList = getRobotRetMsg.Data.RobotList.ToList();
             var messageList = new List<string>();
 
@@ -318,6 +322,10 @@ namespace MujinAGVDemo
 
         private void btnSetOwner_Click(object sender, EventArgs e)
         {
+            if (showCheckMessage($"AGV[{param.RobotID}]をロックしますか？") != DialogResult.OK)
+            {
+                return;
+            }
             setOwner();
         }
 
@@ -951,7 +959,7 @@ namespace MujinAGVDemo
             }
 
 
-            var getRobotRetMsg = (GetRobotListFromDBReturnMessage)factory.Create(new GetRobotListFromDBParam()).DoAction();
+            var getRobotRetMsg = (GetRobotListReturnMessage)factory.Create(new GetRobotListParam()).DoAction();
 
             var rb = getRobotRetMsg.Data.RobotList.Where(x => x.RobotID == param.RobotID).FirstOrDefault();
             if (rb == null)
@@ -972,37 +980,52 @@ namespace MujinAGVDemo
 
             return false;
         }
+        #region メッセージボックス関連
 
         /// <summary>
-        /// エラーメッセージを表示する
+        /// Infoのメッセージボックスを表示します
         /// </summary>
-        /// <param name="message">表示するメッセージ</param>
-        private void showErrorMessageBox(string message)
+        /// <param name="message">メッセージ</param>
+        /// <returns>ダイアログボックスの戻り値</returns>
+        private DialogResult showInfoMessageBox(string message)
         {
-            MessageBox.Show(message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            logger.Error(message);
-        }
-        /// <summary>
-        /// エラーではないメッセージを表示する
-        /// </summary>
-        /// <param name="message">表示するメッセージ</param>
-        private void showInfoMessageBox(string message)
-        {
-            MessageBox.Show(message, "Info", MessageBoxButtons.OK, MessageBoxIcon.Information);
             //ログ表示の際に改行文字を空白に置き換える
             logger.Info(message.Replace(Environment.NewLine, string.Empty));
+            return MessageBox.Show(message, "成功", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
-        private void showMessageBox(bool isSuccess, string message)
+        /// <summary>
+        /// Errorのメッセージボックスを表示します
+        /// </summary>
+        /// <param name="message">メッセージ</param>
+        /// <returns>ダイアログボックスの戻り値</returns>
+        private DialogResult showErrorMessageBox(string message)
         {
-            if (!isSuccess)
-            {
-                showErrorMessageBox(message);
-            }
-            else
-            {
-                showInfoMessageBox(message);
-            }
+            logger.Error(message);
+            return MessageBox.Show(message, "エラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
+        /// <summary>
+        /// メッセージボックスを表示します
+        /// </summary>
+        /// <param name="isSuccess">Infoの場合true,Errorの場合falseを入れる</param>
+        /// <param name="message">メッセージ</param>
+        /// <returns>ダイアログボックスの戻り値</returns>
+        private DialogResult showMessageBox(bool isSuccess, string message)
+        {
+            return isSuccess
+                ? showInfoMessageBox(message)
+                : showErrorMessageBox(message);
+        }
+        /// <summary>
+        /// 確認のメッセージボックスを表示します
+        /// </summary>
+        /// <param name="message">表示するメッセージ</param>
+        /// <returns>ダイアログボックスの戻り値</returns>
+        private DialogResult showCheckMessage(string message)
+        {
+            return MessageBox.Show(message, "確認", MessageBoxButtons.OKCancel, MessageBoxIcon.Question);
+        }
+
+        #endregion メッセージボックス関連
         /// <summary>
         /// サンプルCSVファイルの場所を開く
         /// </summary>
