@@ -1085,6 +1085,10 @@ namespace MujinAGVDemo
         private void setOwner()
         {
             var robotID = param.RobotID;
+            setOwner(robotID);
+        }
+        private void setOwner(string robotID)
+        {
             var factory = new CommandFactory(param.ServerIP, param.WarehouseID);
             var (isSuccess, message) = Command.MapCommands.SetOwner(factory, robotID);
             showMessageBox(isSuccess, message);
@@ -1107,8 +1111,27 @@ namespace MujinAGVDemo
             }
 
         }
+
         #endregion Method
 
-
+        private void dgvAGVDetail_CellContentDoubleClick(object sender, DataGridViewCellEventArgs e)
+        {
+            const int ownerCol = 2;
+            const int robotIDCol = 0;
+            if (e.ColumnIndex == ownerCol)
+            {
+                var robotID = dgvAGVDetail[robotIDCol, e.RowIndex].Value.ToString();
+                var owner = dgvAGVDetail[e.ColumnIndex, e.RowIndex].Value.ToString();
+                switch (owner)
+                {
+                    case "TES":
+                        setOwner(robotID);
+                        break;
+                    case "biz_test":
+                        unsetOwner(robotID);
+                        break;
+                }
+            }
+        }
     }
 }

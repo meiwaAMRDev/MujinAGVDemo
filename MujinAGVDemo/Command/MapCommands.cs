@@ -450,7 +450,7 @@ namespace MujinAGVDemo.Command
 
             var factory = new CommandFactory(hetuIP, warehouseID);
             if (!factory.IsConnectedTESServer())
-                return (false,table);
+                return (false, table);
             try
             {
                 var getRobotListAns = (GetRobotListReturnMessage)factory.Create(new GetRobotListParam()).DoAction();
@@ -469,13 +469,13 @@ namespace MujinAGVDemo.Command
                     table.Rows.Add(rb.RobotID, rb.WorkStatus, rb.Owner, rb.ErrorState, $"{rb.UcPower}", rb.CurNodeID, rb.CurX, rb.CurY, rb.TaskID, rb.TaskType);
                 });
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 table.Rows.Add(ex);
                 return (false, table);
             }
-            
-            return (true,table);
+
+            return (true, table);
         }
         #region TaskCancel
 
@@ -628,8 +628,7 @@ namespace MujinAGVDemo.Command
         /// <returns></returns>
         public static (bool isSuccess, string message) SetOwner(CommandFactory factory, string robotID)
         {
-            var robotList =
-                (GetRobotListReturnMessage)factory.Create(new GetRobotListParam()).DoAction();
+            var robotList = (GetRobotListReturnMessage)factory.Create(new GetRobotListParam()).DoAction();
             var rb = robotList.Data?.RobotList.Where(x => x.RobotID == robotID).FirstOrDefault();
             if (rb == null)
             {

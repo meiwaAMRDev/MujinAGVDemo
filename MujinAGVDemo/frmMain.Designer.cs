@@ -80,6 +80,7 @@ namespace MujinAGVDemo
             this.label19 = new System.Windows.Forms.Label();
             this.textBoxTaskID = new System.Windows.Forms.TextBox();
             this.tabPage4 = new System.Windows.Forms.TabPage();
+            this.btnUnsetOwnerAll = new System.Windows.Forms.Button();
             this.btnSetOwner = new System.Windows.Forms.Button();
             this.btnUnSetOwner = new System.Windows.Forms.Button();
             this.btnShowOwner = new System.Windows.Forms.Button();
@@ -87,12 +88,14 @@ namespace MujinAGVDemo
             this.btnShowAGVPosition = new System.Windows.Forms.Button();
             this.btnShowPodDetail = new System.Windows.Forms.Button();
             this.tabPage6 = new System.Windows.Forms.TabPage();
+            this.btnRemovePodAll = new System.Windows.Forms.Button();
             this.btnSetPodPos = new System.Windows.Forms.Button();
             this.btnAddPod = new System.Windows.Forms.Button();
             this.btnRemovePod = new System.Windows.Forms.Button();
             this.label10 = new System.Windows.Forms.Label();
             this.label9 = new System.Windows.Forms.Label();
             this.tabPage7 = new System.Windows.Forms.TabPage();
+            this.btnLiftDownAll = new System.Windows.Forms.Button();
             this.label23 = new System.Windows.Forms.Label();
             this.listBoxPodDirection = new System.Windows.Forms.ListBox();
             this.btnLiftUp = new System.Windows.Forms.Button();
@@ -114,9 +117,6 @@ namespace MujinAGVDemo
             this.mnuOpenLogDir = new System.Windows.Forms.ToolStripMenuItem();
             this.デバッグToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.tmrAGVInfoUpdate = new System.Windows.Forms.Timer(this.components);
-            this.btnRemovePodAll = new System.Windows.Forms.Button();
-            this.btnLiftDownAll = new System.Windows.Forms.Button();
-            this.btnUnsetOwnerAll = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.numRepeatCount)).BeginInit();
             this.statusStrip1.SuspendLayout();
             this.tabControl1.SuspendLayout();
@@ -254,7 +254,7 @@ namespace MujinAGVDemo
             // btnRotationMove
             // 
             this.btnRotationMove.Location = new System.Drawing.Point(308, 115);
-            this.btnRotationMove.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.btnRotationMove.Margin = new System.Windows.Forms.Padding(2);
             this.btnRotationMove.Name = "btnRotationMove";
             this.btnRotationMove.Size = new System.Drawing.Size(147, 38);
             this.btnRotationMove.TabIndex = 24;
@@ -325,7 +325,7 @@ namespace MujinAGVDemo
             // numRepeatCount
             // 
             this.numRepeatCount.Location = new System.Drawing.Point(309, 13);
-            this.numRepeatCount.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.numRepeatCount.Margin = new System.Windows.Forms.Padding(2);
             this.numRepeatCount.Name = "numRepeatCount";
             this.numRepeatCount.Size = new System.Drawing.Size(90, 19);
             this.numRepeatCount.TabIndex = 31;
@@ -443,7 +443,7 @@ namespace MujinAGVDemo
             this.tabPage1.Controls.Add(this.btnMoveAGV);
             this.tabPage1.Location = new System.Drawing.Point(4, 22);
             this.tabPage1.Name = "tabPage1";
-            this.tabPage1.Padding = new System.Windows.Forms.Padding(3, 3, 3, 3);
+            this.tabPage1.Padding = new System.Windows.Forms.Padding(3);
             this.tabPage1.Size = new System.Drawing.Size(739, 272);
             this.tabPage1.TabIndex = 0;
             this.tabPage1.Text = "各個";
@@ -515,7 +515,7 @@ namespace MujinAGVDemo
             this.tabPage2.Controls.Add(this.numRepeatCount);
             this.tabPage2.Location = new System.Drawing.Point(4, 22);
             this.tabPage2.Name = "tabPage2";
-            this.tabPage2.Padding = new System.Windows.Forms.Padding(3, 3, 3, 3);
+            this.tabPage2.Padding = new System.Windows.Forms.Padding(3);
             this.tabPage2.Size = new System.Drawing.Size(739, 272);
             this.tabPage2.TabIndex = 1;
             this.tabPage2.Text = "連続";
@@ -583,9 +583,9 @@ namespace MujinAGVDemo
             this.tabPage3.Controls.Add(this.label19);
             this.tabPage3.Controls.Add(this.textBoxTaskID);
             this.tabPage3.Location = new System.Drawing.Point(4, 22);
-            this.tabPage3.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.tabPage3.Margin = new System.Windows.Forms.Padding(2);
             this.tabPage3.Name = "tabPage3";
-            this.tabPage3.Padding = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.tabPage3.Padding = new System.Windows.Forms.Padding(2);
             this.tabPage3.Size = new System.Drawing.Size(739, 272);
             this.tabPage3.TabIndex = 2;
             this.tabPage3.Text = "タスク";
@@ -594,7 +594,7 @@ namespace MujinAGVDemo
             // btnGetTaskDetail
             // 
             this.btnGetTaskDetail.Location = new System.Drawing.Point(21, 54);
-            this.btnGetTaskDetail.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.btnGetTaskDetail.Margin = new System.Windows.Forms.Padding(2);
             this.btnGetTaskDetail.Name = "btnGetTaskDetail";
             this.btnGetTaskDetail.Size = new System.Drawing.Size(234, 18);
             this.btnGetTaskDetail.TabIndex = 12;
@@ -628,18 +628,30 @@ namespace MujinAGVDemo
             this.tabPage4.Controls.Add(this.btnUnSetOwner);
             this.tabPage4.Controls.Add(this.btnShowOwner);
             this.tabPage4.Location = new System.Drawing.Point(4, 22);
-            this.tabPage4.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.tabPage4.Margin = new System.Windows.Forms.Padding(2);
             this.tabPage4.Name = "tabPage4";
-            this.tabPage4.Padding = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.tabPage4.Padding = new System.Windows.Forms.Padding(2);
             this.tabPage4.Size = new System.Drawing.Size(739, 272);
             this.tabPage4.TabIndex = 3;
             this.tabPage4.Text = "所有者";
             this.tabPage4.UseVisualStyleBackColor = true;
             // 
+            // btnUnsetOwnerAll
+            // 
+            this.btnUnsetOwnerAll.Location = new System.Drawing.Point(252, 127);
+            this.btnUnsetOwnerAll.Margin = new System.Windows.Forms.Padding(2);
+            this.btnUnsetOwnerAll.Name = "btnUnsetOwnerAll";
+            this.btnUnsetOwnerAll.Size = new System.Drawing.Size(234, 18);
+            this.btnUnsetOwnerAll.TabIndex = 16;
+            this.btnUnsetOwnerAll.Text = "UnSetOwnerAll";
+            this.toolTip.SetToolTip(this.btnUnsetOwnerAll, "全AGVのSetOwnerを解除します。");
+            this.btnUnsetOwnerAll.UseVisualStyleBackColor = true;
+            this.btnUnsetOwnerAll.Click += new System.EventHandler(this.btnUnsetOwnerAll_Click);
+            // 
             // btnSetOwner
             // 
             this.btnSetOwner.Location = new System.Drawing.Point(5, 149);
-            this.btnSetOwner.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.btnSetOwner.Margin = new System.Windows.Forms.Padding(2);
             this.btnSetOwner.Name = "btnSetOwner";
             this.btnSetOwner.Size = new System.Drawing.Size(234, 18);
             this.btnSetOwner.TabIndex = 15;
@@ -651,7 +663,7 @@ namespace MujinAGVDemo
             // btnUnSetOwner
             // 
             this.btnUnSetOwner.Location = new System.Drawing.Point(4, 126);
-            this.btnUnSetOwner.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.btnUnSetOwner.Margin = new System.Windows.Forms.Padding(2);
             this.btnUnSetOwner.Name = "btnUnSetOwner";
             this.btnUnSetOwner.Size = new System.Drawing.Size(234, 18);
             this.btnUnSetOwner.TabIndex = 14;
@@ -663,7 +675,7 @@ namespace MujinAGVDemo
             // btnShowOwner
             // 
             this.btnShowOwner.Location = new System.Drawing.Point(4, 89);
-            this.btnShowOwner.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.btnShowOwner.Margin = new System.Windows.Forms.Padding(2);
             this.btnShowOwner.Name = "btnShowOwner";
             this.btnShowOwner.Size = new System.Drawing.Size(234, 18);
             this.btnShowOwner.TabIndex = 13;
@@ -678,7 +690,7 @@ namespace MujinAGVDemo
             this.tabPage5.Controls.Add(this.btnShowPodDetail);
             this.tabPage5.Location = new System.Drawing.Point(4, 22);
             this.tabPage5.Name = "tabPage5";
-            this.tabPage5.Padding = new System.Windows.Forms.Padding(3, 3, 3, 3);
+            this.tabPage5.Padding = new System.Windows.Forms.Padding(3);
             this.tabPage5.Size = new System.Drawing.Size(739, 272);
             this.tabPage5.TabIndex = 4;
             this.tabPage5.Text = "棚情報確認";
@@ -713,18 +725,28 @@ namespace MujinAGVDemo
             this.tabPage6.Controls.Add(this.label10);
             this.tabPage6.Controls.Add(this.label9);
             this.tabPage6.Location = new System.Drawing.Point(4, 22);
-            this.tabPage6.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.tabPage6.Margin = new System.Windows.Forms.Padding(2);
             this.tabPage6.Name = "tabPage6";
-            this.tabPage6.Padding = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.tabPage6.Padding = new System.Windows.Forms.Padding(2);
             this.tabPage6.Size = new System.Drawing.Size(739, 272);
             this.tabPage6.TabIndex = 5;
             this.tabPage6.Text = "棚の追加と削除";
             this.tabPage6.UseVisualStyleBackColor = true;
             // 
+            // btnRemovePodAll
+            // 
+            this.btnRemovePodAll.Location = new System.Drawing.Point(381, 74);
+            this.btnRemovePodAll.Name = "btnRemovePodAll";
+            this.btnRemovePodAll.Size = new System.Drawing.Size(75, 23);
+            this.btnRemovePodAll.TabIndex = 43;
+            this.btnRemovePodAll.Text = "全棚削除";
+            this.btnRemovePodAll.UseVisualStyleBackColor = true;
+            this.btnRemovePodAll.Click += new System.EventHandler(this.btnRemovePodAll_Click);
+            // 
             // btnSetPodPos
             // 
             this.btnSetPodPos.Location = new System.Drawing.Point(381, 102);
-            this.btnSetPodPos.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.btnSetPodPos.Margin = new System.Windows.Forms.Padding(2);
             this.btnSetPodPos.Name = "btnSetPodPos";
             this.btnSetPodPos.Size = new System.Drawing.Size(74, 35);
             this.btnSetPodPos.TabIndex = 42;
@@ -779,11 +801,21 @@ namespace MujinAGVDemo
             this.tabPage7.Controls.Add(this.btnLiftDown);
             this.tabPage7.Location = new System.Drawing.Point(4, 22);
             this.tabPage7.Name = "tabPage7";
-            this.tabPage7.Padding = new System.Windows.Forms.Padding(3, 3, 3, 3);
+            this.tabPage7.Padding = new System.Windows.Forms.Padding(3);
             this.tabPage7.Size = new System.Drawing.Size(739, 272);
             this.tabPage7.TabIndex = 6;
             this.tabPage7.Text = "その場動作";
             this.tabPage7.UseVisualStyleBackColor = true;
+            // 
+            // btnLiftDownAll
+            // 
+            this.btnLiftDownAll.Location = new System.Drawing.Point(6, 117);
+            this.btnLiftDownAll.Name = "btnLiftDownAll";
+            this.btnLiftDownAll.Size = new System.Drawing.Size(131, 23);
+            this.btnLiftDownAll.TabIndex = 53;
+            this.btnLiftDownAll.Text = "全AGVの棚を下ろす";
+            this.btnLiftDownAll.UseVisualStyleBackColor = true;
+            this.btnLiftDownAll.Click += new System.EventHandler(this.btnLiftDownAll_Click);
             // 
             // label23
             // 
@@ -835,9 +867,9 @@ namespace MujinAGVDemo
             this.tabPage8.Controls.Add(this.lblUpdateTime);
             this.tabPage8.Controls.Add(this.dgvAGVDetail);
             this.tabPage8.Location = new System.Drawing.Point(4, 22);
-            this.tabPage8.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.tabPage8.Margin = new System.Windows.Forms.Padding(2);
             this.tabPage8.Name = "tabPage8";
-            this.tabPage8.Padding = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.tabPage8.Padding = new System.Windows.Forms.Padding(2);
             this.tabPage8.Size = new System.Drawing.Size(739, 272);
             this.tabPage8.TabIndex = 7;
             this.tabPage8.Text = "AGV情報";
@@ -876,13 +908,14 @@ namespace MujinAGVDemo
             this.dgvAGVDetail.AutoSizeRowsMode = System.Windows.Forms.DataGridViewAutoSizeRowsMode.AllCells;
             this.dgvAGVDetail.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.dgvAGVDetail.Location = new System.Drawing.Point(2, 24);
-            this.dgvAGVDetail.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.dgvAGVDetail.Margin = new System.Windows.Forms.Padding(2);
             this.dgvAGVDetail.Name = "dgvAGVDetail";
             this.dgvAGVDetail.RowHeadersWidth = 51;
             this.dgvAGVDetail.RowTemplate.Height = 24;
             this.dgvAGVDetail.Size = new System.Drawing.Size(718, 230);
             this.dgvAGVDetail.TabIndex = 1;
             this.dgvAGVDetail.DataSourceChanged += new System.EventHandler(this.dgvAGVDetail_DataSourceChanged);
+            this.dgvAGVDetail.CellContentDoubleClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgvAGVDetail_CellContentDoubleClick);
             // 
             // tabPage9
             // 
@@ -907,9 +940,9 @@ namespace MujinAGVDemo
             this.tabPage9.Controls.Add(this.textBoxRobotID);
             this.tabPage9.Controls.Add(this.label8);
             this.tabPage9.Location = new System.Drawing.Point(4, 22);
-            this.tabPage9.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.tabPage9.Margin = new System.Windows.Forms.Padding(2);
             this.tabPage9.Name = "tabPage9";
-            this.tabPage9.Padding = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.tabPage9.Padding = new System.Windows.Forms.Padding(2);
             this.tabPage9.Size = new System.Drawing.Size(739, 272);
             this.tabPage9.TabIndex = 8;
             this.tabPage9.Text = "設定";
@@ -1009,38 +1042,6 @@ namespace MujinAGVDemo
             // 
             this.tmrAGVInfoUpdate.Interval = 5000;
             this.tmrAGVInfoUpdate.Tick += new System.EventHandler(this.tmrAGVInfoUpdate_Tick);
-            // 
-            // btnRemovePodAll
-            // 
-            this.btnRemovePodAll.Location = new System.Drawing.Point(381, 74);
-            this.btnRemovePodAll.Name = "btnRemovePodAll";
-            this.btnRemovePodAll.Size = new System.Drawing.Size(75, 23);
-            this.btnRemovePodAll.TabIndex = 43;
-            this.btnRemovePodAll.Text = "全棚削除";
-            this.btnRemovePodAll.UseVisualStyleBackColor = true;
-            this.btnRemovePodAll.Click += new System.EventHandler(this.btnRemovePodAll_Click);
-            // 
-            // btnLiftDownAll
-            // 
-            this.btnLiftDownAll.Location = new System.Drawing.Point(6, 117);
-            this.btnLiftDownAll.Name = "btnLiftDownAll";
-            this.btnLiftDownAll.Size = new System.Drawing.Size(131, 23);
-            this.btnLiftDownAll.TabIndex = 53;
-            this.btnLiftDownAll.Text = "全AGVの棚を下ろす";
-            this.btnLiftDownAll.UseVisualStyleBackColor = true;
-            this.btnLiftDownAll.Click += new System.EventHandler(this.btnLiftDownAll_Click);
-            // 
-            // btnUnsetOwnerAll
-            // 
-            this.btnUnsetOwnerAll.Location = new System.Drawing.Point(252, 127);
-            this.btnUnsetOwnerAll.Margin = new System.Windows.Forms.Padding(2);
-            this.btnUnsetOwnerAll.Name = "btnUnsetOwnerAll";
-            this.btnUnsetOwnerAll.Size = new System.Drawing.Size(234, 18);
-            this.btnUnsetOwnerAll.TabIndex = 16;
-            this.btnUnsetOwnerAll.Text = "UnSetOwnerAll";
-            this.toolTip.SetToolTip(this.btnUnsetOwnerAll, "全AGVのSetOwnerを解除します。");
-            this.btnUnsetOwnerAll.UseVisualStyleBackColor = true;
-            this.btnUnsetOwnerAll.Click += new System.EventHandler(this.btnUnsetOwnerAll_Click);
             // 
             // frmMain
             // 
