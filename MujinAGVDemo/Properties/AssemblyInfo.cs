@@ -9,7 +9,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyDescription("HetuのAPIを使ってAGVを動かすソフト")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("MEIWA e-TEC Co.LTD.")]
-[assembly: AssemblyProduct("MujinAGVDemo")]
+[assembly: AssemblyProduct("AGVデモソフト")]
 [assembly: AssemblyCopyright("Copyright © MEIWA e-TEC Co.LTD. 2021")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]

@@ -10,17 +10,18 @@ namespace MujinAGVDemo
     static class Program
     {
         static Logger logger = LogManager.GetLogger("ProgramLogger");
+        
         /// <summary>
         /// アプリケーションのメイン エントリ ポイントです。
         /// </summary>
         [STAThread]
         static void Main()
         {
-            logger.Info(Messages.StartMsg);
+            logger.Info($"{Application.ProductName}{Application.ProductVersion}を開始します。");
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             Application.Run(new frmMain());
-            logger.Info(Messages.EndMsg);
+            logger.Info($"{Application.ProductName}{Application.ProductVersion}を終了します。");
         }
     }
 }
