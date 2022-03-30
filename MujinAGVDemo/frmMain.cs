@@ -293,9 +293,15 @@ namespace MujinAGVDemo
             var factory = new CommandFactory(param.ServerIP, param.WarehouseID);
             try
             {
-                var getPodListAns = (GetPodListReturnMessage)factory.Create(new GetPodListParam()).DoAction();
+                //var getPodListAns = (GetPodListReturnMessage)factory.Create(new GetPodListParam()).DoAction();
+                var getPodListAns = (GetPodListFromDBReturnMessage)factory.Create(new GetPodListFromDBParam()).DoAction();
 
                 var podList = getPodListAns.Data.PodList.Where(x => x.RobotID == param.RobotID).ToList();
+                if (podList == null)
+                {
+                    logger.Info("podListがnullです。");
+                    return;
+                }
                 logger.Info($"棚の位置を表示します");
                 foreach (var pod in podList)
                 {

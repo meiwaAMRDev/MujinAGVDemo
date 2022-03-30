@@ -446,27 +446,45 @@ namespace MujinAGVDemo.Command
         /// <returns>isSuccess:取得成功ならtrue,table:AGV情報が入ったデータテーブル</returns>
         public static (bool isSuccess, DataTable table) GetAgvDetailTable(string hetuIP, string warehouseID)
         {
+            var factory = new CommandFactory(hetuIP, warehouseID);
+            return GetAgvDetailTable(factory);
+        }
+
+        /// <summary>
+        /// AGV情報テーブルを取得します
+        /// </summary>
+        /// <param name="factory">ファクトリ</param>
+        /// <returns>isSuccess:取得成功ならtrue,table:AGV情報が入ったデータテーブル</returns>
+        public static (bool isSuccess, DataTable table) GetAgvDetailTable(CommandFactory factory)
+        {
             var table = new DataTable();
 
-            var factory = new CommandFactory(hetuIP, warehouseID);
+
             if (!factory.IsConnectedTESServer())
                 return (false, table);
             try
             {
                 var getRobotListAns = (GetRobotListReturnMessage)factory.Create(new GetRobotListParam()).DoAction();
+                var getPodListFromDBAns = (GetPodListFromDBReturnMessage)factory.Create(new GetPodListFromDBParam()).DoAction();
+                var podList = getPodListFromDBAns.Data.PodList;
+
+
                 table.Columns.Add("号機");
                 table.Columns.Add("状態");
                 table.Columns.Add("所有者");
                 table.Columns.Add("エラー");
-                table.Columns.Add("電池残量");
+                table.Columns.Add("電池");
+                table.Columns.Add("棚ID");
+                table.Columns.Add("タスクタイプ");
+                table.Columns.Add("タスクID");
                 table.Columns.Add("ノードID");
                 table.Columns.Add("X座標");
                 table.Columns.Add("Y座標");
-                table.Columns.Add("タスクID");
-                table.Columns.Add("タスクタイプ");
+
                 getRobotListAns.Data.RobotList.ForEach(rb =>
                 {
-                    table.Rows.Add(rb.RobotID, rb.WorkStatus, rb.Owner, rb.ErrorState, $"{rb.UcPower}", rb.CurNodeID, rb.CurX, rb.CurY, rb.TaskID, rb.TaskType);
+                    var pod = podList.Where(x => x.RobotID == rb.RobotID).FirstOrDefault();
+                    table.Rows.Add(rb.RobotID, rb.WorkStatus, rb.Owner, rb.ErrorState, $"{rb.UcPower}", $"{(pod == null ? string.Empty : pod?.PodID)}", rb.TaskType, rb.TaskID, rb.CurNodeID, rb.CurX, rb.CurY);
                 });
             }
             catch (Exception ex)
@@ -476,6 +494,26 @@ namespace MujinAGVDemo.Command
             }
 
             return (true, table);
+        }
+        /// <summary>
+        /// AGVが持ち上げている棚IDを取得する
+        /// </summary>
+        /// <param name="factory">ファクトリ</param>
+        /// <param name="robotID">AGVの番号</param>
+        /// <returns>棚ID（持ち上げている棚がない場合は空白）</returns>
+        public static string GetLiftPodID(CommandFactory factory, string robotID)
+        {
+            if (!factory.IsConnectedTESServer())
+                return string.Empty;
+            var getPodListFromDBRet = (GetPodListFromDBReturnMessage)factory.Create(new GetPodListFromDBParam()).DoAction();
+            if (getPodListFromDBRet.Data == null)
+            {
+                return string.Empty;
+            }
+            var pod = getPodListFromDBRet.Data.PodList.Where(x => x.RobotID == robotID).FirstOrDefault();
+            return pod == null
+                ? string.Empty
+                : pod.PodID;
         }
         #region TaskCancel
 
