@@ -1139,5 +1139,26 @@ namespace MujinAGVDemo
                 }
             }
         }
+
+        private void btnMovePodAuto_Click(object sender, EventArgs e)
+        {
+            var factory = new CommandFactory(param.ServerIP, param.WarehouseID);
+            var a = factory.Create(new MovePodAutoSelectAGVParam(robotGroupID: textBoxGroupID.Text,
+                                                                 podID: param.PodID,
+                                                                 desMode: DestinationModes.StorageID,
+                                                                 //turnMode:param.TurnMode,
+                                                                 //unload:param.Unload,
+                                                                 desID: param.NodeID)).DoAction() as MovePodAutoSelectAGVReturnMessage;
+            var isSuccess = a.ReturnCode == 0;
+            if (a.Data == null)
+            {
+                showMessageBox(false, "AGV未指定での棚搬送の結果が取得できません。");
+                return;
+            }
+            else
+            {
+                showMessageBox(isSuccess, $"棚[{param.PodID}]を[{param.NodeID}]へAGV未指定で搬送するタスクが[{(isSuccess?"成功":"失敗")}]しました。[{a.ReturnMsg}]");
+            }
+        }
     }
 }
