@@ -73,6 +73,12 @@ namespace MujinAGVDemo
 
         #endregion Private Parameter
 
+        #region Public Paramater
+
+        public CommandFactory Factory = new CommandFactory("10.10.10.4");
+
+        #endregion Public Paramater
+
         #region Deligate
 
         delegate void ChangeDgvDelegate();
@@ -399,18 +405,7 @@ namespace MujinAGVDemo
                     var text = $"AGV[{rb.RobotID}] Node[{rb.CurNodeID}] X[{rb.CurX}] Y[{rb.CurY}] Owner[{rb.Owner}] Status[{rb.WorkStatus}] TaskID[{rb.TaskID}]";
                     logger.Info(text);
                     textList.Add(text);
-
-                    //table.Rows.Add(rb.RobotID, rb.WorkStatus, rb.Owner, rb.ErrorState, $"{rb.UcPower}", rb.CurNodeID, rb.CurX, rb.CurY, rb.TaskID);
                 });
-                var (isSuccess, table) = Command.MapCommands.GetAgvDetailTable(param.ServerIP, param.WarehouseID);
-                if (isSuccess)
-                {
-                    dgvAGVDetail.DataSource = table;
-                }
-                else
-                {
-                    showErrorMessageBox("テーブルの取得に失敗しました。");
-                }
 
             }
             catch (Exception ex)
@@ -1105,10 +1100,15 @@ namespace MujinAGVDemo
         /// </summary>
         private void changeDgv()
         {
-            var (isSuccess, table) = Command.MapCommands.GetAgvDetailTable(param.ServerIP, param.WarehouseID);
-            if (isSuccess)
+            //var (isSuccess, table) = Command.MapCommands.GetAgvDetailTable(param.ServerIP, param.WarehouseID);
+            var factory = new CommandFactory(param.ServerIP, param.WarehouseID);
+            var getRobotListRet = (GetRobotListReturnMessage)factory.Create(new GetRobotListParam()).DoAction();
+            var getPodListRet = (GetPodListFromDBReturnMessage)factory.Create(new GetPodListFromDBParam()).DoAction();
+            if (getRobotListRet.Data != null)
             {
-                dgvAGVDetail.DataSource = table;
+                agvDataControl.ChangeDgv(getRobotListRet, getPodListRet);
+                //dgvAGVDetail.DataSource = table;
+                lblUpdateTime.Text = $"更新日時：{DateTime.Now}";
             }
             else
             {
@@ -1120,25 +1120,7 @@ namespace MujinAGVDemo
 
         #endregion Method
 
-        private void dgvAGVDetail_CellContentDoubleClick(object sender, DataGridViewCellEventArgs e)
-        {
-            const int ownerCol = 2;
-            const int robotIDCol = 0;
-            if (e.ColumnIndex == ownerCol)
-            {
-                var robotID = dgvAGVDetail[robotIDCol, e.RowIndex].Value.ToString();
-                var owner = dgvAGVDetail[e.ColumnIndex, e.RowIndex].Value.ToString();
-                switch (owner)
-                {
-                    case "TES":
-                        setOwner(robotID);
-                        break;
-                    case "biz_test":
-                        unsetOwner(robotID);
-                        break;
-                }
-            }
-        }
+        
 
         private void btnMovePodAuto_Click(object sender, EventArgs e)
         {
@@ -1157,7 +1139,7 @@ namespace MujinAGVDemo
             }
             else
             {
-                showMessageBox(isSuccess, $"棚[{param.PodID}]を[{param.NodeID}]へAGV未指定で搬送するタスクが[{(isSuccess?"成功":"失敗")}]しました。[{a.ReturnMsg}]");
+                showMessageBox(isSuccess, $"棚[{param.PodID}]を[{param.NodeID}]へAGV未指定で搬送するタスクが[{(isSuccess ? "成功" : "失敗")}]しました。[{a.ReturnMsg}]");
             }
         }
     }
