@@ -47,8 +47,8 @@
     <Reference Include="Google.Protobuf, Version=3.19.4.0, Culture=neutral, PublicKeyToken=a7d26565bac4d604, processorArchitecture=MSIL">
       <HintPath>..\packages\Google.Protobuf.3.19.4\lib\net45\Google.Protobuf.dll</HintPath>
     </Reference>
-    <Reference Include="Hetu20dotnet, Version=1.0.11.3, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Hetu20dotnet.1.0.11.3\lib\net472\Hetu20dotnet.dll</HintPath>
+    <Reference Include="Hetu20dotnet, Version=1.0.13.1, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Hetu20dotnet.1.0.13.1\lib\net472\Hetu20dotnet.dll</HintPath>
     </Reference>
     <Reference Include="K4os.Compression.LZ4, Version=1.2.16.0, Culture=neutral, PublicKeyToken=2186fa9121ef231d, processorArchitecture=MSIL">
       <HintPath>..\packages\K4os.Compression.LZ4.1.2.16\lib\net46\K4os.Compression.LZ4.dll</HintPath>
