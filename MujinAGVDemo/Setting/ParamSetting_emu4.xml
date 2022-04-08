@@ -3,12 +3,12 @@
   <TurnMode>0</TurnMode>
   <Unload>1</Unload>
   <RepeatCount>1</RepeatCount>
-  <ServerIP>39.107.238.55</ServerIP>
-  <WarehouseID>393007550154407945</WarehouseID>
-  <LayoutID>c1629264762498</LayoutID>
-  <NodeID>16291843921095</NodeID>
-  <PodID>325150</PodID>
-  <RobotID>115</RobotID>
+  <ServerIP>39.105.164.106</ServerIP>
+  <WarehouseID>394860926471241736</WarehouseID>
+  <LayoutID>c1625463844245</LayoutID>
+  <NodeID>164367296541</NodeID>
+  <PodID />
+  <RobotID>101</RobotID>
   <DestinationMode>StorageID</DestinationMode>
   <StationListPath>C:\MEIWA\MujinAGVDemo\MujinAGVDemo\社内デモエリア用移動テスト.csv</StationListPath>
 </ParamSettings>
