@@ -24,6 +24,11 @@ namespace MujinAGVDemo
         {
             InitializeComponent();
         }
+        public frmMain(ParamSettings param)
+        {            
+            InitializeComponent();
+            this.param = param;
+        }
 
         #endregion Constructor
 
@@ -75,7 +80,7 @@ namespace MujinAGVDemo
 
         #region Public Paramater
 
-        public CommandFactory Factory = new CommandFactory("10.10.10.4");
+        //public CommandFactory Factory = new CommandFactory("10.10.10.4");
 
         #endregion Public Paramater
 
