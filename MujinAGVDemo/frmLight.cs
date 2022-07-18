@@ -27,6 +27,22 @@ namespace MujinAGVDemo
         /// 設定ファイルのデフォルトパス
         /// </summary>
         const string defaultSettingPath = @"Setting/ParamSetting.xml";
+        /// <summary>
+        /// 名前列
+        /// </summary>
+        const int dgvNameColumn = 0;
+        /// <summary>
+        /// ノードID列
+        /// </summary>
+        const int dgvNodeColumn = 1;
+        /// <summary>
+        /// AGV移動列
+        /// </summary>
+        const int dgvMoveAGVColumn = 2;
+        /// <summary>
+        /// 棚移動列
+        /// </summary>
+        const int dgvMovePodColumn = 3;
 
         #endregion Const
 
@@ -43,8 +59,18 @@ namespace MujinAGVDemo
         #endregion Private Parameter
 
         #region Public Paramater
+        /// <summary>
+        /// ノード情報リスト
+        /// </summary>
+        public List<NodeData> NodeDatas = new List<NodeData>()
+        {
+            new NodeData("N1", "164982914836"),
+            new NodeData("N2", "1649829148141"),
+            new NodeData("N3", "1649829148140"),
+            new NodeData("N4", "164982914835"),
+        };
 
-        //public CommandFactory Factory = new CommandFactory("10.10.10.4");
+        public CommandFactory Factory;
 
         #endregion Public Paramater
 
@@ -75,6 +101,11 @@ namespace MujinAGVDemo
                 agvDataControl.Settings.AddAGVHouseDictionary("116", "162918439278", "原位置", Color.LightGreen);
                 agvDataControl.Settings.AddAGVHouseDictionary("117", "1629184392169", "原位置", Color.LightGreen);
                 agvDataControl.Settings.AddAGVHouseDictionary("118", "1629184392168", "原位置", Color.LightGreen);
+
+                NodeDatas.ForEach(x =>
+                {
+                    addDgvMove(x);
+                });
             }
             catch (Exception ex)
             {
@@ -459,15 +490,121 @@ namespace MujinAGVDemo
         }
 
         #endregion メッセージボックス関連
-
+        /// <summary>
+        /// AGV移動を行います
+        /// </summary>
+        /// <param name="factory">ファクトリ</param>
+        /// <param name="param">AGV移動のパラメータ</param>
+        /// <returns>成功か、メッセージ</returns>
+        private (bool isSuccess, string message) moveRobot(CommandFactory factory, MoveRobotParam param)
+        {
+            var result = (MoveRobotReturnMessage)factory.Create(param).DoAction();
+            return (result.ReturnMsg == "succ", result.ReturnMsg);
+        }
+        /// <summary>
+        /// AGV移動を行います
+        /// </summary>
+        /// <param name="factory">ファクトリ</param>
+        /// <param name="robotID">ロボットID</param>
+        /// <param name="nodeID">ノードID</param>
+        /// <returns>成功か、メッセージ</returns>
+        private (bool isSuccess, string message) moveRobot(CommandFactory factory, string robotID, string nodeID)
+        {
+            var moveRobotParam = new MoveRobotParam(robotID: robotID,
+                                           desMode: DestinationModes.NodeID,
+                                           desID: nodeID);
+            return moveRobot(factory, moveRobotParam);
+        }
+        /// <summary>
+        /// 棚移動を行います。
+        /// </summary>
+        /// <param name="factory">ファクトリ</param>
+        /// <param name="param">棚移動パラメータ</param>
+        /// <returns>成功か、メッセージ</returns>
+        private (bool isSuccess, string message) movePod(CommandFactory factory, MovePodParam param)
+        {
+            var result = (MovePodReturnMessage)factory.Create(param).DoAction();
+            return (result.ReturnMsg == "succ", result.ReturnMsg);
+        }
+        /// <summary>
+        /// 棚移動を行います。
+        /// </summary>
+        /// <param name="factory">ファクトリ</param>
+        /// <param name="robotID">ロボットID</param>
+        /// <param name="nodeID">ノードID</param>
+        /// <param name="podID">棚ID</param>
+        /// <returns>成功か、メッセージ</returns>
+        private (bool isSuccess, string message) movePod(CommandFactory factory, string robotID, string nodeID, string podID)
+        {
+            var movePodParam = new MovePodParam(robotID: robotID,
+                                       podID: podID,
+                                       desMode: DestinationModes.StorageID,
+                                       desID: nodeID,
+                                       turnMode: param.TurnMode,
+                                       unload: param.Unload);
+            return movePod(factory, movePodParam);
+        }
+        /// <summary>
+        /// ノード情報DGVに追加する
+        /// </summary>
+        /// <param name="nodeData">ノード情報</param>
+        private void addDgvMove(NodeData nodeData)
+        {
+            dgvMove.Rows.Add(nodeData.Name, nodeData.NodeID, "AGV移動", "棚移動");
+        }
         #endregion Method
 
         private void mnuOpenMainForm_Click(object sender, EventArgs e)
         {
-            using(var frm=new frmMain(param))
+            using (var frm = new frmMain(param))
             {
                 frm.ShowDialog();
             }
+        }
+
+        private void dgvMove_CellContentClick(object sender, DataGridViewCellEventArgs e)
+        {
+            if (Factory == null)
+            {
+                Factory = new CommandFactory(param.ServerIP, param.WarehouseID);
+            }
+            if (e.ColumnIndex == dgvMoveAGVColumn)
+            {
+                moveRobot(factory: Factory,
+                          robotID: param.RobotID,
+                          nodeID: dgvMove[dgvNodeColumn, e.RowIndex].Value.ToString());
+            }
+            else if (e.ColumnIndex == dgvMovePodColumn)
+            {
+                movePod(factory: Factory,
+                          robotID: param.RobotID,
+                          nodeID: dgvMove[dgvNodeColumn, e.RowIndex].Value.ToString(),
+                          podID: param.PodID);
+            }
+        }
+    }
+    /// <summary>
+    /// ノード情報クラス
+    /// </summary>
+    public class NodeData
+    {
+        /// <summary>
+        /// ノード名称
+        /// </summary>
+        public string Name { get; set; }
+        /// <summary>
+        /// ノードID
+        /// </summary>
+        public string NodeID { get; set; }
+        /// <summary>
+        /// コンストラクタ
+        /// </summary>
+        /// <param name="name">ノード名称</param>
+        /// <param name="nodeID">ノードID</param>
+        public NodeData(string name, string nodeID)
+        {
+            this.Name = name;
+            this.NodeID = nodeID;
         }
     }
 }

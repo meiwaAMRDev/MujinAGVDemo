@@ -20,7 +20,8 @@ namespace MujinAGVDemo
             logger.Info($"{Application.ProductName}{Application.ProductVersion}を開始します。");
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new frmMain());
+            //Application.Run(new frmMain());
+            Application.Run(new frmLight());
             logger.Info($"{Application.ProductName}{Application.ProductVersion}を終了します。");
         }
     }
