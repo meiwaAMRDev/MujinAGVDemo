@@ -1155,5 +1155,13 @@ namespace MujinAGVDemo
                 showMessageBox(isSuccess, $"棚[{param.PodID}]を[{param.NodeID}]へAGV未指定で搬送するタスクが[{(isSuccess ? "成功" : "失敗")}]しました。[{a.ReturnMsg}]");
             }
         }
+
+        private void mnuMove_Click(object sender, EventArgs e)
+        {
+            using (var frm = new frmMove(new CommandFactory(param.ServerIP, param.WarehouseID)))
+            {
+                frm.Show();
+            }
+        }
     }
 }
