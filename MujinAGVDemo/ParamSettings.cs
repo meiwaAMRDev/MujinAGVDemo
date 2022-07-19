@@ -9,6 +9,8 @@ namespace MujinAGVDemo
 {
     public class ParamSettings
     {
+        #region Property
+
         /// <summary>
         /// 棚搬送時のシンクロターン設定
         /// 0:シンクロターンしない
@@ -57,8 +59,8 @@ namespace MujinAGVDemo
         public string RobotID { get; set; }
         /// <summary>
         /// AGVの行先指定方法
-        /// NodeID=1（MovePodでは棚置けない。棚置きたい場合はStorageIDを使うこと）
-        /// StorageID = 2 （NodeID指定で棚を置きたいとき）
+        /// NodeID=1（MovePodでは棚置けない。棚置きたい場合はStorageIDを使うこと）※MoveRobotで使用
+        /// StorageID = 2 （NodeID指定で棚を置きたいとき）※MovePodで使用
         /// ZoneID = 3(ZoneID指定の場合に使う)
         /// </summary>
         public DestinationModes DestinationMode { get; set; }
@@ -66,7 +68,15 @@ namespace MujinAGVDemo
         /// 読み込むCSVファイルのパス
         /// </summary>
         public string StationListPath { get; set; }
-
+        /// <summary>
+        /// 充電ゾーンID
+        /// </summary>
+        public string ChargeZoneID { get; set; }
+        /// <summary>
+        /// ノード情報のリスト
+        /// </summary>
+        public List<NodeData> NodeDatas { get; set; }
+        #endregion Property
 
         public ParamSettings()
         {
@@ -74,16 +84,57 @@ namespace MujinAGVDemo
             Unload = 1;
             RepeatCount = 1;
                         
-            ServerIP = "39.106.65.245";
-            WarehouseID = "361868188280946696";
-            LayoutID = "c1625463844245";
-            NodeID = "162634055515651";
-            PodID = "1942";
-            RobotID = "105";
+            ServerIP = "60.205.92.182";
+            WarehouseID = "417071259357020162";
+            LayoutID = "c1658124614457";
+            NodeID = "164982914836";
+            PodID = "1111";
+            RobotID = "1";
+            ChargeZoneID = "164982914897";
+
             StationListPath = @"CSVSample/エミュレータ用移動テスト.csv";
-            
 
             DestinationMode = DestinationModes.StorageID;
+
+            NodeDatas = new List<NodeData>()
+            {
+                //new NodeData("N1", "164982914836"),
+                //new NodeData("N2", "1649829148141"),
+                //new NodeData("N3", "1649829148140"),
+                //new NodeData("N4", "164982914835"),
+            };
+        }
+    }
+    /// <summary>
+    /// ノード情報クラス
+    /// </summary>
+    public class NodeData
+    {
+        /// <summary>
+        /// ノード名称
+        /// </summary>
+        public string Name { get; set; }
+        /// <summary>
+        /// ノードID
+        /// </summary>
+        public string NodeID { get; set; }
+        /// <summary>
+        /// コンストラクタ
+        /// </summary>
+        /// <param name="name">ノード名称</param>
+        /// <param name="nodeID">ノードID</param>
+        public NodeData(string name, string nodeID)
+        {
+            this.Name = name;
+            this.NodeID = nodeID;
+        }
+        /// <summary>
+        /// コンストラクタ
+        /// </summary>
+        public NodeData()
+        {
+            this.Name = string.Empty;
+            this.NodeID = string.Empty;
         }
     }
 }

@@ -9,7 +9,7 @@ namespace MujinAGVDemo
 {
     static class Program
     {
-        static Logger logger = LogManager.GetLogger("ProgramLogger");
+        static readonly Logger logger = LogManager.GetLogger("ProgramLogger");
         
         /// <summary>
         /// アプリケーションのメイン エントリ ポイントです。

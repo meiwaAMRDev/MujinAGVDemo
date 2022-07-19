@@ -43,6 +43,12 @@ namespace MujinAGVDemo
         /// 棚移動列
         /// </summary>
         const int dgvMovePodColumn = 3;
+        /// <summary>
+        /// 編集列
+        /// </summary>
+        const int dgvEditColumn = 4;
+        private const int ON = 1;
+        private const int OFF = 0;
 
         #endregion Const
 
@@ -55,20 +61,10 @@ namespace MujinAGVDemo
         private bool isStop = false;
         private readonly FileIO fileIO = new FileIO();
         private readonly Logger logger = LogManager.GetLogger("ProgramLogger");
-
+        private CancellationTokenSource source = new CancellationTokenSource();
         #endregion Private Parameter
 
         #region Public Paramater
-        /// <summary>
-        /// ノード情報リスト
-        /// </summary>
-        public List<NodeData> NodeDatas = new List<NodeData>()
-        {
-            new NodeData("N1", "164982914836"),
-            new NodeData("N2", "1649829148141"),
-            new NodeData("N3", "1649829148140"),
-            new NodeData("N4", "164982914835"),
-        };
 
         public CommandFactory Factory;
 
@@ -102,7 +98,7 @@ namespace MujinAGVDemo
                 agvDataControl.Settings.AddAGVHouseDictionary("117", "1629184392169", "原位置", Color.LightGreen);
                 agvDataControl.Settings.AddAGVHouseDictionary("118", "1629184392168", "原位置", Color.LightGreen);
 
-                NodeDatas.ForEach(x =>
+                param.NodeDatas.ForEach(x =>
                 {
                     addDgvMove(x);
                 });
@@ -292,6 +288,9 @@ namespace MujinAGVDemo
             textBoxPodID.Text = param.PodID;
             textBoxNodeID.Text = param.NodeID;
             textBoxRobotID.Text = param.RobotID;
+            textBoxChargeZoneID.Text = param.ChargeZoneID;
+            chkTurn.Checked = param.TurnMode == ON;
+            chkUnload.Checked = param.Unload == ON;
         }
         /// <summary>
         /// コントロールの内容をパラメータに反映する
@@ -304,6 +303,7 @@ namespace MujinAGVDemo
             param.PodID = textBoxPodID.Text;
             param.NodeID = textBoxNodeID.Text;
             param.RobotID = textBoxRobotID.Text;
+            param.ChargeZoneID = textBoxChargeZoneID.Text;
         }
         /// <summary>
         /// AGV情報タブのデータを更新します
@@ -550,10 +550,14 @@ namespace MujinAGVDemo
         /// <param name="nodeData">ノード情報</param>
         private void addDgvMove(NodeData nodeData)
         {
-            dgvMove.Rows.Add(nodeData.Name, nodeData.NodeID, "AGV移動", "棚移動");
+            dgvMove.Rows.Add(nodeData.Name, nodeData.NodeID, "AGV移動", "棚移動", "名前とノードを上書き");
         }
         #endregion Method
-
+        /// <summary>
+        /// 通常版フォームを開きます
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void mnuOpenMainForm_Click(object sender, EventArgs e)
         {
             using (var frm = new frmMain(param))
@@ -561,50 +565,132 @@ namespace MujinAGVDemo
                 frm.ShowDialog();
             }
         }
-
+        /// <summary>
+        /// ノード指定移動DGVのセルをクリックした際のイベントです。
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void dgvMove_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
+            //行の範囲外の時は終了
+            if (e.RowIndex < 0 || param.NodeDatas.Count <= e.RowIndex)
+            {
+                return;
+            }
+
             if (Factory == null)
             {
                 Factory = new CommandFactory(param.ServerIP, param.WarehouseID);
             }
+            //AGV移動をクリック
             if (e.ColumnIndex == dgvMoveAGVColumn)
             {
                 moveRobot(factory: Factory,
                           robotID: param.RobotID,
                           nodeID: dgvMove[dgvNodeColumn, e.RowIndex].Value.ToString());
             }
+            //棚移動をクリック
             else if (e.ColumnIndex == dgvMovePodColumn)
             {
                 movePod(factory: Factory,
-                          robotID: param.RobotID,
-                          nodeID: dgvMove[dgvNodeColumn, e.RowIndex].Value.ToString(),
-                          podID: param.PodID);
+                        robotID: param.RobotID,
+                        nodeID: dgvMove[dgvNodeColumn, e.RowIndex].Value.ToString(),
+                        podID: param.PodID);
+            }
+            //編集をクリック
+            else if (e.ColumnIndex == dgvEditColumn)
+            {
+                var name = dgvMove[dgvNameColumn, e.RowIndex].Value.ToString();
+                var nodeID = dgvMove[dgvNodeColumn, e.RowIndex].Value.ToString();
+
+                var target = param.NodeDatas[e.RowIndex];
+                target.Name = name;
+                target.NodeID = nodeID;
+
+                fileIO.SaveSetting(settingPath, param);
             }
         }
-    }
-    /// <summary>
-    /// ノード情報クラス
-    /// </summary>
-    public class NodeData
-    {
         /// <summary>
-        /// ノード名称
+        /// 「連続AGV移動」クリック
         /// </summary>
-        public string Name { get; set; }
-        /// <summary>
-        /// ノードID
-        /// </summary>
-        public string NodeID { get; set; }
-        /// <summary>
-        /// コンストラクタ
-        /// </summary>
-        /// <param name="name">ノード名称</param>
-        /// <param name="nodeID">ノードID</param>
-        public NodeData(string name, string nodeID)
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void btnCycleMoveRobot_Click(object sender, EventArgs e)
         {
-            this.Name = name;
-            this.NodeID = nodeID;
+            source.Cancel();
+            source = new CancellationTokenSource();
+            if (Factory == null)
+            {
+                Factory = new CommandFactory(param.ServerIP, param.WarehouseID);
+            }
+            param.NodeDatas.ForEach(x =>
+            {
+                if (source.IsCancellationRequested)
+                    return;
+                moveRobot(Factory, param.RobotID, x.NodeID);
+            });
+        }
+        /// <summary>
+        /// 「連続棚移動」クリック
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void btnCycleMovePod_Click(object sender, EventArgs e)
+        {
+            source.Cancel();
+            source = new CancellationTokenSource();
+            if (Factory == null)
+            {
+                Factory = new CommandFactory(param.ServerIP, param.WarehouseID);
+            }
+            param.NodeDatas.ForEach(x =>
+            {
+                if (source.IsCancellationRequested)
+                    return;
+                movePod(factory: Factory,
+                        robotID: param.RobotID,
+                        nodeID: x.NodeID,
+                        podID: param.PodID);
+            });
+        }
+
+        private void chkTurn_CheckedChanged(object sender, EventArgs e)
+        {
+            param.TurnMode = chkTurn.Checked ? ON : OFF;
+        }
+
+        private void chkUnload_CheckedChanged(object sender, EventArgs e)
+        {
+            param.Unload = chkUnload.Checked ? ON : OFF;
+        }
+
+        private void btnCharge_Click(object sender, EventArgs e)
+        {
+            if (Factory == null)
+            {
+                Factory = new CommandFactory(param.ServerIP, param.WarehouseID);
+            }
+            var chargeResult = (ChargeRobotReturnMessage)Factory.Create(new ChargeRobotParam(param.RobotID, param.ChargeZoneID)).DoAction();
+        }
+
+        private void btnTaskCancel_Click(object sender, EventArgs e)
+        {
+            if (Factory == null)
+            {
+                Factory = new CommandFactory(param.ServerIP, param.WarehouseID);
+            }
+            var taskStatusList = new List<TaskStatuses>() { TaskStatuses.Ready, TaskStatuses.Init, TaskStatuses.Running };
+            var getTaskResult = (GetAllTaskSelectStatusFromDBReturnMessage)Factory.Create(new GetAllTaskSelectStatusFromDBParam(taskStatusList)).DoAction();
+            var taskList = getTaskResult.GetAllTaskSelectStatusList                
+                .Where(x => x.RobotID == param.RobotID)
+                .ToList();
+
+            taskList.ForEach(x =>
+            {
+                var cancelTaskResult=(CancelTaskReturnMessage)Factory.Create(new CancelTaskParam(x.TaskID)).DoAction();
+            });
+            
         }
     }
+
 }
