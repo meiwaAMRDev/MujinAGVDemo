@@ -681,15 +681,41 @@ namespace MujinAGVDemo
             }
             var taskStatusList = new List<TaskStatuses>() { TaskStatuses.Ready, TaskStatuses.Init, TaskStatuses.Running };
             var getTaskResult = (GetAllTaskSelectStatusFromDBReturnMessage)Factory.Create(new GetAllTaskSelectStatusFromDBParam(taskStatusList)).DoAction();
-            var taskList = getTaskResult.GetAllTaskSelectStatusList                
+            var taskList = getTaskResult.GetAllTaskSelectStatusList
                 .Where(x => x.RobotID == param.RobotID)
                 .ToList();
 
             taskList.ForEach(x =>
             {
-                var cancelTaskResult=(CancelTaskReturnMessage)Factory.Create(new CancelTaskParam(x.TaskID)).DoAction();
+                var cancelTaskResult = (CancelTaskReturnMessage)Factory.Create(new CancelTaskParam(x.TaskID)).DoAction();
             });
-            
+
+        }
+
+        private void btnLiftUp_Click(object sender, EventArgs e)
+        {
+            var (isSuccess, messages) = Command.MapCommands.LiftUpRobot(factory: Factory, robotID: param.RobotID);
+            if (!isSuccess)
+            {
+                showErrorMessageBox(messages);
+            }
+            else
+            {
+                showInfoMessageBox(messages);
+            }
+        }
+
+        private void btnLiftDown_Click(object sender, EventArgs e)
+        {
+            var (isSuccess, messages) = Command.MapCommands.LiftDownRobot(factory: Factory, robotID: param.RobotID);
+            if (!isSuccess)
+            {
+                showErrorMessageBox(messages);
+            }
+            else
+            {
+                showInfoMessageBox(messages);
+            }
         }
     }
 

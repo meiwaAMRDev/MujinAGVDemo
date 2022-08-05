@@ -243,14 +243,12 @@ namespace MujinAGVDemo.Command
         /// <summary>
         /// 指定のノードにある棚のIDを取得する
         /// </summary>
+        /// <param name="factory">ファクトリ</param>
         /// <param name="nodeID">棚が存在するか確認するノードID</param>
-        /// <param name="hetuIP">HetuサーバーのIP</param>
-        /// <param name="warehouseID">マップのID</param>
         /// <returns>isSuccess=成功=true 失敗=false,　messages=結果の応答メッセージ, podID=棚ID（棚が無い時は空白）</returns>
-        public static (bool isSuccess, string messages, string podID) GetPodID(string hetuIP, string warehouseID, string nodeID)
+        public static (bool isSuccess, string messages, string podID) GetPodID(CommandFactory factory, string nodeID)
         {
             var podID = string.Empty;
-            var factory = new CommandFactory(hetuIP, warehouseID);
             if (!factory.IsConnectedTESServer())
             {
                 return (false, faultConnectoToHetuServer, podID);
@@ -273,6 +271,18 @@ namespace MujinAGVDemo.Command
                 podID = pod.PodID;
                 return (true, $"nodeID[{nodeID}]に棚[{pod.PodID}]が存在します。", podID);
             }
+        }
+        /// <summary>
+        /// 指定のノードにある棚のIDを取得する
+        /// </summary>
+        /// <param name="nodeID">棚が存在するか確認するノードID</param>
+        /// <param name="hetuIP">HetuサーバーのIP</param>
+        /// <param name="warehouseID">マップのID</param>
+        /// <returns>isSuccess=成功=true 失敗=false,　messages=結果の応答メッセージ, podID=棚ID（棚が無い時は空白）</returns>
+        public static (bool isSuccess, string messages, string podID) GetPodID(string hetuIP, string warehouseID, string nodeID)
+        {            
+            var factory = new CommandFactory(hetuIP, warehouseID);
+            return GetPodID(factory, nodeID);
         }
         /// <summary>
         /// AGVを指定してその場で棚を下ろす
@@ -381,6 +391,17 @@ namespace MujinAGVDemo.Command
         public static (bool isSuccess, string messages) LiftUpRobot(string hetuIP, string warehouseID, string robotID)
         {
             var factory = new CommandFactory(hetuIP, warehouseID);
+            return LiftUpRobot(factory, robotID);
+        }
+        /// <summary>
+        /// AGVを指定してその場で棚を持ち上げる
+        /// </summary>
+        /// <param name="factory">ファクトリ</param>
+        /// <param name="robotID">AGVの番号</param>
+        /// <returns>isSuccess=成功=true 失敗=false,　messages=Hetuの応答メッセージ</returns>
+        public static (bool isSuccess, string messages) LiftUpRobot(CommandFactory factory, string robotID)
+        {
+            //var factory = new CommandFactory(hetuIP, warehouseID);
             var getRobotListReturnMessage = (GetRobotListReturnMessage)factory.Create(new GetRobotListParam()).DoAction();
             var rb = getRobotListReturnMessage.Data.RobotList.Where(x => x.RobotID == robotID).FirstOrDefault();
             var returnMessage = string.Empty;
@@ -394,7 +415,7 @@ namespace MujinAGVDemo.Command
             var nodeID = rb.CurNodeID;
             var unload = OFF;
 
-            var getPodResult = GetPodID(hetuIP, warehouseID, nodeID);
+            var getPodResult = GetPodID(factory, nodeID);
             //AGVと同じ場所に棚がない場合はここで終了
             if (!getPodResult.isSuccess)
             {
