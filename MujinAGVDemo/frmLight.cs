@@ -350,13 +350,9 @@ namespace MujinAGVDemo
             try
             {
                 var addPodResult = factory.Create(new AddPodParam(podID, nodeID, layoutID)).DoAction();
-                var logMessage = $"棚 {podID},作成位置 {nodeID}";
-                logger.Info(logMessage);
-                logger.Info(addPodResult.ReturnMsg);
-                //lblCurrentLineProcess.Text = logMessage;
-                var resultMessage =
-                    addPodResult.ReturnMsg == "succ" ? "成功" : "失敗";
-                showInfoMessageBox($"棚作成に{resultMessage}しました。{Environment.NewLine}棚 {podID},作成位置 {nodeID}");
+                var logMessage = $"棚作成結果:[{addPodResult.ReturnMsg}] リターンコード:[{addPodResult.ReturnCode}] 棚ID:[{podID}] 作成位置:[{nodeID}] コンテナID:[{layoutID}]";
+                //logger.Info(message);
+                showInfoMessageBox($"{logMessage}");
             }
             catch (EmergencyException ee)
             {
@@ -386,18 +382,12 @@ namespace MujinAGVDemo
                 logger.Error(Messages.NotConnectMsg);
                 //showRemovePodErrorDialog(Messages.NotConnectMsg);
                 return;
-            }
-            logger.Info($"棚[{podID}]を削除します。IP[{serverIP}]warehouseID[{warehouseID}]");
+            }            
             try
             {
                 var removePodResult = factory.Create(new RemovePodParam(podID)).DoAction();
-                var logMessage = $"棚 {podID}";
-                logger.Info(logMessage);
-                logger.Info(removePodResult.ReturnMsg);
-                //lblCurrentLineProcess.Text = logMessage;
-                var resultMessage =
-                    removePodResult.ReturnMsg == "succ" ? "成功" : "失敗";
-                showInfoMessageBox($"棚削除に{resultMessage}しました。{Environment.NewLine}棚 {podID}");
+                var logMessage = $"棚削除結果:[{removePodResult.ReturnMsg}] リターンコード:[{removePodResult.ReturnCode}] 棚ID:[{podID}]";
+                showInfoMessageBox($"{logMessage}");
             }
             catch (EmergencyException ee)
             {
