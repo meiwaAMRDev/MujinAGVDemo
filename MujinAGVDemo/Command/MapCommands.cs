@@ -456,7 +456,7 @@ namespace MujinAGVDemo.Command
                 return (false, faultConnectoToHetuServer);
             }
             var retMessage = (SetPodPosReturnMessage)factory.Create(new SetPodPosParam(podID, nodeID)).DoAction();
-            var message = $"棚位置セット 結果[{retMessage.ReturnMsg}]棚[{podID}] ノード[{nodeID}]";
+            var message = $"棚位置セット結果:[{retMessage.ReturnMsg}] リターンコード[{retMessage.ReturnCode}] 棚ID:[{podID}] ノードID:[{nodeID}]";
             return (retMessage.ReturnCode == successCode, message);
         }
         /// <summary>

@@ -58,17 +58,15 @@ namespace MujinAGVDemo
             this.tmrAGVInfoUpdate = new System.Windows.Forms.Timer(this.components);
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.mnuOpenMainForm = new System.Windows.Forms.ToolStripMenuItem();
+            this.mnuOpenLog = new System.Windows.Forms.ToolStripMenuItem();
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabMove = new System.Windows.Forms.TabPage();
             this.btnCycleMovePod = new System.Windows.Forms.Button();
             this.btnCycleMoveRobot = new System.Windows.Forms.Button();
             this.dgvMove = new System.Windows.Forms.DataGridView();
-            this.colName = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.colNode = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.colMoveAGV = new System.Windows.Forms.DataGridViewButtonColumn();
-            this.colMovePod = new System.Windows.Forms.DataGridViewButtonColumn();
-            this.colEdit = new System.Windows.Forms.DataGridViewButtonColumn();
             this.tabSetting = new System.Windows.Forms.TabPage();
+            this.label7 = new System.Windows.Forms.Label();
+            this.listBoxPodDirection = new System.Windows.Forms.ListBox();
             this.label6 = new System.Windows.Forms.Label();
             this.textBoxChargeZoneID = new System.Windows.Forms.TextBox();
             this.chkUnload = new System.Windows.Forms.CheckBox();
@@ -77,6 +75,12 @@ namespace MujinAGVDemo
             this.btnTaskCancel = new System.Windows.Forms.Button();
             this.btnLiftUp = new System.Windows.Forms.Button();
             this.btnLiftDown = new System.Windows.Forms.Button();
+            this.colName = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colNode = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colMoveAGV = new System.Windows.Forms.DataGridViewButtonColumn();
+            this.colMovePod = new System.Windows.Forms.DataGridViewButtonColumn();
+            this.colAddPod = new System.Windows.Forms.DataGridViewButtonColumn();
+            this.colEdit = new System.Windows.Forms.DataGridViewButtonColumn();
             this.menuStrip1.SuspendLayout();
             this.tabControl1.SuspendLayout();
             this.tabMove.SuspendLayout();
@@ -127,7 +131,7 @@ namespace MujinAGVDemo
             // 
             // btnOpenParamSettings
             // 
-            this.btnOpenParamSettings.Location = new System.Drawing.Point(453, 118);
+            this.btnOpenParamSettings.Location = new System.Drawing.Point(409, 116);
             this.btnOpenParamSettings.Name = "btnOpenParamSettings";
             this.btnOpenParamSettings.Size = new System.Drawing.Size(63, 23);
             this.btnOpenParamSettings.TabIndex = 65;
@@ -153,7 +157,7 @@ namespace MujinAGVDemo
             // 
             // btnLoadSetting
             // 
-            this.btnLoadSetting.Location = new System.Drawing.Point(453, 98);
+            this.btnLoadSetting.Location = new System.Drawing.Point(409, 96);
             this.btnLoadSetting.Name = "btnLoadSetting";
             this.btnLoadSetting.Size = new System.Drawing.Size(63, 23);
             this.btnLoadSetting.TabIndex = 63;
@@ -197,7 +201,7 @@ namespace MujinAGVDemo
             // 
             // btnSaveSetting
             // 
-            this.btnSaveSetting.Location = new System.Drawing.Point(453, 75);
+            this.btnSaveSetting.Location = new System.Drawing.Point(409, 73);
             this.btnSaveSetting.Name = "btnSaveSetting";
             this.btnSaveSetting.Size = new System.Drawing.Size(63, 23);
             this.btnSaveSetting.TabIndex = 60;
@@ -237,7 +241,7 @@ namespace MujinAGVDemo
             this.checkBoxIsStop.Appearance = System.Windows.Forms.Appearance.Button;
             this.checkBoxIsStop.AutoSize = true;
             this.checkBoxIsStop.BackColor = System.Drawing.Color.GreenYellow;
-            this.checkBoxIsStop.Location = new System.Drawing.Point(453, 54);
+            this.checkBoxIsStop.Location = new System.Drawing.Point(409, 52);
             this.checkBoxIsStop.Name = "checkBoxIsStop";
             this.checkBoxIsStop.Size = new System.Drawing.Size(63, 22);
             this.checkBoxIsStop.TabIndex = 59;
@@ -333,7 +337,8 @@ namespace MujinAGVDemo
             // menuStrip1
             // 
             this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.mnuOpenMainForm});
+            this.mnuOpenMainForm,
+            this.mnuOpenLog});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
             this.menuStrip1.Size = new System.Drawing.Size(800, 24);
@@ -347,6 +352,13 @@ namespace MujinAGVDemo
             this.mnuOpenMainForm.Text = "通常版を開く";
             this.mnuOpenMainForm.Click += new System.EventHandler(this.mnuOpenMainForm_Click);
             // 
+            // mnuOpenLog
+            // 
+            this.mnuOpenLog.Name = "mnuOpenLog";
+            this.mnuOpenLog.Size = new System.Drawing.Size(37, 20);
+            this.mnuOpenLog.Text = "ログ";
+            this.mnuOpenLog.Click += new System.EventHandler(this.mnuOpenLog_Click);
+            // 
             // tabControl1
             // 
             this.tabControl1.Controls.Add(this.tabMove);
@@ -354,7 +366,7 @@ namespace MujinAGVDemo
             this.tabControl1.Location = new System.Drawing.Point(2, 27);
             this.tabControl1.Name = "tabControl1";
             this.tabControl1.SelectedIndex = 0;
-            this.tabControl1.Size = new System.Drawing.Size(530, 170);
+            this.tabControl1.Size = new System.Drawing.Size(486, 170);
             this.tabControl1.TabIndex = 74;
             // 
             // tabMove
@@ -365,7 +377,7 @@ namespace MujinAGVDemo
             this.tabMove.Location = new System.Drawing.Point(4, 22);
             this.tabMove.Name = "tabMove";
             this.tabMove.Padding = new System.Windows.Forms.Padding(3);
-            this.tabMove.Size = new System.Drawing.Size(522, 144);
+            this.tabMove.Size = new System.Drawing.Size(478, 144);
             this.tabMove.TabIndex = 1;
             this.tabMove.Text = "移動指示";
             this.tabMove.UseVisualStyleBackColor = true;
@@ -400,54 +412,21 @@ namespace MujinAGVDemo
             this.colNode,
             this.colMoveAGV,
             this.colMovePod,
+            this.colAddPod,
             this.colEdit});
             this.dgvMove.Dock = System.Windows.Forms.DockStyle.Top;
             this.dgvMove.Location = new System.Drawing.Point(3, 3);
             this.dgvMove.Name = "dgvMove";
             this.dgvMove.RowHeadersVisible = false;
             this.dgvMove.RowTemplate.Height = 21;
-            this.dgvMove.Size = new System.Drawing.Size(516, 114);
+            this.dgvMove.Size = new System.Drawing.Size(472, 114);
             this.dgvMove.TabIndex = 0;
             this.dgvMove.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgvMove_CellContentClick);
             // 
-            // colName
-            // 
-            this.colName.HeaderText = "名前";
-            this.colName.Name = "colName";
-            this.colName.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Programmatic;
-            this.colName.Width = 54;
-            // 
-            // colNode
-            // 
-            this.colNode.HeaderText = "ノードID";
-            this.colNode.Name = "colNode";
-            this.colNode.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Programmatic;
-            this.colNode.Width = 68;
-            // 
-            // colMoveAGV
-            // 
-            this.colMoveAGV.HeaderText = "AGV移動";
-            this.colMoveAGV.Name = "colMoveAGV";
-            this.colMoveAGV.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Programmatic;
-            this.colMoveAGV.Width = 78;
-            // 
-            // colMovePod
-            // 
-            this.colMovePod.HeaderText = "棚移動";
-            this.colMovePod.Name = "colMovePod";
-            this.colMovePod.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Programmatic;
-            this.colMovePod.Width = 66;
-            // 
-            // colEdit
-            // 
-            this.colEdit.HeaderText = "編集";
-            this.colEdit.Name = "colEdit";
-            this.colEdit.Resizable = System.Windows.Forms.DataGridViewTriState.True;
-            this.colEdit.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Programmatic;
-            this.colEdit.Width = 54;
-            // 
             // tabSetting
             // 
+            this.tabSetting.Controls.Add(this.label7);
+            this.tabSetting.Controls.Add(this.listBoxPodDirection);
             this.tabSetting.Controls.Add(this.label6);
             this.tabSetting.Controls.Add(this.textBoxChargeZoneID);
             this.tabSetting.Controls.Add(this.chkUnload);
@@ -471,10 +450,34 @@ namespace MujinAGVDemo
             this.tabSetting.Location = new System.Drawing.Point(4, 22);
             this.tabSetting.Name = "tabSetting";
             this.tabSetting.Padding = new System.Windows.Forms.Padding(3);
-            this.tabSetting.Size = new System.Drawing.Size(522, 144);
+            this.tabSetting.Size = new System.Drawing.Size(478, 144);
             this.tabSetting.TabIndex = 0;
             this.tabSetting.Text = "基本設定";
             this.tabSetting.UseVisualStyleBackColor = true;
+            // 
+            // label7
+            // 
+            this.label7.AutoSize = true;
+            this.label7.Location = new System.Drawing.Point(245, 89);
+            this.label7.Name = "label7";
+            this.label7.Size = new System.Drawing.Size(48, 12);
+            this.label7.TabIndex = 71;
+            this.label7.Text = "棚の向き";
+            // 
+            // listBoxPodDirection
+            // 
+            this.listBoxPodDirection.FormattingEnabled = true;
+            this.listBoxPodDirection.ItemHeight = 12;
+            this.listBoxPodDirection.Items.AddRange(new object[] {
+            "北",
+            "東",
+            "南",
+            "西",
+            "指定しない"});
+            this.listBoxPodDirection.Location = new System.Drawing.Point(302, 87);
+            this.listBoxPodDirection.Name = "listBoxPodDirection";
+            this.listBoxPodDirection.Size = new System.Drawing.Size(50, 52);
+            this.listBoxPodDirection.TabIndex = 70;
             // 
             // label6
             // 
@@ -496,22 +499,22 @@ namespace MujinAGVDemo
             // chkUnload
             // 
             this.chkUnload.AutoSize = true;
-            this.chkUnload.Location = new System.Drawing.Point(245, 55);
+            this.chkUnload.Location = new System.Drawing.Point(245, 52);
             this.chkUnload.Name = "chkUnload";
-            this.chkUnload.Size = new System.Drawing.Size(176, 16);
+            this.chkUnload.Size = new System.Drawing.Size(130, 28);
             this.chkUnload.TabIndex = 67;
-            this.chkUnload.Text = "アンロード(移動先で棚を下ろす)";
+            this.chkUnload.Text = "アンロード\r\n(移動先で棚を下ろす)";
             this.chkUnload.UseVisualStyleBackColor = true;
             this.chkUnload.CheckedChanged += new System.EventHandler(this.chkUnload_CheckedChanged);
             // 
             // chkTurn
             // 
             this.chkTurn.AutoSize = true;
-            this.chkTurn.Location = new System.Drawing.Point(245, 33);
+            this.chkTurn.Location = new System.Drawing.Point(245, 25);
             this.chkTurn.Name = "chkTurn";
-            this.chkTurn.Size = new System.Drawing.Size(220, 16);
+            this.chkTurn.Size = new System.Drawing.Size(157, 28);
             this.chkTurn.TabIndex = 66;
-            this.chkTurn.Text = "シンクロターン(AGVと棚の向きを合わせる)";
+            this.chkTurn.Text = "シンクロターン\r\n(AGVと棚の向きを合わせる)";
             this.chkTurn.UseVisualStyleBackColor = true;
             this.chkTurn.CheckedChanged += new System.EventHandler(this.chkTurn_CheckedChanged);
             // 
@@ -554,6 +557,48 @@ namespace MujinAGVDemo
             this.btnLiftDown.Text = "リフトダウン";
             this.btnLiftDown.UseVisualStyleBackColor = true;
             this.btnLiftDown.Click += new System.EventHandler(this.btnLiftDown_Click);
+            // 
+            // colName
+            // 
+            this.colName.HeaderText = "名前";
+            this.colName.Name = "colName";
+            this.colName.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Programmatic;
+            this.colName.Width = 54;
+            // 
+            // colNode
+            // 
+            this.colNode.HeaderText = "ノードID";
+            this.colNode.Name = "colNode";
+            this.colNode.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Programmatic;
+            this.colNode.Width = 68;
+            // 
+            // colMoveAGV
+            // 
+            this.colMoveAGV.HeaderText = "AGV移動";
+            this.colMoveAGV.Name = "colMoveAGV";
+            this.colMoveAGV.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Programmatic;
+            this.colMoveAGV.Width = 78;
+            // 
+            // colMovePod
+            // 
+            this.colMovePod.HeaderText = "棚移動";
+            this.colMovePod.Name = "colMovePod";
+            this.colMovePod.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Programmatic;
+            this.colMovePod.Width = 66;
+            // 
+            // colAddPod
+            // 
+            this.colAddPod.HeaderText = "棚作成";
+            this.colAddPod.Name = "colAddPod";
+            this.colAddPod.Width = 47;
+            // 
+            // colEdit
+            // 
+            this.colEdit.HeaderText = "編集";
+            this.colEdit.Name = "colEdit";
+            this.colEdit.Resizable = System.Windows.Forms.DataGridViewTriState.True;
+            this.colEdit.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Programmatic;
+            this.colEdit.Width = 54;
             // 
             // frmLight
             // 
@@ -629,16 +674,20 @@ namespace MujinAGVDemo
         private System.Windows.Forms.Button btnCycleMovePod;
         private System.Windows.Forms.CheckBox chkTurn;
         private System.Windows.Forms.CheckBox chkUnload;
-        private System.Windows.Forms.DataGridViewTextBoxColumn colName;
-        private System.Windows.Forms.DataGridViewTextBoxColumn colNode;
-        private System.Windows.Forms.DataGridViewButtonColumn colMoveAGV;
-        private System.Windows.Forms.DataGridViewButtonColumn colMovePod;
-        private System.Windows.Forms.DataGridViewButtonColumn colEdit;
         private System.Windows.Forms.Label label6;
         private System.Windows.Forms.TextBox textBoxChargeZoneID;
         private System.Windows.Forms.Button btnCharge;
         private System.Windows.Forms.Button btnTaskCancel;
         private System.Windows.Forms.Button btnLiftUp;
         private System.Windows.Forms.Button btnLiftDown;
+        private System.Windows.Forms.ToolStripMenuItem mnuOpenLog;
+        private System.Windows.Forms.ListBox listBoxPodDirection;
+        private System.Windows.Forms.Label label7;
+        private System.Windows.Forms.DataGridViewTextBoxColumn colName;
+        private System.Windows.Forms.DataGridViewTextBoxColumn colNode;
+        private System.Windows.Forms.DataGridViewButtonColumn colMoveAGV;
+        private System.Windows.Forms.DataGridViewButtonColumn colMovePod;
+        private System.Windows.Forms.DataGridViewButtonColumn colAddPod;
+        private System.Windows.Forms.DataGridViewButtonColumn colEdit;
     }
 }

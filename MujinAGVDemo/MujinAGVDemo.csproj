@@ -135,22 +135,22 @@
   <ItemGroup>
     <Compile Include="Command\MapCommands.cs" />
     <Compile Include="FileIO.cs" />
-    <Compile Include="frmLight.cs">
+    <Compile Include="Forms\frmLight.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="frmLight.Designer.cs">
+    <Compile Include="Forms\frmLight.Designer.cs">
       <DependentUpon>frmLight.cs</DependentUpon>
     </Compile>
-    <Compile Include="frmMain.cs">
+    <Compile Include="Forms\frmMain.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="frmMain.Designer.cs">
+    <Compile Include="Forms\frmMain.Designer.cs">
       <DependentUpon>frmMain.cs</DependentUpon>
     </Compile>
-    <Compile Include="frmMove.cs">
+    <Compile Include="Forms\frmMove.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="frmMove.Designer.cs">
+    <Compile Include="Forms\frmMove.Designer.cs">
       <DependentUpon>frmMove.cs</DependentUpon>
     </Compile>
     <Compile Include="ParamSettings.cs" />
@@ -185,13 +185,13 @@
     <Content Include="Setting\ParamSetting_meiwa.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <EmbeddedResource Include="frmLight.resx">
+    <EmbeddedResource Include="Forms\frmLight.resx">
       <DependentUpon>frmLight.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="frmMain.resx">
+    <EmbeddedResource Include="Forms\frmMain.resx">
       <DependentUpon>frmMain.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="frmMove.resx">
+    <EmbeddedResource Include="Forms\frmMove.resx">
       <DependentUpon>frmMove.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">

@@ -27,6 +27,7 @@ namespace MujinAGVDemo
         /// 設定ファイルのデフォルトパス
         /// </summary>
         const string defaultSettingPath = @"Setting/ParamSetting.xml";
+
         /// <summary>
         /// 名前列
         /// </summary>
@@ -44,12 +45,22 @@ namespace MujinAGVDemo
         /// </summary>
         const int dgvMovePodColumn = 3;
         /// <summary>
+        /// 棚作成列
+        /// </summary>
+        const int dgvAddPodColumn = 4;
+        /// <summary>
         /// 編集列
         /// </summary>
-        const int dgvEditColumn = 4;
+        const int dgvEditColumn = 5;
+
+
+
         private const int ON = 1;
         private const int OFF = 0;
-
+        /// <summary>
+        /// ログディレクトリのパス
+        /// </summary>
+        private const string logDirPath = @"logs";
         #endregion Const
 
         #region Private Parameter
@@ -89,6 +100,8 @@ namespace MujinAGVDemo
             {
                 updateControl();
                 checkBoxIsStop.Checked = isStop;
+                //棚の向きを指定しない
+                listBoxPodDirection.SelectedIndex = 4;
                 agvDataControl.Settings.AddAGVHouseDictionary("111", "162918439249", "原位置", Color.LightGreen);
                 agvDataControl.Settings.AddAGVHouseDictionary("112", "162918439248", "原位置", Color.LightGreen);
                 agvDataControl.Settings.AddAGVHouseDictionary("113", "1629184392138", "原位置", Color.LightGreen);
@@ -331,38 +344,39 @@ namespace MujinAGVDemo
         /// <summary>
         /// 棚を追加します
         /// </summary>
-        private void addPod()
+        /// <param name="nodeID">棚作成位置（指定しなければ「基本設定」を参照します）</param>
+        private void addPod(string nodeID = "")
         {
             updateParam();
-            var serverIP = param.ServerIP;
-            var warehouseID = param.WarehouseID;
+
             var layoutID = param.LayoutID;
             var podID = param.PodID;
-            var nodeID = param.NodeID;
+            if (nodeID == "")
+                nodeID = param.NodeID;
 
+            var addPodParam = new AddPodParam(podID, nodeID, layoutID);
+
+            var serverIP = param.ServerIP;
+            var warehouseID = param.WarehouseID;
             var factory = new CommandFactory(serverIP, warehouseID);
             if (!factory.IsConnectedTESServer())
             {
                 logger.Error(Messages.NotConnectMsg);
-                //showAddPodErrorDialog(Messages.NotConnectMsg);
                 return;
             }
             try
             {
-                var addPodResult = factory.Create(new AddPodParam(podID, nodeID, layoutID)).DoAction();
+                var addPodResult = factory.Create(addPodParam).DoAction();
                 var logMessage = $"棚作成結果:[{addPodResult.ReturnMsg}] リターンコード:[{addPodResult.ReturnCode}] 棚ID:[{podID}] 作成位置:[{nodeID}] コンテナID:[{layoutID}]";
-                //logger.Info(message);
                 showInfoMessageBox($"{logMessage}");
             }
             catch (EmergencyException ee)
             {
                 logger.Error(ee);
-                //showAddPodErrorDialog(ee.Message);
             }
             catch (Exception ex)
             {
                 logger.Error(ex);
-                //showAddPodErrorDialog(ex.Message);
             }
         }
         /// <summary>
@@ -382,7 +396,7 @@ namespace MujinAGVDemo
                 logger.Error(Messages.NotConnectMsg);
                 //showRemovePodErrorDialog(Messages.NotConnectMsg);
                 return;
-            }            
+            }
             try
             {
                 var removePodResult = factory.Create(new RemovePodParam(podID)).DoAction();
@@ -489,6 +503,8 @@ namespace MujinAGVDemo
         private (bool isSuccess, string message) moveRobot(CommandFactory factory, MoveRobotParam param)
         {
             var result = (MoveRobotReturnMessage)factory.Create(param).DoAction();
+            var logMessage = $"AGV移動結果:[{result.ReturnMsg}] リターンコード:[{result.ReturnCode}] robotID:[{param.RobotID}] 移動先:[{param.DesID}]";
+            showInfoMessageBox($"{logMessage}");
             return (result.ReturnMsg == "succ", result.ReturnMsg);
         }
         /// <summary>
@@ -514,6 +530,8 @@ namespace MujinAGVDemo
         private (bool isSuccess, string message) movePod(CommandFactory factory, MovePodParam param)
         {
             var result = (MovePodReturnMessage)factory.Create(param).DoAction();
+            var logMessage = $"棚移動結果:[{result.ReturnMsg}] リターンコード:[{result.ReturnCode}] robotID:[{param.RobotID}] 移動先:[{param.DesID}] 棚ID:[{param.PodID}]";
+            showInfoMessageBox($"{logMessage}");
             return (result.ReturnMsg == "succ", result.ReturnMsg);
         }
         /// <summary>
@@ -523,15 +541,17 @@ namespace MujinAGVDemo
         /// <param name="robotID">ロボットID</param>
         /// <param name="nodeID">ノードID</param>
         /// <param name="podID">棚ID</param>
+        /// <param name="podFace">棚の向き -255:指定なし　0:北,1.57:東,3.14:南,4.71:西</param>
         /// <returns>成功か、メッセージ</returns>
-        private (bool isSuccess, string message) movePod(CommandFactory factory, string robotID, string nodeID, string podID)
+        private (bool isSuccess, string message) movePod(CommandFactory factory, string robotID, string nodeID, string podID, double podFace = -255)
         {
             var movePodParam = new MovePodParam(robotID: robotID,
                                        podID: podID,
                                        desMode: DestinationModes.StorageID,
                                        desID: nodeID,
                                        turnMode: param.TurnMode,
-                                       unload: param.Unload);
+                                       unload: param.Unload,
+                                       podFace: podFace);
             return movePod(factory, movePodParam);
         }
         /// <summary>
@@ -540,7 +560,8 @@ namespace MujinAGVDemo
         /// <param name="nodeData">ノード情報</param>
         private void addDgvMove(NodeData nodeData)
         {
-            dgvMove.Rows.Add(nodeData.Name, nodeData.NodeID, "AGV移動", "棚移動", "名前とノードを上書き");
+            dgvMove.Rows.Add(nodeData.Name, nodeData.NodeID, "AGV移動", "棚移動", "棚作成", "名前とノードを上書き");
+
         }
         #endregion Method
         /// <summary>
@@ -582,10 +603,31 @@ namespace MujinAGVDemo
             //棚移動をクリック
             else if (e.ColumnIndex == dgvMovePodColumn)
             {
+                var podDir = Direction.NoSelect;
+                switch (listBoxPodDirection.SelectedIndex)
+                {
+                    case 0:
+                        podDir = Direction.North;
+                        break;
+                    case 1:
+                        podDir = Direction.East;
+                        break;
+                    case 2:
+                        podDir = Direction.South;
+                        break;
+                    case 3:
+                        podDir = Direction.West;
+                        break;
+                    case 4:
+                        podDir = Direction.NoSelect;
+                        break;
+                }
+
                 movePod(factory: Factory,
                         robotID: param.RobotID,
                         nodeID: dgvMove[dgvNodeColumn, e.RowIndex].Value.ToString(),
-                        podID: param.PodID);
+                        podID: param.PodID,
+                        podFace: podDir);
             }
             //編集をクリック
             else if (e.ColumnIndex == dgvEditColumn)
@@ -598,6 +640,11 @@ namespace MujinAGVDemo
                 target.NodeID = nodeID;
 
                 fileIO.SaveSetting(settingPath, param);
+            }
+            //棚作成をクリック
+            else if (e.ColumnIndex == dgvAddPodColumn)
+            {
+                addPod(nodeID: dgvMove[dgvNodeColumn, e.RowIndex].Value.ToString());
             }
         }
         /// <summary>
@@ -684,6 +731,10 @@ namespace MujinAGVDemo
 
         private void btnLiftUp_Click(object sender, EventArgs e)
         {
+            if (Factory == null)
+            {
+                Factory = new CommandFactory(param.ServerIP, param.WarehouseID);
+            }
             var (isSuccess, messages) = Command.MapCommands.LiftUpRobot(factory: Factory, robotID: param.RobotID);
             if (!isSuccess)
             {
@@ -697,6 +748,10 @@ namespace MujinAGVDemo
 
         private void btnLiftDown_Click(object sender, EventArgs e)
         {
+            if (Factory == null)
+            {
+                Factory = new CommandFactory(param.ServerIP, param.WarehouseID);
+            }
             var (isSuccess, messages) = Command.MapCommands.LiftDownRobot(factory: Factory, robotID: param.RobotID);
             if (!isSuccess)
             {
@@ -706,6 +761,16 @@ namespace MujinAGVDemo
             {
                 showInfoMessageBox(messages);
             }
+        }
+
+        private void mnuOpenLog_Click(object sender, EventArgs e)
+        {
+            if (!Directory.Exists(logDirPath))
+            {
+                showErrorMessageBox($"{Path.GetFullPath(logDirPath)}が見つかりません。");
+                return;
+            }
+            System.Diagnostics.Process.Start("EXPLORER.EXE", logDirPath);
         }
     }
 
