@@ -30,6 +30,7 @@ namespace MujinAGVDemo
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(frmLight));
             this.agvDataControl = new Hetu20dotnet.Controls.AGVDataControl();
             this.checkBoxTimerRun = new System.Windows.Forms.CheckBox();
             this.lblUpdateTime = new System.Windows.Forms.Label();
@@ -64,6 +65,12 @@ namespace MujinAGVDemo
             this.btnCycleMovePod = new System.Windows.Forms.Button();
             this.btnCycleMoveRobot = new System.Windows.Forms.Button();
             this.dgvMove = new System.Windows.Forms.DataGridView();
+            this.colName = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colNode = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colMoveAGV = new System.Windows.Forms.DataGridViewButtonColumn();
+            this.colMovePod = new System.Windows.Forms.DataGridViewButtonColumn();
+            this.colAddPod = new System.Windows.Forms.DataGridViewButtonColumn();
+            this.colEdit = new System.Windows.Forms.DataGridViewButtonColumn();
             this.tabSetting = new System.Windows.Forms.TabPage();
             this.label7 = new System.Windows.Forms.Label();
             this.listBoxPodDirection = new System.Windows.Forms.ListBox();
@@ -75,12 +82,6 @@ namespace MujinAGVDemo
             this.btnTaskCancel = new System.Windows.Forms.Button();
             this.btnLiftUp = new System.Windows.Forms.Button();
             this.btnLiftDown = new System.Windows.Forms.Button();
-            this.colName = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.colNode = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.colMoveAGV = new System.Windows.Forms.DataGridViewButtonColumn();
-            this.colMovePod = new System.Windows.Forms.DataGridViewButtonColumn();
-            this.colAddPod = new System.Windows.Forms.DataGridViewButtonColumn();
-            this.colEdit = new System.Windows.Forms.DataGridViewButtonColumn();
             this.menuStrip1.SuspendLayout();
             this.tabControl1.SuspendLayout();
             this.tabMove.SuspendLayout();
@@ -423,6 +424,48 @@ namespace MujinAGVDemo
             this.dgvMove.TabIndex = 0;
             this.dgvMove.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgvMove_CellContentClick);
             // 
+            // colName
+            // 
+            this.colName.HeaderText = "名前";
+            this.colName.Name = "colName";
+            this.colName.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Programmatic;
+            this.colName.Width = 54;
+            // 
+            // colNode
+            // 
+            this.colNode.HeaderText = "ノードID";
+            this.colNode.Name = "colNode";
+            this.colNode.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Programmatic;
+            this.colNode.Width = 68;
+            // 
+            // colMoveAGV
+            // 
+            this.colMoveAGV.HeaderText = "AGV移動";
+            this.colMoveAGV.Name = "colMoveAGV";
+            this.colMoveAGV.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Programmatic;
+            this.colMoveAGV.Width = 78;
+            // 
+            // colMovePod
+            // 
+            this.colMovePod.HeaderText = "棚移動";
+            this.colMovePod.Name = "colMovePod";
+            this.colMovePod.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Programmatic;
+            this.colMovePod.Width = 66;
+            // 
+            // colAddPod
+            // 
+            this.colAddPod.HeaderText = "棚作成";
+            this.colAddPod.Name = "colAddPod";
+            this.colAddPod.Width = 47;
+            // 
+            // colEdit
+            // 
+            this.colEdit.HeaderText = "編集";
+            this.colEdit.Name = "colEdit";
+            this.colEdit.Resizable = System.Windows.Forms.DataGridViewTriState.True;
+            this.colEdit.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Programmatic;
+            this.colEdit.Width = 54;
+            // 
             // tabSetting
             // 
             this.tabSetting.Controls.Add(this.label7);
@@ -558,48 +601,6 @@ namespace MujinAGVDemo
             this.btnLiftDown.UseVisualStyleBackColor = true;
             this.btnLiftDown.Click += new System.EventHandler(this.btnLiftDown_Click);
             // 
-            // colName
-            // 
-            this.colName.HeaderText = "名前";
-            this.colName.Name = "colName";
-            this.colName.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Programmatic;
-            this.colName.Width = 54;
-            // 
-            // colNode
-            // 
-            this.colNode.HeaderText = "ノードID";
-            this.colNode.Name = "colNode";
-            this.colNode.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Programmatic;
-            this.colNode.Width = 68;
-            // 
-            // colMoveAGV
-            // 
-            this.colMoveAGV.HeaderText = "AGV移動";
-            this.colMoveAGV.Name = "colMoveAGV";
-            this.colMoveAGV.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Programmatic;
-            this.colMoveAGV.Width = 78;
-            // 
-            // colMovePod
-            // 
-            this.colMovePod.HeaderText = "棚移動";
-            this.colMovePod.Name = "colMovePod";
-            this.colMovePod.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Programmatic;
-            this.colMovePod.Width = 66;
-            // 
-            // colAddPod
-            // 
-            this.colAddPod.HeaderText = "棚作成";
-            this.colAddPod.Name = "colAddPod";
-            this.colAddPod.Width = 47;
-            // 
-            // colEdit
-            // 
-            this.colEdit.HeaderText = "編集";
-            this.colEdit.Name = "colEdit";
-            this.colEdit.Resizable = System.Windows.Forms.DataGridViewTriState.True;
-            this.colEdit.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Programmatic;
-            this.colEdit.Width = 54;
-            // 
             // frmLight
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
@@ -620,6 +621,7 @@ namespace MujinAGVDemo
             this.Controls.Add(this.lblUpdateTime);
             this.Controls.Add(this.agvDataControl);
             this.Controls.Add(this.menuStrip1);
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MainMenuStrip = this.menuStrip1;
             this.Name = "frmLight";
             this.Text = "AGVデモソフト（軽量版）";
