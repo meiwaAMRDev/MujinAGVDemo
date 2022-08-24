@@ -217,7 +217,7 @@ namespace MujinAGVDemo
             if (isStop == false)
             {
                 //AGV停止指示
-                factory.Create(new PauseRobotParam(robotID)).DoAction();
+                factory.Create(new PauseRobotParam(robotID, isAll: true)).DoAction();
                 //ボタン表示の変更
                 checkBoxIsStop.Text = "AGV運行";
                 checkBoxIsStop.BackColor = Color.GreenYellow;
@@ -229,7 +229,7 @@ namespace MujinAGVDemo
                 checkBoxIsStop.Text = "AGV停止";
                 checkBoxIsStop.BackColor = Color.Red;
                 //AGV運航指示
-                factory.Create(new ResumeRobotParam(robotID)).DoAction();
+                factory.Create(new ResumeRobotParam(robotID, isAll: true)).DoAction();
             }
         }
 
@@ -501,7 +501,7 @@ namespace MujinAGVDemo
         /// <param name="param">AGV移動のパラメータ</param>
         /// <returns>成功か、メッセージ</returns>
         private (bool isSuccess, string message) moveRobot(CommandFactory factory, MoveRobotParam param)
-        {
+        {            
             var result = (MoveRobotReturnMessage)factory.Create(param).DoAction();
             var logMessage = $"AGV移動結果:[{result.ReturnMsg}] リターンコード:[{result.ReturnCode}] robotID:[{param.RobotID}] 移動先:[{param.DesID}]";
             showInfoMessageBox($"{logMessage}");
