@@ -501,7 +501,7 @@ namespace MujinAGVDemo
         /// <param name="param">AGV移動のパラメータ</param>
         /// <returns>成功か、メッセージ</returns>
         private (bool isSuccess, string message) moveRobot(CommandFactory factory, MoveRobotParam param)
-        {            
+        {
             var result = (MoveRobotReturnMessage)factory.Create(param).DoAction();
             var logMessage = $"AGV移動結果:[{result.ReturnMsg}] リターンコード:[{result.ReturnCode}] robotID:[{param.RobotID}] 移動先:[{param.DesID}]";
             showInfoMessageBox($"{logMessage}");
@@ -518,7 +518,13 @@ namespace MujinAGVDemo
         {
             var moveRobotParam = new MoveRobotParam(robotID: robotID,
                                            desMode: DestinationModes.NodeID,
-                                           desID: nodeID);
+                                           desID: nodeID)
+            {
+                //CachingCallがnullだと例外が発生するため何もしないイベントを追加
+                CachingCall = (obj, e) =>
+                {
+                }
+            };
             return moveRobot(factory, moveRobotParam);
         }
         /// <summary>
@@ -644,7 +650,12 @@ namespace MujinAGVDemo
             //棚作成をクリック
             else if (e.ColumnIndex == dgvAddPodColumn)
             {
-                addPod(nodeID: dgvMove[dgvNodeColumn, e.RowIndex].Value.ToString());
+                var nodeID = dgvMove[dgvNodeColumn, e.RowIndex].Value.ToString();
+                if (showCheckMessage($"[{nodeID}]に棚[{param.PodID}]を作成しますか？") != DialogResult.OK)
+                {
+                    return;
+                }
+                addPod(nodeID: nodeID);
             }
         }
         /// <summary>
