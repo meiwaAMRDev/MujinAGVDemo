@@ -110,11 +110,6 @@ namespace MujinAGVDemo
                 agvDataControl.Settings.AddAGVHouseDictionary("116", "162918439278", "原位置", Color.LightGreen);
                 agvDataControl.Settings.AddAGVHouseDictionary("117", "1629184392169", "原位置", Color.LightGreen);
                 agvDataControl.Settings.AddAGVHouseDictionary("118", "1629184392168", "原位置", Color.LightGreen);
-
-                param.NodeDatas.ForEach(x =>
-                {
-                    addDgvMove(x);
-                });
             }
             catch (Exception ex)
             {
@@ -304,6 +299,7 @@ namespace MujinAGVDemo
             textBoxChargeZoneID.Text = param.ChargeZoneID;
             chkTurn.Checked = param.TurnMode == ON;
             chkUnload.Checked = param.Unload == ON;
+            updateDgvMove(param.NodeDatas);
         }
         /// <summary>
         /// コントロールの内容をパラメータに反映する
@@ -569,6 +565,19 @@ namespace MujinAGVDemo
             dgvMove.Rows.Add(nodeData.Name, nodeData.NodeID, "AGV移動", "棚移動", "棚作成", "名前とノードを上書き");
 
         }
+        /// <summary>
+        /// ノード情報DGVを一旦クリアしてから更新します。
+        /// </summary>
+        /// <param name="nodeDatas">ノード情報リスト</param>
+        private void updateDgvMove(List<NodeData> nodeDatas)
+        {
+            dgvMove.Rows.Clear();
+            nodeDatas.ForEach(x =>
+            {
+                addDgvMove(x);
+            });
+        }
+
         #endregion Method
         /// <summary>
         /// 通常版フォームを開きます
