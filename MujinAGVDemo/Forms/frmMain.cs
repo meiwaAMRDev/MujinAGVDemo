@@ -1158,7 +1158,7 @@ namespace MujinAGVDemo
 
         private void mnuMove_Click(object sender, EventArgs e)
         {
-            using (var frm = new frmMove(new CommandFactory(param.ServerIP, param.WarehouseID)))
+            using (var frm = new frmDGV(new CommandFactory(param.ServerIP, param.WarehouseID)))
             {
                 frm.Show();
             }

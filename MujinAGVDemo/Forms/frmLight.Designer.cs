@@ -82,6 +82,9 @@ namespace MujinAGVDemo
             this.btnTaskCancel = new System.Windows.Forms.Button();
             this.btnLiftUp = new System.Windows.Forms.Button();
             this.btnLiftDown = new System.Windows.Forms.Button();
+            this.btnGetAGVData = new System.Windows.Forms.Button();
+            this.chkAllSet = new System.Windows.Forms.CheckBox();
+            this.mnuOpenDGV = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.tabControl1.SuspendLayout();
             this.tabMove.SuspendLayout();
@@ -339,7 +342,8 @@ namespace MujinAGVDemo
             // 
             this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.mnuOpenMainForm,
-            this.mnuOpenLog});
+            this.mnuOpenLog,
+            this.mnuOpenDGV});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
             this.menuStrip1.Size = new System.Drawing.Size(800, 24);
@@ -601,11 +605,44 @@ namespace MujinAGVDemo
             this.btnLiftDown.UseVisualStyleBackColor = true;
             this.btnLiftDown.Click += new System.EventHandler(this.btnLiftDown_Click);
             // 
+            // btnGetAGVData
+            // 
+            this.btnGetAGVData.Location = new System.Drawing.Point(538, 154);
+            this.btnGetAGVData.Margin = new System.Windows.Forms.Padding(2);
+            this.btnGetAGVData.Name = "btnGetAGVData";
+            this.btnGetAGVData.Size = new System.Drawing.Size(82, 23);
+            this.btnGetAGVData.TabIndex = 79;
+            this.btnGetAGVData.Text = "AGV情報";
+            this.btnGetAGVData.UseVisualStyleBackColor = true;
+            this.btnGetAGVData.Click += new System.EventHandler(this.btnGetAGVData_Click);
+            // 
+            // chkAllSet
+            // 
+            this.chkAllSet.Appearance = System.Windows.Forms.Appearance.Button;
+            this.chkAllSet.AutoSize = true;
+            this.chkAllSet.BackColor = System.Drawing.Color.GreenYellow;
+            this.chkAllSet.Location = new System.Drawing.Point(628, 154);
+            this.chkAllSet.Name = "chkAllSet";
+            this.chkAllSet.Size = new System.Drawing.Size(51, 22);
+            this.chkAllSet.TabIndex = 80;
+            this.chkAllSet.Text = "全占有";
+            this.chkAllSet.UseVisualStyleBackColor = false;
+            this.chkAllSet.CheckedChanged += new System.EventHandler(this.chkAllSet_CheckedChanged);
+            // 
+            // mnuOpenDGV
+            // 
+            this.mnuOpenDGV.Name = "mnuOpenDGV";
+            this.mnuOpenDGV.Size = new System.Drawing.Size(42, 20);
+            this.mnuOpenDGV.Text = "DGV";
+            this.mnuOpenDGV.Click += new System.EventHandler(this.mnuOpenDGV_Click);
+            // 
             // frmLight
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(800, 488);
+            this.Controls.Add(this.chkAllSet);
+            this.Controls.Add(this.btnGetAGVData);
             this.Controls.Add(this.btnLiftDown);
             this.Controls.Add(this.btnLiftUp);
             this.Controls.Add(this.btnTaskCancel);
@@ -691,5 +728,8 @@ namespace MujinAGVDemo
         private System.Windows.Forms.DataGridViewButtonColumn colMovePod;
         private System.Windows.Forms.DataGridViewButtonColumn colAddPod;
         private System.Windows.Forms.DataGridViewButtonColumn colEdit;
+        private System.Windows.Forms.Button btnGetAGVData;
+        private System.Windows.Forms.CheckBox chkAllSet;
+        private System.Windows.Forms.ToolStripMenuItem mnuOpenDGV;
     }
 }

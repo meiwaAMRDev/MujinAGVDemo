@@ -586,10 +586,12 @@ namespace MujinAGVDemo
         /// <param name="e"></param>
         private void mnuOpenMainForm_Click(object sender, EventArgs e)
         {
-            using (var frm = new frmMain(param))
-            {
-                frm.ShowDialog();
-            }
+            //using (var frm = new frmMain(param))
+            //{
+            //    frm.ShowDialog();
+            //}
+            var frmMain = new frmMain(param);
+            frmMain.Show();
         }
         /// <summary>
         /// ノード指定移動DGVのセルをクリックした際のイベントです。
@@ -791,6 +793,70 @@ namespace MujinAGVDemo
                 return;
             }
             System.Diagnostics.Process.Start("EXPLORER.EXE", logDirPath);
+        }
+
+        private void btnGetAGVData_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                if (Factory == null)
+                {
+                    Factory = new CommandFactory(rcsIP: param.ServerIP, warehouseID: param.WarehouseID);
+                }
+
+                var getRobotListRet = (GetRobotListFromDBReturnMessage)Factory.Create(new GetRobotListFromDBParam(isOnlineRobotOnly: true)).DoAction();
+
+                var rbList = getRobotListRet.Data?.RobotList;
+                var message = new StringBuilder();
+                rbList.ForEach(x =>
+                {
+                    message.AppendLine($"AGV[{x.RobotID}] TaskID[{x.TaskID}] TaskType[{x.TaskType}] TaskStatus[{x.TaskStatus}]");
+                });
+                showInfoMessageBox(message.ToString());
+
+            }
+            catch (Exception ex)
+            {
+                showErrorMessageBox(ex.ToString());
+            }
+        }
+
+        private void chkAllSet_CheckedChanged(object sender, EventArgs e)
+        {
+            try
+            {
+                if (Factory == null)
+                {
+                    Factory = new CommandFactory(param.ServerIP, param.WarehouseID);
+                }
+                if (!chkAllSet.Checked)
+                {
+                    chkAllSet.Text = "全占有解除";
+                    chkAllSet.BackColor = Color.Red;
+
+                    var a = Command.MapCommands.SetOwnerAll(Factory);
+                }
+                else
+                {
+                    chkAllSet.Text = "全占有";
+                    chkAllSet.BackColor = Color.GreenYellow;
+                    var a = Command.MapCommands.UnsetOwnerAll(Factory);
+                }
+            }
+            catch (Exception ex)
+            {
+                showErrorMessageBox(ex.ToString());
+            }
+        }
+
+        private void mnuOpenDGV_Click(object sender, EventArgs e)
+        {
+            if (Factory == null)
+            {
+                Factory = new CommandFactory(param.ServerIP, param.WarehouseID);
+            }
+            var frm = new frmDGV(Factory);
+            frm.Show();
         }
     }
 

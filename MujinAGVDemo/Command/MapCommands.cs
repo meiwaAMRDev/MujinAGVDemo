@@ -280,7 +280,7 @@ namespace MujinAGVDemo.Command
         /// <param name="warehouseID">マップのID</param>
         /// <returns>isSuccess=成功=true 失敗=false,　messages=結果の応答メッセージ, podID=棚ID（棚が無い時は空白）</returns>
         public static (bool isSuccess, string messages, string podID) GetPodID(string hetuIP, string warehouseID, string nodeID)
-        {            
+        {
             var factory = new CommandFactory(hetuIP, warehouseID);
             return GetPodID(factory, nodeID);
         }
@@ -505,7 +505,17 @@ namespace MujinAGVDemo.Command
                 getRobotListAns.Data.RobotList.ForEach(rb =>
                 {
                     var pod = podList.Where(x => x.RobotID == rb.RobotID).FirstOrDefault();
-                    table.Rows.Add(rb.RobotID, rb.WorkStatus, rb.Owner, rb.ErrorState, $"{rb.UcPower}", $"{(pod == null ? string.Empty : pod?.PodID)}", rb.TaskType, rb.TaskID, rb.CurNodeID, rb.CurX, rb.CurY);
+                    table.Rows.Add(rb.RobotID,
+                                   rb.WorkStatus,
+                                   rb.Owner,
+                                   rb.ErrorState,
+                                   $"{rb.UcPower}",
+                                   $"{(pod == null ? string.Empty : pod?.PodID)}",
+                                   rb.TaskType,
+                                   rb.TaskID,
+                                   rb.CurNodeID,
+                                   rb.CurX,
+                                   rb.CurY);
                 });
             }
             catch (Exception ex)
@@ -516,6 +526,49 @@ namespace MujinAGVDemo.Command
 
             return (true, table);
         }
+
+        /// <summary>
+        /// AGV情報テーブルを取得します
+        /// </summary>
+        /// <param name="factory">ファクトリ</param>
+        /// <returns>isSuccess:取得成功ならtrue,table:AGV情報が入ったデータテーブル</returns>
+        public static (bool isSuccess, DataTable table) GetAgvTaskInfoTable(CommandFactory factory)
+        {
+            var table = new DataTable();
+
+
+            if (!factory.IsConnectedTESServer())
+                return (false, table);
+            try
+            {
+                var getRobotListAns = (GetRobotListFromDBReturnMessage)factory.Create(new GetRobotListFromDBParam()).DoAction();
+
+                table.Columns.Add("号機");
+                table.Columns.Add("所有者");
+                table.Columns.Add("タスクタイプ");
+                table.Columns.Add("タスクID");
+                table.Columns.Add("タスク状態");
+
+                getRobotListAns.Data.RobotList.OrderBy(x => x.RobotID).ToList().ForEach(rb =>
+                  {
+                      table.Rows.Add(rb.RobotID,
+                                     rb.Owner,
+                                     rb.TaskType,
+                                     rb.TaskID,
+                                     rb.TaskStatus
+                                     );
+                  });
+            }
+            catch (Exception ex)
+            {
+                table.Rows.Add(ex);
+                return (false, table);
+            }
+
+            return (true, table);
+        }
+
+
         /// <summary>
         /// AGVが持ち上げている棚IDを取得する
         /// </summary>
@@ -704,6 +757,49 @@ namespace MujinAGVDemo.Command
                 ? (false, $"AGV[{robotID}]に対してSetOwnerが失敗しました。{setOwnerResult.ReturnMsg}")
                 : (true, $"AGV[{robotID}]に対してSetOwnerが成功しました。");
         }
+        /// <summary>
+        /// 全AGVを占有します。
+        /// </summary>
+        /// <param name="factory">ファクトリ</param>
+        /// <returns>結果,メッセージ</returns>
+        public static (bool isSuccess, string message) SetOwnerAll(CommandFactory factory)
+        {
+            var issuccess = false;
+            var message = string.Empty;
+            var getRobotListReturnMessage = (GetRobotListReturnMessage)factory.Create(new GetRobotListParam()).DoAction();
+            getRobotListReturnMessage.Data?.RobotList.ForEach(x =>
+            {
+                var a = SetOwner(factory, x.RobotID);
+                if (!a.isSuccess)
+                {
+                    issuccess = false;
+                    message = a.message;
+                }
+            });
+            return (issuccess, message);
+        }
+        /// <summary>
+        /// 全AGVを占有解除します。
+        /// </summary>
+        /// <param name="factory">ファクトリ</param>
+        /// <returns>結果,メッセージ</returns>
+        public static (bool isSuccess, string message) UnsetOwnerAll(CommandFactory factory)
+        {
+            var issuccess = false;
+            var message = string.Empty;
+            var getRobotListReturnMessage = (GetRobotListReturnMessage)factory.Create(new GetRobotListParam()).DoAction();
+            getRobotListReturnMessage.Data?.RobotList.ForEach(x =>
+            {
+                var a = UnsetOwner(factory, x.RobotID);
+                if (!a.isSuccess)
+                {
+                    issuccess = false;
+                    message = a.message;
+                }
+            });
+            return (issuccess, message);
+        }
+
         #endregion
 
         #endregion
