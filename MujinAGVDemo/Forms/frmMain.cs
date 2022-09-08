@@ -25,7 +25,7 @@ namespace MujinAGVDemo
             InitializeComponent();
         }
         public frmMain(ParamSettings param)
-        {            
+        {
             InitializeComponent();
             this.param = param;
         }
@@ -315,18 +315,25 @@ namespace MujinAGVDemo
                 //var getPodListAns = (GetPodListReturnMessage)factory.Create(new GetPodListParam()).DoAction();
                 var getPodListAns = (GetPodListFromDBReturnMessage)factory.Create(new GetPodListFromDBParam()).DoAction();
 
-                var podList = getPodListAns.Data.PodList.Where(x => x.RobotID == param.RobotID).ToList();
+                var podList = getPodListAns.Data.PodList
+                    //.Where(x => x.RobotID == param.RobotID)
+                    .ToList();
                 if (podList == null)
                 {
                     logger.Info("podListがnullです。");
                     return;
                 }
                 logger.Info($"棚の位置を表示します");
+                var podMessages = new StringBuilder();
+
                 foreach (var pod in podList)
                 {
-                    var podMessage = $"podID[{pod.PodID}]positionType[{pod.PositionType}]strageID[{pod.StorageID}]robotID[{pod.RobotID}]";
+                    //var podMessage = $"podID[{pod.PodID}]positionType[{pod.PositionType}]strageID[{pod.StorageID}]robotID[{pod.RobotID}]";
+                    var podMessage = $"PodID[{pod.PodID}]PositionType[{pod.PositionType}]Storage[{pod.StorageID}]Robot[{pod.RobotID}]";
+                    podMessages.AppendLine(podMessage);
                     logger.Info(podMessage);
                 }
+                showMessageBox(true, podMessages.ToString(), false);
 
             }
             catch (Exception ex)
@@ -1000,21 +1007,25 @@ namespace MujinAGVDemo
         /// Infoのメッセージボックスを表示します
         /// </summary>
         /// <param name="message">メッセージ</param>
+        /// <param name="isLogging">ログに書き込むか</param>
         /// <returns>ダイアログボックスの戻り値</returns>
-        private DialogResult showInfoMessageBox(string message)
+        private DialogResult showInfoMessageBox(string message, bool isLogging = true)
         {
-            //ログ表示の際に改行文字を空白に置き換える
-            logger.Info(message.Replace(Environment.NewLine, string.Empty));
+            if (isLogging)
+                //ログ表示の際に改行文字を空白に置き換える
+                logger.Info(message.Replace(Environment.NewLine, string.Empty));
             return MessageBox.Show(message, "成功", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
         /// <summary>
         /// Errorのメッセージボックスを表示します
         /// </summary>
         /// <param name="message">メッセージ</param>
+        /// <param name="isLogging">ログに書き込むか</param>
         /// <returns>ダイアログボックスの戻り値</returns>
-        private DialogResult showErrorMessageBox(string message)
+        private DialogResult showErrorMessageBox(string message, bool isLogging = true)
         {
-            logger.Error(message);
+            if (isLogging)
+                logger.Error(message);
             return MessageBox.Show(message, "エラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
         /// <summary>
@@ -1022,12 +1033,13 @@ namespace MujinAGVDemo
         /// </summary>
         /// <param name="isSuccess">Infoの場合true,Errorの場合falseを入れる</param>
         /// <param name="message">メッセージ</param>
+        /// <param name="isLogging">ログに書き込むか</param>
         /// <returns>ダイアログボックスの戻り値</returns>
-        private DialogResult showMessageBox(bool isSuccess, string message)
+        private DialogResult showMessageBox(bool isSuccess, string message, bool isLogging = true)
         {
             return isSuccess
-                ? showInfoMessageBox(message)
-                : showErrorMessageBox(message);
+                ? showInfoMessageBox(message, isLogging)
+                : showErrorMessageBox(message, isLogging);
         }
         /// <summary>
         /// 確認のメッセージボックスを表示します
@@ -1070,7 +1082,8 @@ namespace MujinAGVDemo
             logger.Info($"{task.ToString()}");
 
             var detail = task.Data.Detail;
-            var message = $"タスクID：{detail.TaskID}　状態：{detail.Status}　失敗理由：{detail.ErrorReason} エラーコード：{detail.ErrorCode}";
+            var message =
+                $"タスクID：{detail.TaskID}　状態：{detail.Status}　失敗理由：{detail.ErrorReason} エラーコード：{detail.ErrorCode} AGV:{detail.RobotID} 型:{detail.TaskType}";
             showInfoMessageBox(message);
         }
         /// <summary>
@@ -1133,7 +1146,7 @@ namespace MujinAGVDemo
 
         #endregion Method
 
-        
+
 
         private void btnMovePodAuto_Click(object sender, EventArgs e)
         {
