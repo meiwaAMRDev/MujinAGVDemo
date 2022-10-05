@@ -60,6 +60,7 @@ namespace MujinAGVDemo
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.mnuOpenMainForm = new System.Windows.Forms.ToolStripMenuItem();
             this.mnuOpenLog = new System.Windows.Forms.ToolStripMenuItem();
+            this.mnuOpenDGV = new System.Windows.Forms.ToolStripMenuItem();
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabMove = new System.Windows.Forms.TabPage();
             this.btnCycleMovePod = new System.Windows.Forms.Button();
@@ -84,7 +85,6 @@ namespace MujinAGVDemo
             this.btnLiftDown = new System.Windows.Forms.Button();
             this.btnGetAGVData = new System.Windows.Forms.Button();
             this.chkAllSet = new System.Windows.Forms.CheckBox();
-            this.mnuOpenDGV = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.tabControl1.SuspendLayout();
             this.tabMove.SuspendLayout();
@@ -364,6 +364,13 @@ namespace MujinAGVDemo
             this.mnuOpenLog.Text = "ログ";
             this.mnuOpenLog.Click += new System.EventHandler(this.mnuOpenLog_Click);
             // 
+            // mnuOpenDGV
+            // 
+            this.mnuOpenDGV.Name = "mnuOpenDGV";
+            this.mnuOpenDGV.Size = new System.Drawing.Size(42, 20);
+            this.mnuOpenDGV.Text = "DGV";
+            this.mnuOpenDGV.Click += new System.EventHandler(this.mnuOpenDGV_Click);
+            // 
             // tabControl1
             // 
             this.tabControl1.Controls.Add(this.tabMove);
@@ -628,13 +635,6 @@ namespace MujinAGVDemo
             this.chkAllSet.Text = "全占有";
             this.chkAllSet.UseVisualStyleBackColor = false;
             this.chkAllSet.CheckedChanged += new System.EventHandler(this.chkAllSet_CheckedChanged);
-            // 
-            // mnuOpenDGV
-            // 
-            this.mnuOpenDGV.Name = "mnuOpenDGV";
-            this.mnuOpenDGV.Size = new System.Drawing.Size(42, 20);
-            this.mnuOpenDGV.Text = "DGV";
-            this.mnuOpenDGV.Click += new System.EventHandler(this.mnuOpenDGV_Click);
             // 
             // frmLight
             // 

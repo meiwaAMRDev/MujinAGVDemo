@@ -118,8 +118,8 @@ namespace MujinAGVDemo
             this.ファイルToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.mnuOpenLogDir = new System.Windows.Forms.ToolStripMenuItem();
             this.デバッグToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.tmrAGVInfoUpdate = new System.Windows.Forms.Timer(this.components);
             this.mnuMove = new System.Windows.Forms.ToolStripMenuItem();
+            this.tmrAGVInfoUpdate = new System.Windows.Forms.Timer(this.components);
             ((System.ComponentModel.ISupportInitialize)(this.numRepeatCount)).BeginInit();
             this.statusStrip1.SuspendLayout();
             this.tabControl1.SuspendLayout();
@@ -1051,17 +1051,17 @@ namespace MujinAGVDemo
             this.デバッグToolStripMenuItem.Size = new System.Drawing.Size(55, 20);
             this.デバッグToolStripMenuItem.Text = "デバッグ";
             // 
-            // tmrAGVInfoUpdate
-            // 
-            this.tmrAGVInfoUpdate.Interval = 5000;
-            this.tmrAGVInfoUpdate.Tick += new System.EventHandler(this.tmrAGVInfoUpdate_Tick);
-            // 
             // mnuMove
             // 
             this.mnuMove.Name = "mnuMove";
             this.mnuMove.Size = new System.Drawing.Size(66, 20);
             this.mnuMove.Text = "AGV移動";
             this.mnuMove.Click += new System.EventHandler(this.mnuMove_Click);
+            // 
+            // tmrAGVInfoUpdate
+            // 
+            this.tmrAGVInfoUpdate.Interval = 5000;
+            this.tmrAGVInfoUpdate.Tick += new System.EventHandler(this.tmrAGVInfoUpdate_Tick);
             // 
             // frmMain
             // 
