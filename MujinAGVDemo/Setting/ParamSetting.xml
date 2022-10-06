@@ -10,7 +10,7 @@
   <PodID>2222</PodID>
   <RobotID>112</RobotID>
   <DestinationMode>StorageID</DestinationMode>
-  <StationListPath>C:\MEIWA\MujinAGVDemo\MujinAGVDemo\社内デモエリア用移動テスト.csv</StationListPath>
+  <StationListPath>C:\Users\k_ohmura\source\repos\MujinAGVDemo\MujinAGVDemo\bin\Release\CSVSample\デンソー用移動テスト.csv</StationListPath>
   <ChargeZoneID>16292657541</ChargeZoneID>
   <NodeDatas>
     <NodeData>

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
+using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
@@ -9,6 +10,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Windows.Threading;
 using Hetu20dotnet;
 using Hetu20dotnet.Parameters;
 using Hetu20dotnet.ReturnMsgs;
@@ -76,6 +78,9 @@ namespace MujinAGVDemo
         private CancellationTokenSource cancelTokenSource = new CancellationTokenSource();
         private readonly Logger logger = LogManager.GetLogger("ProgramLogger");
 
+        Stopwatch stopwatch = new Stopwatch();
+        DispatcherTimer dispatcherTimer = new DispatcherTimer();
+
         #endregion Private Parameter
 
         #region Public Paramater
@@ -118,11 +123,19 @@ namespace MujinAGVDemo
                 agvDataControl.Settings.AddAGVHouseDictionary("116", "162918439278", "原位置", Color.LightGreen);
                 agvDataControl.Settings.AddAGVHouseDictionary("117", "1629184392169", "原位置", Color.LightGreen);
                 agvDataControl.Settings.AddAGVHouseDictionary("118", "1629184392168", "原位置", Color.LightGreen);
+                dispatcherTimer.Interval = new TimeSpan(0, 0, 0, 0, 10);
+                dispatcherTimer.Tick += DispatcherTimer_Tick;
             }
             catch (Exception ex)
             {
                 logger.Error(ex.ToString());
             }
+        }
+
+        private void DispatcherTimer_Tick(object sender, EventArgs e)
+        {
+            var result = stopwatch.Elapsed;
+            lblRunningTime.Text = $"動作時間[{result.TotalSeconds:N1}]sec";
         }
 
         private async void btnMovePod_Click(object sender, EventArgs e)
@@ -143,6 +156,9 @@ namespace MujinAGVDemo
 
         private async void btnRotationMove_Click(object sender, EventArgs e)
         {
+            logger.Info("連続動作開始");
+            stopwatch.Restart();
+            dispatcherTimer.Start();
             var stationListPath = param.StationListPath;
             var paramSetting = this.param;
             var robotID = param.RobotID;
@@ -150,6 +166,11 @@ namespace MujinAGVDemo
             updateParam();
             await movePodRotate(stationListPath, paramSetting, robotID, podID);
             unsetOwner(robotID);
+
+            if (dispatcherTimer.IsEnabled)
+                dispatcherTimer.Stop();
+            if (stopwatch.IsRunning)
+                stopwatch.Stop();
         }
 
         private async Task movePodRotate(string stationListPath, ParamSettings paramSetting, string robotID, string podID)
@@ -667,7 +688,7 @@ namespace MujinAGVDemo
                 if (cancelToken.IsCancellationRequested)
                 {
                     lblCurrentLineProcess.Text = "連続動作完了";
-                    showInfoMessageBox("連続動作完了");
+                    showInfoMessageBox($"連続動作完了:{lblRunningTime.Text}");
                     return;
                 }
                 if (!isInfinityLoop)
@@ -719,9 +740,10 @@ namespace MujinAGVDemo
             }
             //while (nowCount != param.RepeatCount && !cancelToken.IsCancellationRequested);
             while (isRunning);
-
+            dispatcherTimer.Stop();
+            stopwatch.Stop();
             lblCurrentLineProcess.Text = "連続動作完了";
-            showInfoMessageBox("連続動作完了");
+            showInfoMessageBox($"連続動作完了:{lblRunningTime.Text}");
 
         }
         private async Task moveRobot(string serverIP, string warehouseID, string robotID, string nodeID, CancellationToken token)

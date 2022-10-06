@@ -10,5 +10,24 @@
   <PodID>1120</PodID>
   <RobotID>112</RobotID>
   <DestinationMode>StorageID</DestinationMode>
-  <StationListPath>C:\Users\MEIWA\source\repos\MujinAGVDemo\MujinAGVDemo\bin\Debug\社内用移動テスト.csv</StationListPath>
+  <StationListPath>C:\MEIWA\MujinAGVDemo\MujinAGVDemo\社内デモエリア用移動テスト.csv</StationListPath>
+  <ChargeZoneID>16292657541</ChargeZoneID>
+  <NodeDatas>
+    <NodeData>
+      <Name>N1</Name>
+      <NodeID>162918439258</NodeID>
+    </NodeData>
+    <NodeData>
+      <Name>N2</Name>
+      <NodeID>162918439273</NodeID>
+    </NodeData>
+    <NodeData>
+      <Name>N3</Name>
+      <NodeID>1629184392514</NodeID>
+    </NodeData>
+    <NodeData>
+      <Name>N4</Name>
+      <NodeID>1629184392499</NodeID>
+    </NodeData>
+  </NodeDatas>
 </ParamSettings>

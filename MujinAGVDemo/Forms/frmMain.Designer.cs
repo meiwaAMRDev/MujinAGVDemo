@@ -120,6 +120,7 @@ namespace MujinAGVDemo
             this.デバッグToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.mnuMove = new System.Windows.Forms.ToolStripMenuItem();
             this.tmrAGVInfoUpdate = new System.Windows.Forms.Timer(this.components);
+            this.lblRunningTime = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.numRepeatCount)).BeginInit();
             this.statusStrip1.SuspendLayout();
             this.tabControl1.SuspendLayout();
@@ -260,7 +261,7 @@ namespace MujinAGVDemo
             this.btnRotationMove.Name = "btnRotationMove";
             this.btnRotationMove.Size = new System.Drawing.Size(147, 38);
             this.btnRotationMove.TabIndex = 24;
-            this.btnRotationMove.Text = "CSVに従って棚移動";
+            this.btnRotationMove.Text = "連続動作開始";
             this.btnRotationMove.UseVisualStyleBackColor = true;
             this.btnRotationMove.Click += new System.EventHandler(this.btnRotationMove_Click);
             // 
@@ -570,6 +571,7 @@ namespace MujinAGVDemo
             // 
             // tabAuto
             // 
+            this.tabAuto.Controls.Add(this.lblRunningTime);
             this.tabAuto.Controls.Add(this.label18);
             this.tabAuto.Controls.Add(this.label17);
             this.tabAuto.Controls.Add(this.btnSaveSampleCSV);
@@ -601,7 +603,7 @@ namespace MujinAGVDemo
             // label17
             // 
             this.label17.AutoSize = true;
-            this.label17.Location = new System.Drawing.Point(16, 161);
+            this.label17.Location = new System.Drawing.Point(17, 203);
             this.label17.Name = "label17";
             this.label17.Size = new System.Drawing.Size(195, 24);
             this.label17.TabIndex = 47;
@@ -619,7 +621,7 @@ namespace MujinAGVDemo
             // 
             // btnCancel
             // 
-            this.btnCancel.Location = new System.Drawing.Point(308, 162);
+            this.btnCancel.Location = new System.Drawing.Point(309, 204);
             this.btnCancel.Name = "btnCancel";
             this.btnCancel.Size = new System.Drawing.Size(147, 23);
             this.btnCancel.TabIndex = 45;
@@ -1063,6 +1065,15 @@ namespace MujinAGVDemo
             this.tmrAGVInfoUpdate.Interval = 5000;
             this.tmrAGVInfoUpdate.Tick += new System.EventHandler(this.tmrAGVInfoUpdate_Tick);
             // 
+            // lblRunningTime
+            // 
+            this.lblRunningTime.AutoSize = true;
+            this.lblRunningTime.Location = new System.Drawing.Point(307, 167);
+            this.lblRunningTime.Name = "lblRunningTime";
+            this.lblRunningTime.Size = new System.Drawing.Size(93, 12);
+            this.lblRunningTime.TabIndex = 49;
+            this.lblRunningTime.Text = "動作時間[0.0]sec";
+            // 
             // frmMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
@@ -1194,6 +1205,7 @@ namespace MujinAGVDemo
         private Hetu20dotnet.Controls.AGVDataControl agvDataControl;
         private System.Windows.Forms.TabPage tabAuto;
         private System.Windows.Forms.ToolStripMenuItem mnuMove;
+        private System.Windows.Forms.Label lblRunningTime;
     }
 }
 
