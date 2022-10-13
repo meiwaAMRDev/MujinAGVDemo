@@ -562,8 +562,8 @@ namespace MujinAGVDemo
         /// <param name="nodeData">ノード情報</param>
         private void addDgvMove(NodeData nodeData)
         {
-            dgvMove.Rows.Add(nodeData.Name, nodeData.NodeID, "AGV移動", "棚移動", "棚作成", "名前とノードを上書き");
-
+            //dgvMove.Rows.Add(nodeData.Name, nodeData.NodeID, "AGV移動", "棚移動", "棚作成", "名前とノードを上書き");
+            dgvMove.Rows.Add(nodeData.Name, nodeData.NodeID, "移動", "移動", "作成", "編集");
         }
         /// <summary>
         /// ノード情報DGVを一旦クリアしてから更新します。
@@ -576,6 +576,7 @@ namespace MujinAGVDemo
             {
                 addDgvMove(x);
             });
+            dgvMove.AutoResizeColumns();
         }
 
         #endregion Method
@@ -857,6 +858,43 @@ namespace MujinAGVDemo
             }
             var frm = new frmDGV(Factory);
             frm.Show();
+        }
+        private void btnLoadNodeData_Click(object sender, EventArgs e)
+        {
+            var filePath = string.Empty;
+
+            var openFileDialog = new OpenFileDialog
+            {
+                Title = "ノード設定ファイルを選択",
+                InitialDirectory = Path.GetDirectoryName($"NodeDataSample/設備とノード.csv"),
+                Filter = "CSVファイル|*.csv"
+            };
+
+            if (openFileDialog.ShowDialog() == DialogResult.OK)
+            {
+                filePath = openFileDialog.FileName;
+                try
+                {
+                    var nodeDatas = new List<NodeData>();
+                    var allLines = File.ReadAllLines(filePath, Encoding.Default).ToList();
+                    allLines.ForEach(x =>
+                    {
+                        var splitX = x.Split(',').ToList();
+                        nodeDatas.Add(new NodeData(name: splitX[0], nodeID: splitX[1]));
+                    });
+                    param.NodeDatas = nodeDatas;
+                    updateDgvMove(param.NodeDatas);
+                }
+                catch (Exception ex)
+                {
+                    logger.Error($"ノードデータ読込時にエラーが発生しました。{ex.ToString()}");
+                }
+            }
+            else
+            {
+                logger.Info("設定ファイルの選択がキャンセルされました。");
+            }
+            openFileDialog.Dispose();
         }
     }
 

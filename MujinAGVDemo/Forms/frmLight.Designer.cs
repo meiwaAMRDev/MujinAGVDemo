@@ -63,6 +63,7 @@ namespace MujinAGVDemo
             this.mnuOpenDGV = new System.Windows.Forms.ToolStripMenuItem();
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabMove = new System.Windows.Forms.TabPage();
+            this.btnLoadNodeData = new System.Windows.Forms.Button();
             this.btnCycleMovePod = new System.Windows.Forms.Button();
             this.btnCycleMoveRobot = new System.Windows.Forms.Button();
             this.dgvMove = new System.Windows.Forms.DataGridView();
@@ -378,21 +379,32 @@ namespace MujinAGVDemo
             this.tabControl1.Location = new System.Drawing.Point(2, 27);
             this.tabControl1.Name = "tabControl1";
             this.tabControl1.SelectedIndex = 0;
-            this.tabControl1.Size = new System.Drawing.Size(486, 170);
+            this.tabControl1.Size = new System.Drawing.Size(529, 170);
             this.tabControl1.TabIndex = 74;
             // 
             // tabMove
             // 
+            this.tabMove.Controls.Add(this.btnLoadNodeData);
             this.tabMove.Controls.Add(this.btnCycleMovePod);
             this.tabMove.Controls.Add(this.btnCycleMoveRobot);
             this.tabMove.Controls.Add(this.dgvMove);
             this.tabMove.Location = new System.Drawing.Point(4, 22);
             this.tabMove.Name = "tabMove";
             this.tabMove.Padding = new System.Windows.Forms.Padding(3);
-            this.tabMove.Size = new System.Drawing.Size(478, 144);
+            this.tabMove.Size = new System.Drawing.Size(521, 144);
             this.tabMove.TabIndex = 1;
             this.tabMove.Text = "移動指示";
             this.tabMove.UseVisualStyleBackColor = true;
+            // 
+            // btnLoadNodeData
+            // 
+            this.btnLoadNodeData.Location = new System.Drawing.Point(195, 118);
+            this.btnLoadNodeData.Name = "btnLoadNodeData";
+            this.btnLoadNodeData.Size = new System.Drawing.Size(103, 23);
+            this.btnLoadNodeData.TabIndex = 3;
+            this.btnLoadNodeData.Text = "ノード情報取得";
+            this.btnLoadNodeData.UseVisualStyleBackColor = true;
+            this.btnLoadNodeData.Click += new System.EventHandler(this.btnLoadNodeData_Click);
             // 
             // btnCycleMovePod
             // 
@@ -431,7 +443,7 @@ namespace MujinAGVDemo
             this.dgvMove.Name = "dgvMove";
             this.dgvMove.RowHeadersVisible = false;
             this.dgvMove.RowTemplate.Height = 21;
-            this.dgvMove.Size = new System.Drawing.Size(472, 114);
+            this.dgvMove.Size = new System.Drawing.Size(515, 114);
             this.dgvMove.TabIndex = 0;
             this.dgvMove.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgvMove_CellContentClick);
             // 
@@ -451,30 +463,34 @@ namespace MujinAGVDemo
             // 
             // colMoveAGV
             // 
-            this.colMoveAGV.HeaderText = "AGV移動";
+            this.colMoveAGV.HeaderText = "AGV";
             this.colMoveAGV.Name = "colMoveAGV";
-            this.colMoveAGV.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Programmatic;
-            this.colMoveAGV.Width = 78;
+            this.colMoveAGV.Resizable = System.Windows.Forms.DataGridViewTriState.True;
+            this.colMoveAGV.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
+            this.colMoveAGV.Width = 54;
             // 
             // colMovePod
             // 
-            this.colMovePod.HeaderText = "棚移動";
+            this.colMovePod.HeaderText = "棚";
             this.colMovePod.Name = "colMovePod";
-            this.colMovePod.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Programmatic;
-            this.colMovePod.Width = 66;
+            this.colMovePod.Resizable = System.Windows.Forms.DataGridViewTriState.True;
+            this.colMovePod.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
+            this.colMovePod.Width = 42;
             // 
             // colAddPod
             // 
-            this.colAddPod.HeaderText = "棚作成";
+            this.colAddPod.HeaderText = "棚";
             this.colAddPod.Name = "colAddPod";
-            this.colAddPod.Width = 47;
+            this.colAddPod.Resizable = System.Windows.Forms.DataGridViewTriState.True;
+            this.colAddPod.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
+            this.colAddPod.Width = 42;
             // 
             // colEdit
             // 
             this.colEdit.HeaderText = "編集";
             this.colEdit.Name = "colEdit";
             this.colEdit.Resizable = System.Windows.Forms.DataGridViewTriState.True;
-            this.colEdit.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Programmatic;
+            this.colEdit.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
             this.colEdit.Width = 54;
             // 
             // tabSetting
@@ -504,7 +520,7 @@ namespace MujinAGVDemo
             this.tabSetting.Location = new System.Drawing.Point(4, 22);
             this.tabSetting.Name = "tabSetting";
             this.tabSetting.Padding = new System.Windows.Forms.Padding(3);
-            this.tabSetting.Size = new System.Drawing.Size(478, 144);
+            this.tabSetting.Size = new System.Drawing.Size(521, 144);
             this.tabSetting.TabIndex = 0;
             this.tabSetting.Text = "基本設定";
             this.tabSetting.UseVisualStyleBackColor = true;
@@ -721,7 +737,7 @@ namespace MujinAGVDemo
         private System.Windows.Forms.Button btnLiftDown;
         private System.Windows.Forms.ToolStripMenuItem mnuOpenLog;
         private System.Windows.Forms.ListBox listBoxPodDirection;
-        private System.Windows.Forms.Label label7;
+        private System.Windows.Forms.Label label7;        
         private System.Windows.Forms.DataGridViewTextBoxColumn colName;
         private System.Windows.Forms.DataGridViewTextBoxColumn colNode;
         private System.Windows.Forms.DataGridViewButtonColumn colMoveAGV;
@@ -731,5 +747,6 @@ namespace MujinAGVDemo
         private System.Windows.Forms.Button btnGetAGVData;
         private System.Windows.Forms.CheckBox chkAllSet;
         private System.Windows.Forms.ToolStripMenuItem mnuOpenDGV;
+        private System.Windows.Forms.Button btnLoadNodeData;
     }
 }
