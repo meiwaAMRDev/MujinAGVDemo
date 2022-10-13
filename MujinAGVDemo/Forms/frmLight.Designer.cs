@@ -466,7 +466,7 @@ namespace MujinAGVDemo
             this.colMoveAGV.HeaderText = "AGV";
             this.colMoveAGV.Name = "colMoveAGV";
             this.colMoveAGV.Resizable = System.Windows.Forms.DataGridViewTriState.True;
-            this.colMoveAGV.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
+            this.colMoveAGV.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Programmatic;
             this.colMoveAGV.Width = 54;
             // 
             // colMovePod
@@ -474,7 +474,7 @@ namespace MujinAGVDemo
             this.colMovePod.HeaderText = "棚";
             this.colMovePod.Name = "colMovePod";
             this.colMovePod.Resizable = System.Windows.Forms.DataGridViewTriState.True;
-            this.colMovePod.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
+            this.colMovePod.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Programmatic;
             this.colMovePod.Width = 42;
             // 
             // colAddPod
@@ -482,7 +482,7 @@ namespace MujinAGVDemo
             this.colAddPod.HeaderText = "棚";
             this.colAddPod.Name = "colAddPod";
             this.colAddPod.Resizable = System.Windows.Forms.DataGridViewTriState.True;
-            this.colAddPod.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
+            this.colAddPod.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Programmatic;
             this.colAddPod.Width = 42;
             // 
             // colEdit
@@ -490,7 +490,7 @@ namespace MujinAGVDemo
             this.colEdit.HeaderText = "編集";
             this.colEdit.Name = "colEdit";
             this.colEdit.Resizable = System.Windows.Forms.DataGridViewTriState.True;
-            this.colEdit.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
+            this.colEdit.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Programmatic;
             this.colEdit.Width = 54;
             // 
             // tabSetting
