@@ -321,6 +321,13 @@ namespace MujinAGVDemo
         {
             //var (isSuccess, table) = Command.MapCommands.GetAgvDetailTable(param.ServerIP, param.WarehouseID);
             var factory = new CommandFactory(param.ServerIP, param.WarehouseID);
+            if (!factory.IsConnectedTESServer())
+            {
+                checkBoxTimerRun.Checked = false;
+                var message = $"Hetuサーバーに接続できないためAGV状態監視を終了します。IP:[{param.ServerIP}] WarehouseID:[{param.WarehouseID}]";
+                showErrorMessageBox($"{message}");
+                return;
+            }
             var getRobotListRet = (GetRobotListReturnMessage)factory.Create(new GetRobotListParam()).DoAction();
             var getPodListRet = (GetPodListFromDBReturnMessage)factory.Create(new GetPodListFromDBParam()).DoAction();
             if (getRobotListRet.Data != null)
