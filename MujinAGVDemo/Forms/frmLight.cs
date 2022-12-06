@@ -110,6 +110,7 @@ namespace MujinAGVDemo
                 agvDataControl.Settings.AddAGVHouseDictionary("116", "162918439278", "原位置", Color.LightGreen);
                 agvDataControl.Settings.AddAGVHouseDictionary("117", "1629184392169", "原位置", Color.LightGreen);
                 agvDataControl.Settings.AddAGVHouseDictionary("118", "1629184392168", "原位置", Color.LightGreen);
+                agvDataControl.Settings.AddAGVHouseDictionary("119", "1629184392170", "原位置", Color.LightGreen);
             }
             catch (Exception ex)
             {
@@ -874,7 +875,7 @@ namespace MujinAGVDemo
             {
                 Title = "ノード設定ファイルを選択",
                 InitialDirectory = Path.GetDirectoryName($"NodeDataSample/設備とノード.csv"),
-                Filter = "CSVファイル|*.csv"
+                Filter = "CSVファイル|*.csv|すべてのファイル|*.*"
             };
 
             if (openFileDialog.ShowDialog() == DialogResult.OK)
@@ -883,18 +884,20 @@ namespace MujinAGVDemo
                 try
                 {
                     var nodeDatas = new List<NodeData>();
-                    var allLines = File.ReadAllLines(filePath, Encoding.Default).ToList();
+                    var enc = GetEncoding(filePath);
+                    var allLines = File.ReadAllLines(filePath, enc).ToList();
                     allLines.ForEach(x =>
                     {
                         var splitX = x.Split(',').ToList();
-                        nodeDatas.Add(new NodeData(name: splitX[0], nodeID: splitX[1]));
+                        nodeDatas.Add(new NodeData(name: splitX[0], nodeID: splitX[1].Trim()));
                     });
                     param.NodeDatas = nodeDatas;
                     updateDgvMove(param.NodeDatas);
+                    showInfoMessageBox($"ノードデータを更新しました。[{filePath}]");
                 }
                 catch (Exception ex)
                 {
-                    logger.Error($"ノードデータ読込時にエラーが発生しました。{ex.ToString()}");
+                    showErrorMessageBox($"ノードデータ読込時にエラーが発生しました。{ex.ToString()}");
                 }
             }
             else
@@ -902,6 +905,31 @@ namespace MujinAGVDemo
                 logger.Info("設定ファイルの選択がキャンセルされました。");
             }
             openFileDialog.Dispose();
+        }
+        /// <summary>
+        /// 指定したファイルのエンコーディングを判別して取得します。
+        /// </summary>
+        /// <param name="filename"></param>
+        /// <returns></returns>
+        public static Encoding GetEncoding(string filename)
+        {
+            // BOMを取得
+            var bom = new byte[4];
+            using (var file = new FileStream(filename, FileMode.Open, FileAccess.Read))
+            {
+                file.Read(bom, 0, 4);
+            }
+
+            // BOMを解析
+            if (bom[0] == 0x2b && bom[1] == 0x2f && bom[2] == 0x76) return Encoding.UTF7;                             // UTF-7
+            if (bom[0] == 0xef && bom[1] == 0xbb && bom[2] == 0xbf) return Encoding.UTF8;                             // UTF-8
+            if (bom[0] == 0xff && bom[1] == 0xfe) return Encoding.Unicode;                                            // UTF-16LE
+            if (bom[0] == 0xfe && bom[1] == 0xff) return Encoding.BigEndianUnicode;                                   // UTF-16BE
+            if (bom[0] == 0xff && bom[1] == 0xfe && bom[2] == 0x00 && bom[3] == 0x00) return Encoding.Unicode;        // UTF-32LE
+            if (bom[0] == 0 && bom[1] == 0 && bom[2] == 0xfe && bom[3] == 0xff) return new UTF32Encoding(true, true); // UTF-32BE
+            //return Encoding.ASCII;
+            //return Encoding.Default;
+            return Encoding.GetEncoding("Shift_Jis");
         }
     }
 
