@@ -73,6 +73,7 @@ namespace MujinAGVDemo
         private readonly FileIO fileIO = new FileIO();
         private readonly Logger logger = LogManager.GetLogger("ProgramLogger");
         private CancellationTokenSource source = new CancellationTokenSource();
+        private List<string> nodeNames = new List<string>();
         #endregion Private Parameter
 
         #region Public Paramater
@@ -111,6 +112,26 @@ namespace MujinAGVDemo
                 agvDataControl.Settings.AddAGVHouseDictionary("117", "1629184392169", "原位置", Color.LightGreen);
                 agvDataControl.Settings.AddAGVHouseDictionary("118", "1629184392168", "原位置", Color.LightGreen);
                 agvDataControl.Settings.AddAGVHouseDictionary("119", "1629184392170", "原位置", Color.LightGreen);
+                cmbNode1.DataSource = nodeNames;
+                cmbNode2.DataSource = nodeNames;
+                cmbTempNode.DataSource = nodeNames;
+                cmbNode1.BindingContext = new BindingContext();
+                cmbNode2.BindingContext = new BindingContext();
+                cmbTempNode.BindingContext = new BindingContext();
+                cmbNode1.SelectedItem = "B1";
+                cmbNode2.SelectedItem = "F1";
+                cmbTempNode.SelectedItem = "C1";
+
+
+                //var node1 = param.NodeDatas.Where(x => x.NodeID == txtNode1.Text).FirstOrDefault();
+                //if (node1 != null)
+                //    cmbNode1.SelectedItem = node1.Name;
+                //var node2 = param.NodeDatas.Where(x => x.NodeID == txtNode2.Text).FirstOrDefault();
+                //if (node2 != null)
+                //    cmbNode2.SelectedItem = node2.Name;
+                //var nodeTemp = param.NodeDatas.Where(x => x.NodeID == txtTempNode1.Text).FirstOrDefault();
+                //if (nodeTemp != null)
+                //    cmbTempNode.SelectedItem = nodeTemp.Name;
             }
             catch (Exception ex)
             {
@@ -580,9 +601,13 @@ namespace MujinAGVDemo
         private void updateDgvMove(List<NodeData> nodeDatas)
         {
             dgvMove.Rows.Clear();
+            //cmbTempNode.Items.Clear();
+            nodeNames.Clear();
             nodeDatas.ForEach(x =>
             {
                 addDgvMove(x);
+                //cmbTempNode.Items.Add(x.Name);
+                nodeNames.Add(x.Name);
             });
             dgvMove.AutoResizeColumns();
         }
@@ -930,6 +955,145 @@ namespace MujinAGVDemo
             //return Encoding.ASCII;
             //return Encoding.Default;
             return Encoding.GetEncoding("Shift_Jis");
+        }
+
+        private async void btnExchangePod_ClickAsync(object sender, EventArgs e)
+        {
+            if (Factory == null)
+            {
+                Factory = new CommandFactory(param.ServerIP, param.WarehouseID);
+            }
+
+            try
+            {
+                var podID1 = txtPod1.Text;
+                var nodeID1 = txtNode1.Text;
+                var nodeIDTemp1 = txtTempNode1.Text;
+                var pod1Param = new ExchangePodParam(podID1, nodeIDTemp1, nodeID1);
+
+                var podID2 = txtPod2.Text;
+                var nodeID2 = txtNode2.Text;
+                //var nodeIDTemp2 = txtTempNode2.Text;
+                var pod2Param = new ExchangePodParam(podID2, string.Empty, nodeID2);
+
+                var startTime = DateTime.Now;
+
+                await ExchangePod(
+                    factory: Factory,
+                    groupID: "c1665124782852",
+                    pod1: pod1Param,
+                    pod2: pod2Param
+                    );
+                var endTime = DateTime.Now;
+                var movingTime = endTime - startTime;
+
+                showInfoMessageBox($"棚交換が完了しました。経過時間[{movingTime.ToString(@"hh\時\間mm\分ss\秒ff")}]");
+            }
+            catch (Exception ex)
+            {
+                showErrorMessageBox($"棚交換でエラーが発生しました。{ex.ToString()}");
+            }
+        }
+
+        private void btnChangePodID_Click(object sender, EventArgs e)
+        {
+            var temp = txtPod1.Text;
+            txtPod1.Text = txtPod2.Text;
+            txtPod2.Text = temp;
+        }
+
+        public async Task ExchangePod(CommandFactory factory, string groupID, ExchangePodParam pod1, ExchangePodParam pod2)
+        {
+            var tempParam1 = new MovePodAutoSelectAGVParam(robotGroupID: groupID,
+                                                             podID: pod1.PodID,
+                                                             desMode: DestinationModes.StorageID,
+                                                             //turnMode:param.TurnMode,
+                                                             unload: 0,
+                                                             desID: pod1.TempNodeID
+                                                             );
+            //var tempParam2 = new MovePodAutoSelectAGVParam(robotGroupID: groupID,
+            //                                                 podID: pod2.PodID,
+            //                                                 desMode: DestinationModes.StorageID,
+            //                                                 //turnMode:param.TurnMode,
+            //                                                 unload: 0,
+            //                                                 desID: pod2.TempNodeID
+            //                                                 );
+
+            var moveParam2 = new MovePodAutoSelectAGVParam(robotGroupID: groupID,
+                                                                 podID: pod2.PodID,
+                                                                 desMode: DestinationModes.StorageID,
+                                                                 //turnMode:param.TurnMode,
+                                                                 //unload:param.Unload,
+                                                                 desID: pod2.NodeID);
+
+            var moveParam1 = new MovePodAutoSelectAGVParam(robotGroupID: groupID,
+                                                             podID: pod1.PodID,
+                                                             desMode: DestinationModes.StorageID,
+                                                             //turnMode:param.TurnMode,
+                                                             //unload:param.Unload,
+                                                             desID: pod1.NodeID
+                                                             );
+            await MovePodAuto(factory, tempParam1);
+            //await Task.WhenAll(new Task[] { MovePodAuto(factory, tempParam1), MovePodAuto(factory, tempParam2) });
+            await Task.WhenAll(new Task[] { MovePodAuto(factory, moveParam1), MovePodAuto(factory, moveParam2) });
+
+        }
+
+        private async Task MovePodAuto(CommandFactory factory, MovePodAutoSelectAGVParam param)
+        {
+            var moveTask = new Task(() =>
+            {
+                var returnMessage = factory.Create(param).DoAction() as MovePodAutoSelectAGVReturnMessage;
+            });
+            moveTask.Start();
+            await moveTask.ConfigureAwait(true);
+            return;
+        }
+        public class ExchangePodParam
+        {
+            public string PodID { get; set; }
+            public string TempNodeID { get; set; }
+            public string NodeID { get; set; }
+
+            public ExchangePodParam(string podID, string tempNodeID, string nodeID)
+            {
+                PodID = podID;
+                TempNodeID = tempNodeID;
+                NodeID = nodeID;
+            }
+        }
+
+        private void cmbTempNode_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            var node = param.NodeDatas.Where(x => x.Name == cmbTempNode.SelectedItem.ToString()).FirstOrDefault();
+            if (node == null)
+                return;
+            else
+            {
+                txtTempNode1.Text = node.NodeID;
+            }
+        }
+
+        private void cmbNode1_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            var node = param.NodeDatas.Where(x => x.Name == cmbNode1.SelectedItem.ToString()).FirstOrDefault();
+            if (node == null)
+                return;
+            else
+            {
+                txtNode1.Text = node.NodeID;
+            }
+        }
+
+        private void cmbNode2_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            var node = param.NodeDatas.Where(x => x.Name == cmbNode2.SelectedItem.ToString()).FirstOrDefault();
+            if (node == null)
+                return;
+            else
+            {
+                txtNode2.Text = node.NodeID;
+            }
         }
     }
 

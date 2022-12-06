@@ -2,32 +2,84 @@
 <ParamSettings xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
   <TurnMode>0</TurnMode>
   <Unload>1</Unload>
-  <RepeatCount>1</RepeatCount>
-  <ServerIP>172.17.131.232</ServerIP>
+  <RepeatCount>10</RepeatCount>
+  <ServerIP>172.17.131.231</ServerIP>
   <WarehouseID>360286233865224207</WarehouseID>
-  <LayoutID>c1629264762498</LayoutID>
-  <NodeID>162918439258</NodeID>
-  <PodID>2222</PodID>
-  <RobotID>112</RobotID>
+  <LayoutID>c1670220174672</LayoutID>
+  <NodeID>1665121976125</NodeID>
+  <PodID>1</PodID>
+  <RobotID>1</RobotID>
   <DestinationMode>StorageID</DestinationMode>
-  <StationListPath>C:\Users\k_ohmura\source\repos\MujinAGVDemo\MujinAGVDemo\bin\Release\CSVSample\デンソー用移動テスト.csv</StationListPath>
-  <ChargeZoneID>16292657541</ChargeZoneID>
+  <StationListPath>C:\Users\MEIWA\source\repos\MujinAGVDemo\MujinAGVDemo\bin\Debug\社内用移動テスト.csv</StationListPath>
+  <ChargeZoneID>16651224036</ChargeZoneID>
   <NodeDatas>
     <NodeData>
-      <Name>N1</Name>
-      <NodeID>162918439258</NodeID>
+      <Name>A1</Name>
+      <NodeID>166512197635</NodeID>
     </NodeData>
     <NodeData>
-      <Name>N2</Name>
-      <NodeID>162918439256</NodeID>
+      <Name>B1</Name>
+      <NodeID>166512197650</NodeID>
     </NodeData>
     <NodeData>
-      <Name>N3</Name>
-      <NodeID>162918439271</NodeID>
+      <Name>C1</Name>
+      <NodeID>166512197665</NodeID>
     </NodeData>
     <NodeData>
-      <Name>N4</Name>
-      <NodeID>162918439273</NodeID>
+      <Name>D1</Name>
+      <NodeID>166512197680</NodeID>
+    </NodeData>
+    <NodeData>
+      <Name>E1</Name>
+      <NodeID>166512197695</NodeID>
+    </NodeData>
+    <NodeData>
+      <Name>F1</Name>
+      <NodeID>1665121976110</NodeID>
+    </NodeData>
+    <NodeData>
+      <Name>G1</Name>
+      <NodeID>1665121976140</NodeID>
+    </NodeData>
+    <NodeData>
+      <Name>H1</Name>
+      <NodeID>1665121976125</NodeID>
+    </NodeData>
+    <NodeData>
+      <Name>A2</Name>
+      <NodeID>166512197636</NodeID>
+    </NodeData>
+    <NodeData>
+      <Name>B2</Name>
+      <NodeID>166512197651</NodeID>
+    </NodeData>
+    <NodeData>
+      <Name>C2</Name>
+      <NodeID>166512197666</NodeID>
+    </NodeData>
+    <NodeData>
+      <Name>D2</Name>
+      <NodeID>166512197681</NodeID>
+    </NodeData>
+    <NodeData>
+      <Name>E2</Name>
+      <NodeID>166512197696</NodeID>
+    </NodeData>
+    <NodeData>
+      <Name>F2</Name>
+      <NodeID>1665121976111</NodeID>
+    </NodeData>
+    <NodeData>
+      <Name>G2</Name>
+      <NodeID>1665121976141</NodeID>
+    </NodeData>
+    <NodeData>
+      <Name>H2</Name>
+      <NodeID>1665121976126</NodeID>
+    </NodeData>
+    <NodeData>
+      <Name>Charge</Name>
+      <NodeID>166512197697</NodeID>
     </NodeData>
   </NodeDatas>
 </ParamSettings>
