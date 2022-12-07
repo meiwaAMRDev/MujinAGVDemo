@@ -81,6 +81,16 @@ namespace MujinAGVDemo
             this.chkUnload = new System.Windows.Forms.CheckBox();
             this.chkTurn = new System.Windows.Forms.CheckBox();
             this.tabExchange = new System.Windows.Forms.TabPage();
+            this.cmbNode2 = new System.Windows.Forms.ComboBox();
+            this.cmbNode1 = new System.Windows.Forms.ComboBox();
+            this.cmbTempNode = new System.Windows.Forms.ComboBox();
+            this.label14 = new System.Windows.Forms.Label();
+            this.label13 = new System.Windows.Forms.Label();
+            this.label12 = new System.Windows.Forms.Label();
+            this.label11 = new System.Windows.Forms.Label();
+            this.label10 = new System.Windows.Forms.Label();
+            this.label9 = new System.Windows.Forms.Label();
+            this.textBoxGroupID = new System.Windows.Forms.TextBox();
             this.txtTempNode2 = new System.Windows.Forms.TextBox();
             this.btnChangePodID = new System.Windows.Forms.Button();
             this.txtNode2 = new System.Windows.Forms.TextBox();
@@ -95,16 +105,6 @@ namespace MujinAGVDemo
             this.btnLiftDown = new System.Windows.Forms.Button();
             this.btnGetAGVData = new System.Windows.Forms.Button();
             this.chkAllSet = new System.Windows.Forms.CheckBox();
-            this.textBoxGroupID = new System.Windows.Forms.TextBox();
-            this.label9 = new System.Windows.Forms.Label();
-            this.label10 = new System.Windows.Forms.Label();
-            this.label11 = new System.Windows.Forms.Label();
-            this.label12 = new System.Windows.Forms.Label();
-            this.label13 = new System.Windows.Forms.Label();
-            this.label14 = new System.Windows.Forms.Label();
-            this.cmbTempNode = new System.Windows.Forms.ComboBox();
-            this.cmbNode1 = new System.Windows.Forms.ComboBox();
-            this.cmbNode2 = new System.Windows.Forms.ComboBox();
             this.menuStrip1.SuspendLayout();
             this.tabControl1.SuspendLayout();
             this.tabMove.SuspendLayout();
@@ -636,17 +636,109 @@ namespace MujinAGVDemo
             this.tabExchange.Text = "棚交換";
             this.tabExchange.UseVisualStyleBackColor = true;
             // 
+            // cmbNode2
+            // 
+            this.cmbNode2.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cmbNode2.FormattingEnabled = true;
+            this.cmbNode2.Location = new System.Drawing.Point(256, 102);
+            this.cmbNode2.Name = "cmbNode2";
+            this.cmbNode2.Size = new System.Drawing.Size(133, 20);
+            this.cmbNode2.TabIndex = 59;
+            this.cmbNode2.SelectedIndexChanged += new System.EventHandler(this.cmbNode2_SelectedIndexChanged);
+            // 
+            // cmbNode1
+            // 
+            this.cmbNode1.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cmbNode1.FormattingEnabled = true;
+            this.cmbNode1.Location = new System.Drawing.Point(60, 102);
+            this.cmbNode1.Name = "cmbNode1";
+            this.cmbNode1.Size = new System.Drawing.Size(133, 20);
+            this.cmbNode1.TabIndex = 58;
+            this.cmbNode1.SelectedIndexChanged += new System.EventHandler(this.cmbNode1_SelectedIndexChanged);
+            // 
+            // cmbTempNode
+            // 
+            this.cmbTempNode.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cmbTempNode.FormattingEnabled = true;
+            this.cmbTempNode.Location = new System.Drawing.Point(60, 57);
+            this.cmbTempNode.Name = "cmbTempNode";
+            this.cmbTempNode.Size = new System.Drawing.Size(133, 20);
+            this.cmbTempNode.TabIndex = 57;
+            this.cmbTempNode.SelectedIndexChanged += new System.EventHandler(this.cmbTempNode_SelectedIndexChanged);
+            // 
+            // label14
+            // 
+            this.label14.AutoSize = true;
+            this.label14.Location = new System.Drawing.Point(393, 52);
+            this.label14.Name = "label14";
+            this.label14.Size = new System.Drawing.Size(54, 12);
+            this.label14.TabIndex = 56;
+            this.label14.Text = "グループID";
+            // 
+            // label13
+            // 
+            this.label13.AutoSize = true;
+            this.label13.Location = new System.Drawing.Point(254, 5);
+            this.label13.Name = "label13";
+            this.label13.Size = new System.Drawing.Size(23, 12);
+            this.label13.TabIndex = 55;
+            this.label13.Text = "棚2";
+            // 
+            // label12
+            // 
+            this.label12.AutoSize = true;
+            this.label12.Location = new System.Drawing.Point(58, 5);
+            this.label12.Name = "label12";
+            this.label12.Size = new System.Drawing.Size(23, 12);
+            this.label12.TabIndex = 54;
+            this.label12.Text = "棚1";
+            // 
+            // label11
+            // 
+            this.label11.AutoSize = true;
+            this.label11.Location = new System.Drawing.Point(10, 102);
+            this.label11.Name = "label11";
+            this.label11.Size = new System.Drawing.Size(48, 24);
+            this.label11.TabIndex = 53;
+            this.label11.Text = "目的P点\r\nノードID";
+            // 
+            // label10
+            // 
+            this.label10.AutoSize = true;
+            this.label10.Location = new System.Drawing.Point(10, 60);
+            this.label10.Name = "label10";
+            this.label10.Size = new System.Drawing.Size(43, 24);
+            this.label10.TabIndex = 52;
+            this.label10.Text = "退避先\r\nノードID";
+            // 
+            // label9
+            // 
+            this.label9.AutoSize = true;
+            this.label9.Location = new System.Drawing.Point(10, 25);
+            this.label9.Name = "label9";
+            this.label9.Size = new System.Drawing.Size(28, 12);
+            this.label9.TabIndex = 51;
+            this.label9.Text = "棚ID";
+            // 
+            // textBoxGroupID
+            // 
+            this.textBoxGroupID.Location = new System.Drawing.Point(395, 69);
+            this.textBoxGroupID.Name = "textBoxGroupID";
+            this.textBoxGroupID.Size = new System.Drawing.Size(123, 19);
+            this.textBoxGroupID.TabIndex = 50;
+            this.textBoxGroupID.Text = "c1665124782852";
+            // 
             // txtTempNode2
             // 
-            this.txtTempNode2.Location = new System.Drawing.Point(280, 77);
+            this.txtTempNode2.Location = new System.Drawing.Point(256, 77);
             this.txtTempNode2.Name = "txtTempNode2";
-            this.txtTempNode2.Size = new System.Drawing.Size(87, 19);
+            this.txtTempNode2.Size = new System.Drawing.Size(133, 19);
             this.txtTempNode2.TabIndex = 7;
             this.txtTempNode2.Visible = false;
             // 
             // btnChangePodID
             // 
-            this.btnChangePodID.Location = new System.Drawing.Point(212, 22);
+            this.btnChangePodID.Location = new System.Drawing.Point(200, 22);
             this.btnChangePodID.Name = "btnChangePodID";
             this.btnChangePodID.Size = new System.Drawing.Size(50, 119);
             this.btnChangePodID.TabIndex = 6;
@@ -656,49 +748,49 @@ namespace MujinAGVDemo
             // 
             // txtNode2
             // 
-            this.txtNode2.Location = new System.Drawing.Point(280, 122);
+            this.txtNode2.Location = new System.Drawing.Point(256, 122);
             this.txtNode2.Name = "txtNode2";
-            this.txtNode2.Size = new System.Drawing.Size(87, 19);
+            this.txtNode2.Size = new System.Drawing.Size(133, 19);
             this.txtNode2.TabIndex = 5;
             this.txtNode2.Text = "166512197650";
             // 
             // txtNode1
             // 
-            this.txtNode1.Location = new System.Drawing.Point(109, 122);
+            this.txtNode1.Location = new System.Drawing.Point(60, 122);
             this.txtNode1.Name = "txtNode1";
-            this.txtNode1.Size = new System.Drawing.Size(87, 19);
+            this.txtNode1.Size = new System.Drawing.Size(133, 19);
             this.txtNode1.TabIndex = 4;
             this.txtNode1.Text = "166512197651";
             // 
             // txtPod2
             // 
-            this.txtPod2.Location = new System.Drawing.Point(280, 22);
+            this.txtPod2.Location = new System.Drawing.Point(256, 22);
             this.txtPod2.Name = "txtPod2";
-            this.txtPod2.Size = new System.Drawing.Size(87, 19);
+            this.txtPod2.Size = new System.Drawing.Size(133, 19);
             this.txtPod2.TabIndex = 3;
             this.txtPod2.Text = "2";
             // 
             // txtTempNode1
             // 
-            this.txtTempNode1.Location = new System.Drawing.Point(109, 77);
+            this.txtTempNode1.Location = new System.Drawing.Point(60, 77);
             this.txtTempNode1.Name = "txtTempNode1";
-            this.txtTempNode1.Size = new System.Drawing.Size(87, 19);
+            this.txtTempNode1.Size = new System.Drawing.Size(133, 19);
             this.txtTempNode1.TabIndex = 2;
             this.txtTempNode1.Text = "166512197665";
             // 
             // txtPod1
             // 
-            this.txtPod1.Location = new System.Drawing.Point(109, 22);
+            this.txtPod1.Location = new System.Drawing.Point(60, 22);
             this.txtPod1.Name = "txtPod1";
-            this.txtPod1.Size = new System.Drawing.Size(87, 19);
+            this.txtPod1.Size = new System.Drawing.Size(133, 19);
             this.txtPod1.TabIndex = 1;
             this.txtPod1.Text = "1";
             // 
             // btnExchangePod
             // 
-            this.btnExchangePod.Location = new System.Drawing.Point(411, 79);
+            this.btnExchangePod.Location = new System.Drawing.Point(395, 98);
             this.btnExchangePod.Name = "btnExchangePod";
-            this.btnExchangePod.Size = new System.Drawing.Size(98, 46);
+            this.btnExchangePod.Size = new System.Drawing.Size(123, 46);
             this.btnExchangePod.TabIndex = 0;
             this.btnExchangePod.Text = "棚交換実行";
             this.btnExchangePod.UseVisualStyleBackColor = true;
@@ -767,98 +859,6 @@ namespace MujinAGVDemo
             this.chkAllSet.Text = "全占有";
             this.chkAllSet.UseVisualStyleBackColor = false;
             this.chkAllSet.CheckedChanged += new System.EventHandler(this.chkAllSet_CheckedChanged);
-            // 
-            // textBoxGroupID
-            // 
-            this.textBoxGroupID.Location = new System.Drawing.Point(411, 50);
-            this.textBoxGroupID.Name = "textBoxGroupID";
-            this.textBoxGroupID.Size = new System.Drawing.Size(98, 19);
-            this.textBoxGroupID.TabIndex = 50;
-            this.textBoxGroupID.Text = "c1665124782852";
-            // 
-            // label9
-            // 
-            this.label9.AutoSize = true;
-            this.label9.Location = new System.Drawing.Point(10, 25);
-            this.label9.Name = "label9";
-            this.label9.Size = new System.Drawing.Size(28, 12);
-            this.label9.TabIndex = 51;
-            this.label9.Text = "棚ID";
-            // 
-            // label10
-            // 
-            this.label10.AutoSize = true;
-            this.label10.Location = new System.Drawing.Point(10, 80);
-            this.label10.Name = "label10";
-            this.label10.Size = new System.Drawing.Size(79, 12);
-            this.label10.TabIndex = 52;
-            this.label10.Text = "退避先ノードID";
-            // 
-            // label11
-            // 
-            this.label11.AutoSize = true;
-            this.label11.Location = new System.Drawing.Point(10, 125);
-            this.label11.Name = "label11";
-            this.label11.Size = new System.Drawing.Size(86, 12);
-            this.label11.TabIndex = 53;
-            this.label11.Text = "目的P点ノードID";
-            // 
-            // label12
-            // 
-            this.label12.AutoSize = true;
-            this.label12.Location = new System.Drawing.Point(107, 5);
-            this.label12.Name = "label12";
-            this.label12.Size = new System.Drawing.Size(23, 12);
-            this.label12.TabIndex = 54;
-            this.label12.Text = "棚1";
-            // 
-            // label13
-            // 
-            this.label13.AutoSize = true;
-            this.label13.Location = new System.Drawing.Point(278, 5);
-            this.label13.Name = "label13";
-            this.label13.Size = new System.Drawing.Size(23, 12);
-            this.label13.TabIndex = 55;
-            this.label13.Text = "棚2";
-            // 
-            // label14
-            // 
-            this.label14.AutoSize = true;
-            this.label14.Location = new System.Drawing.Point(409, 33);
-            this.label14.Name = "label14";
-            this.label14.Size = new System.Drawing.Size(54, 12);
-            this.label14.TabIndex = 56;
-            this.label14.Text = "グループID";
-            // 
-            // cmbTempNode
-            // 
-            this.cmbTempNode.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.cmbTempNode.FormattingEnabled = true;
-            this.cmbTempNode.Location = new System.Drawing.Point(109, 57);
-            this.cmbTempNode.Name = "cmbTempNode";
-            this.cmbTempNode.Size = new System.Drawing.Size(87, 20);
-            this.cmbTempNode.TabIndex = 57;
-            this.cmbTempNode.SelectedIndexChanged += new System.EventHandler(this.cmbTempNode_SelectedIndexChanged);
-            // 
-            // cmbNode1
-            // 
-            this.cmbNode1.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.cmbNode1.FormattingEnabled = true;
-            this.cmbNode1.Location = new System.Drawing.Point(109, 102);
-            this.cmbNode1.Name = "cmbNode1";
-            this.cmbNode1.Size = new System.Drawing.Size(87, 20);
-            this.cmbNode1.TabIndex = 58;
-            this.cmbNode1.SelectedIndexChanged += new System.EventHandler(this.cmbNode1_SelectedIndexChanged);
-            // 
-            // cmbNode2
-            // 
-            this.cmbNode2.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.cmbNode2.FormattingEnabled = true;
-            this.cmbNode2.Location = new System.Drawing.Point(280, 102);
-            this.cmbNode2.Name = "cmbNode2";
-            this.cmbNode2.Size = new System.Drawing.Size(87, 20);
-            this.cmbNode2.TabIndex = 59;
-            this.cmbNode2.SelectedIndexChanged += new System.EventHandler(this.cmbNode2_SelectedIndexChanged);
             // 
             // frmLight
             // 

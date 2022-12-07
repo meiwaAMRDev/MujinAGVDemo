@@ -232,7 +232,9 @@
     <None Include="NLog.xsd">
       <SubType>Designer</SubType>
     </None>
-    <None Include="NodeDataSample\1工場_ノードリスト.csv" />
+    <None Include="NodeDataSample\1工場_ノードリスト.csv">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="NodeDataSample\設備とノード.csv">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

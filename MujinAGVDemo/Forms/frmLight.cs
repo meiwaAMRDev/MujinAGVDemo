@@ -112,26 +112,10 @@ namespace MujinAGVDemo
                 agvDataControl.Settings.AddAGVHouseDictionary("117", "1629184392169", "原位置", Color.LightGreen);
                 agvDataControl.Settings.AddAGVHouseDictionary("118", "1629184392168", "原位置", Color.LightGreen);
                 agvDataControl.Settings.AddAGVHouseDictionary("119", "1629184392170", "原位置", Color.LightGreen);
-                cmbNode1.DataSource = nodeNames;
-                cmbNode2.DataSource = nodeNames;
-                cmbTempNode.DataSource = nodeNames;
-                cmbNode1.BindingContext = new BindingContext();
-                cmbNode2.BindingContext = new BindingContext();
-                cmbTempNode.BindingContext = new BindingContext();
+
                 cmbNode1.SelectedItem = "B1";
                 cmbNode2.SelectedItem = "F1";
                 cmbTempNode.SelectedItem = "C1";
-
-
-                //var node1 = param.NodeDatas.Where(x => x.NodeID == txtNode1.Text).FirstOrDefault();
-                //if (node1 != null)
-                //    cmbNode1.SelectedItem = node1.Name;
-                //var node2 = param.NodeDatas.Where(x => x.NodeID == txtNode2.Text).FirstOrDefault();
-                //if (node2 != null)
-                //    cmbNode2.SelectedItem = node2.Name;
-                //var nodeTemp = param.NodeDatas.Where(x => x.NodeID == txtTempNode1.Text).FirstOrDefault();
-                //if (nodeTemp != null)
-                //    cmbTempNode.SelectedItem = nodeTemp.Name;
             }
             catch (Exception ex)
             {
@@ -601,13 +585,18 @@ namespace MujinAGVDemo
         private void updateDgvMove(List<NodeData> nodeDatas)
         {
             dgvMove.Rows.Clear();
-            //cmbTempNode.Items.Clear();
             nodeNames.Clear();
+            cmbNode1.Items.Clear();
+            cmbNode2.Items.Clear();
+            cmbTempNode.Items.Clear();
             nodeDatas.ForEach(x =>
             {
                 addDgvMove(x);
-                //cmbTempNode.Items.Add(x.Name);
+
                 nodeNames.Add(x.Name);
+                cmbNode1.Items.Add(x.Name);
+                cmbNode2.Items.Add(x.Name);
+                cmbTempNode.Items.Add(x.Name);
             });
             dgvMove.AutoResizeColumns();
         }
@@ -981,8 +970,8 @@ namespace MujinAGVDemo
                 await ExchangePod(
                     factory: Factory,
                     groupID: "c1665124782852",
-                    pod1: pod1Param,
-                    pod2: pod2Param
+                    pod1Param: pod1Param,
+                    pod2Param: pod2Param
                     );
                 var endTime = DateTime.Now;
                 var movingTime = endTime - startTime;
@@ -1001,44 +990,53 @@ namespace MujinAGVDemo
             txtPod1.Text = txtPod2.Text;
             txtPod2.Text = temp;
         }
-
-        public async Task ExchangePod(CommandFactory factory, string groupID, ExchangePodParam pod1, ExchangePodParam pod2)
+        /// <summary>
+        /// 棚交換タスク
+        /// 棚1を退避させた後に、棚1と棚2の移動タスクを同時に実行する。
+        /// 棚1の退避先が空白なら退避動作なしで実行する
+        /// </summary>
+        /// <param name="factory">コマンドファクトリー</param>
+        /// <param name="groupID">AGVのグループID</param>
+        /// <param name="pod1Param">棚1(空)のパラメータ</param>
+        /// <param name="pod2Param">棚2(充)のパラメータ</param>
+        /// <returns>棚交換タスク</returns>
+        public async Task ExchangePod(CommandFactory factory, string groupID, ExchangePodParam pod1Param, ExchangePodParam pod2Param)
         {
-            var tempParam1 = new MovePodAutoSelectAGVParam(robotGroupID: groupID,
-                                                             podID: pod1.PodID,
+            if (pod1Param.TempNodeID != string.Empty)
+            {
+                var tempParam1 = new MovePodAutoSelectAGVParam(robotGroupID: groupID,
+                                                             podID: pod1Param.PodID,
                                                              desMode: DestinationModes.StorageID,
                                                              //turnMode:param.TurnMode,
                                                              unload: 0,
-                                                             desID: pod1.TempNodeID
+                                                             desID: pod1Param.TempNodeID
                                                              );
-            //var tempParam2 = new MovePodAutoSelectAGVParam(robotGroupID: groupID,
-            //                                                 podID: pod2.PodID,
-            //                                                 desMode: DestinationModes.StorageID,
-            //                                                 //turnMode:param.TurnMode,
-            //                                                 unload: 0,
-            //                                                 desID: pod2.TempNodeID
-            //                                                 );
+                await MovePodAuto(factory, tempParam1);
+            }
 
             var moveParam2 = new MovePodAutoSelectAGVParam(robotGroupID: groupID,
-                                                                 podID: pod2.PodID,
+                                                                 podID: pod2Param.PodID,
                                                                  desMode: DestinationModes.StorageID,
                                                                  //turnMode:param.TurnMode,
                                                                  //unload:param.Unload,
-                                                                 desID: pod2.NodeID);
+                                                                 desID: pod2Param.NodeID);
 
             var moveParam1 = new MovePodAutoSelectAGVParam(robotGroupID: groupID,
-                                                             podID: pod1.PodID,
+                                                             podID: pod1Param.PodID,
                                                              desMode: DestinationModes.StorageID,
                                                              //turnMode:param.TurnMode,
                                                              //unload:param.Unload,
-                                                             desID: pod1.NodeID
+                                                             desID: pod1Param.NodeID
                                                              );
-            await MovePodAuto(factory, tempParam1);
-            //await Task.WhenAll(new Task[] { MovePodAuto(factory, tempParam1), MovePodAuto(factory, tempParam2) });
+
             await Task.WhenAll(new Task[] { MovePodAuto(factory, moveParam1), MovePodAuto(factory, moveParam2) });
-
         }
-
+        /// <summary>
+        /// グループ指定のAGV移動タスク
+        /// </summary>
+        /// <param name="factory">コマンドファクトリー</param>
+        /// <param name="param">移動用パラメータ</param>
+        /// <returns>グループ指定のAGV移動タスク</returns>
         private async Task MovePodAuto(CommandFactory factory, MovePodAutoSelectAGVParam param)
         {
             var moveTask = new Task(() =>
@@ -1049,12 +1047,29 @@ namespace MujinAGVDemo
             await moveTask.ConfigureAwait(true);
             return;
         }
+        /// <summary>
+        /// 棚毎の棚交換タスク用パラメータ
+        /// </summary>
         public class ExchangePodParam
         {
+            /// <summary>
+            /// 棚ID
+            /// </summary>
             public string PodID { get; set; }
+            /// <summary>
+            /// 退避先ノードID
+            /// </summary>
             public string TempNodeID { get; set; }
+            /// <summary>
+            /// 目的地ノードID　※P点を指定する
+            /// </summary>
             public string NodeID { get; set; }
-
+            /// <summary>
+            /// コンストラクタ
+            /// </summary>
+            /// <param name="podID">棚ID</param>
+            /// <param name="tempNodeID">退避先ノードID</param>
+            /// <param name="nodeID">目的地ノードID</param>
             public ExchangePodParam(string podID, string tempNodeID, string nodeID)
             {
                 PodID = podID;
