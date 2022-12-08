@@ -287,6 +287,397 @@ namespace MujinAGVDemo
             openFileDialog.Dispose();
         }
 
+        
+        /// <summary>
+        /// 通常版フォームを開きます
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void mnuOpenMainForm_Click(object sender, EventArgs e)
+        {
+            //using (var frm = new frmMain(param))
+            //{
+            //    frm.ShowDialog();
+            //}
+            var frmMain = new frmMain(param);
+            frmMain.Show();
+        }
+        /// <summary>
+        /// ノード指定移動DGVのセルをクリックした際のイベントです。
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void dgvMove_CellContentClick(object sender, DataGridViewCellEventArgs e)
+        {
+            //行の範囲外の時は終了
+            if (e.RowIndex < 0 || param.NodeDatas.Count <= e.RowIndex)
+            {
+                return;
+            }
+
+            if (Factory == null)
+            {
+                Factory = new CommandFactory(param.ServerIP, param.WarehouseID);
+            }
+            //AGV移動をクリック
+            if (e.ColumnIndex == dgvMoveAGVColumn)
+            {
+                moveRobot(factory: Factory,
+                          robotID: param.RobotID,
+                          nodeID: dgvMove[dgvNodeColumn, e.RowIndex].Value.ToString());
+            }
+            //棚移動をクリック
+            else if (e.ColumnIndex == dgvMovePodColumn)
+            {
+                var podDir = Direction.NoSelect;
+                switch (listBoxPodDirection.SelectedIndex)
+                {
+                    case 0:
+                        podDir = Direction.North;
+                        break;
+                    case 1:
+                        podDir = Direction.East;
+                        break;
+                    case 2:
+                        podDir = Direction.South;
+                        break;
+                    case 3:
+                        podDir = Direction.West;
+                        break;
+                    case 4:
+                        podDir = Direction.NoSelect;
+                        break;
+                }
+
+                movePod(factory: Factory,
+                        robotID: param.RobotID,
+                        nodeID: dgvMove[dgvNodeColumn, e.RowIndex].Value.ToString(),
+                        podID: param.PodID,
+                        podFace: podDir);
+            }
+            //編集をクリック
+            else if (e.ColumnIndex == dgvEditColumn)
+            {
+                var name = dgvMove[dgvNameColumn, e.RowIndex].Value.ToString();
+                var nodeID = dgvMove[dgvNodeColumn, e.RowIndex].Value.ToString();
+
+                var target = param.NodeDatas[e.RowIndex];
+                target.Name = name;
+                target.NodeID = nodeID;
+
+                fileIO.SaveSetting(settingPath, param);
+            }
+            //棚作成をクリック
+            else if (e.ColumnIndex == dgvAddPodColumn)
+            {
+                var nodeID = dgvMove[dgvNodeColumn, e.RowIndex].Value.ToString();
+                if (showCheckMessage($"[{nodeID}]に棚[{param.PodID}]を作成しますか？") != DialogResult.OK)
+                {
+                    return;
+                }
+                addPod(nodeID: nodeID);
+            }
+        }
+        /// <summary>
+        /// 「連続AGV移動」クリック
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void btnCycleMoveRobot_Click(object sender, EventArgs e)
+        {
+            source.Cancel();
+            source = new CancellationTokenSource();
+            if (Factory == null)
+            {
+                Factory = new CommandFactory(param.ServerIP, param.WarehouseID);
+            }
+            param.NodeDatas.ForEach(x =>
+            {
+                if (source.IsCancellationRequested)
+                    return;
+                moveRobot(Factory, param.RobotID, x.NodeID);
+            });
+        }
+        /// <summary>
+        /// 「連続棚移動」クリック
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void btnCycleMovePod_Click(object sender, EventArgs e)
+        {
+            source.Cancel();
+            source = new CancellationTokenSource();
+            if (Factory == null)
+            {
+                Factory = new CommandFactory(param.ServerIP, param.WarehouseID);
+            }
+            param.NodeDatas.ForEach(x =>
+            {
+                if (source.IsCancellationRequested)
+                    return;
+                movePod(factory: Factory,
+                        robotID: param.RobotID,
+                        nodeID: x.NodeID,
+                        podID: param.PodID);
+            });
+        }
+
+        private void chkTurn_CheckedChanged(object sender, EventArgs e)
+        {
+            param.TurnMode = chkTurn.Checked ? ON : OFF;
+        }
+
+        private void chkUnload_CheckedChanged(object sender, EventArgs e)
+        {
+            param.Unload = chkUnload.Checked ? ON : OFF;
+        }
+
+        private void btnCharge_Click(object sender, EventArgs e)
+        {
+            if (Factory == null)
+            {
+                Factory = new CommandFactory(param.ServerIP, param.WarehouseID);
+            }
+            var chargeResult = (ChargeRobotReturnMessage)Factory.Create(new ChargeRobotParam(param.RobotID, param.ChargeZoneID)).DoAction();
+        }
+
+        private void btnTaskCancel_Click(object sender, EventArgs e)
+        {
+            if (Factory == null)
+            {
+                Factory = new CommandFactory(param.ServerIP, param.WarehouseID);
+            }
+            var taskStatusList = new List<TaskStatuses>() { TaskStatuses.Ready, TaskStatuses.Init, TaskStatuses.Running };
+            var getTaskResult = (GetAllTaskSelectStatusFromDBReturnMessage)Factory.Create(new GetAllTaskSelectStatusFromDBParam(taskStatusList)).DoAction();
+            var taskList = getTaskResult.GetAllTaskSelectStatusList
+                .Where(x => x.RobotID == param.RobotID)
+                .ToList();
+
+            taskList.ForEach(x =>
+            {
+                var cancelTaskResult = (CancelTaskReturnMessage)Factory.Create(new CancelTaskParam(x.TaskID)).DoAction();
+            });
+
+        }
+
+        private void btnLiftUp_Click(object sender, EventArgs e)
+        {
+            if (Factory == null)
+            {
+                Factory = new CommandFactory(param.ServerIP, param.WarehouseID);
+            }
+            var (isSuccess, messages) = Command.MapCommands.LiftUpRobot(factory: Factory, robotID: param.RobotID);
+            if (!isSuccess)
+            {
+                showErrorMessageBox(messages);
+            }
+            else
+            {
+                showInfoMessageBox(messages);
+            }
+        }
+
+        private void btnLiftDown_Click(object sender, EventArgs e)
+        {
+            if (Factory == null)
+            {
+                Factory = new CommandFactory(param.ServerIP, param.WarehouseID);
+            }
+            var (isSuccess, messages) = Command.MapCommands.LiftDownRobot(factory: Factory, robotID: param.RobotID);
+            if (!isSuccess)
+            {
+                showErrorMessageBox(messages);
+            }
+            else
+            {
+                showInfoMessageBox(messages);
+            }
+        }
+
+        private void mnuOpenLog_Click(object sender, EventArgs e)
+        {
+            if (!Directory.Exists(logDirPath))
+            {
+                showErrorMessageBox($"{Path.GetFullPath(logDirPath)}が見つかりません。");
+                return;
+            }
+            System.Diagnostics.Process.Start("EXPLORER.EXE", logDirPath);
+        }
+
+        private void btnGetAGVData_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                if (Factory == null)
+                {
+                    Factory = new CommandFactory(rcsIP: param.ServerIP, warehouseID: param.WarehouseID);
+                }
+
+                var getRobotListRet = (GetRobotListFromDBReturnMessage)Factory.Create(new GetRobotListFromDBParam(isOnlineRobotOnly: true)).DoAction();
+
+                var rbList = getRobotListRet.Data?.RobotList;
+                var message = new StringBuilder();
+                rbList.ForEach(x =>
+                {
+                    message.AppendLine($"AGV[{x.RobotID}] TaskID[{x.TaskID}] TaskType[{x.TaskType}] TaskStatus[{x.TaskStatus}]");
+                });
+                showInfoMessageBox(message.ToString());
+
+            }
+            catch (Exception ex)
+            {
+                showErrorMessageBox(ex.ToString());
+            }
+        }
+
+        private void chkAllSet_CheckedChanged(object sender, EventArgs e)
+        {
+            try
+            {
+                if (Factory == null)
+                {
+                    Factory = new CommandFactory(param.ServerIP, param.WarehouseID);
+                }
+                if (!chkAllSet.Checked)
+                {
+                    chkAllSet.Text = "全占有解除";
+                    chkAllSet.BackColor = Color.Red;
+
+                    var (isSuccess, message) = Command.MapCommands.SetOwnerAll(Factory);
+                }
+                else
+                {
+                    chkAllSet.Text = "全占有";
+                    chkAllSet.BackColor = Color.GreenYellow;
+                    var (isSuccess, message) = Command.MapCommands.UnsetOwnerAll(Factory);
+                }
+            }
+            catch (Exception ex)
+            {
+                showErrorMessageBox(ex.ToString());
+            }
+        }
+
+        private void mnuOpenDGV_Click(object sender, EventArgs e)
+        {
+            if (Factory == null)
+            {
+                Factory = new CommandFactory(param.ServerIP, param.WarehouseID);
+            }
+            var frm = new frmDGV(Factory);
+            frm.Show();
+        }
+        private void btnLoadNodeData_Click(object sender, EventArgs e)
+        {
+            var filePath = string.Empty;
+
+            var openFileDialog = new OpenFileDialog
+            {
+                Title = "ノード設定ファイルを選択",
+                InitialDirectory = Path.GetDirectoryName($"NodeDataSample/設備とノード.csv"),
+                Filter = "CSVファイル|*.csv|すべてのファイル|*.*"
+            };
+
+            if (openFileDialog.ShowDialog() == DialogResult.OK)
+            {
+                filePath = openFileDialog.FileName;
+                try
+                {
+                    var nodeDatas = new List<NodeData>();
+                    var enc = GetEncoding(filePath);
+                    var allLines = File.ReadAllLines(filePath, enc).ToList();
+                    allLines.ForEach(x =>
+                    {
+                        var splitX = x.Split(',').ToList();
+                        nodeDatas.Add(new NodeData(name: splitX[0], nodeID: splitX[1].Trim()));
+                    });
+                    param.NodeDatas = nodeDatas;
+                    updateDgvMove(param.NodeDatas);
+                    showInfoMessageBox($"ノードデータを更新しました。[{filePath}]");
+                }
+                catch (Exception ex)
+                {
+                    showErrorMessageBox($"ノードデータ読込時にエラーが発生しました。{ex.ToString()}");
+                }
+            }
+            else
+            {
+                logger.Info("設定ファイルの選択がキャンセルされました。");
+            }
+            openFileDialog.Dispose();
+        }
+        
+        private async void btnExchangePod_ClickAsync(object sender, EventArgs e)
+        {
+            if (Factory == null)
+            {
+                Factory = new CommandFactory(param.ServerIP, param.WarehouseID);
+            }
+
+            try
+            {
+                var podID1 = txtPod1.Text;
+                var nodeID1 = txtNode1.Text;
+                var nodeIDTemp1 = txtTempNode1.Text;
+                var pod1Param = new ExchangePodParam(podID1, nodeIDTemp1, nodeID1);
+
+                var podID2 = txtPod2.Text;
+                var nodeID2 = txtNode2.Text;
+                var pod2Param = new ExchangePodParam(podID2, string.Empty, nodeID2);
+
+                var startTime = DateTime.Now;
+
+                await ExchangePod(
+                    factory: Factory,
+                    groupID: "c1665124782852",
+                    pod1Param: pod1Param,
+                    pod2Param: pod2Param
+                    );
+                var endTime = DateTime.Now;
+                var movingTime = endTime - startTime;
+
+                showInfoMessageBox($"棚交換が完了しました。経過時間[{movingTime.ToString(@"hh\時\間mm\分ss\秒ff")}]");
+            }
+            catch (Exception ex)
+            {
+                showErrorMessageBox($"棚交換でエラーが発生しました。{ex.ToString()}");
+            }
+        }
+
+        private void btnChangePodID_Click(object sender, EventArgs e)
+        {
+            var temp = txtPod1.Text;
+            txtPod1.Text = txtPod2.Text;
+            txtPod2.Text = temp;
+        }
+        
+        private void cmbTempNode_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            var node = param.NodeDatas.Where(x => x.Name == cmbTempNode.SelectedItem.ToString()).FirstOrDefault();
+            if (node != null)
+            {
+                txtTempNode1.Text = node.NodeID;
+            }
+        }
+
+        private void cmbNode1_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            var node = param.NodeDatas.Where(x => x.Name == cmbNode1.SelectedItem.ToString()).FirstOrDefault();
+            if (node != null)
+            {
+                txtNode1.Text = node.NodeID;
+            }
+        }
+
+        private void cmbNode2_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            var node = param.NodeDatas.Where(x => x.Name == cmbNode2.SelectedItem.ToString()).FirstOrDefault();
+            if (node != null)
+            {
+                txtNode2.Text = node.NodeID;
+            }
+        }
+
         #endregion Event
 
         #region Method
@@ -600,332 +991,12 @@ namespace MujinAGVDemo
             });
             dgvMove.AutoResizeColumns();
         }
-
-        #endregion Method
-        /// <summary>
-        /// 通常版フォームを開きます
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void mnuOpenMainForm_Click(object sender, EventArgs e)
-        {
-            //using (var frm = new frmMain(param))
-            //{
-            //    frm.ShowDialog();
-            //}
-            var frmMain = new frmMain(param);
-            frmMain.Show();
-        }
-        /// <summary>
-        /// ノード指定移動DGVのセルをクリックした際のイベントです。
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void dgvMove_CellContentClick(object sender, DataGridViewCellEventArgs e)
-        {
-            //行の範囲外の時は終了
-            if (e.RowIndex < 0 || param.NodeDatas.Count <= e.RowIndex)
-            {
-                return;
-            }
-
-            if (Factory == null)
-            {
-                Factory = new CommandFactory(param.ServerIP, param.WarehouseID);
-            }
-            //AGV移動をクリック
-            if (e.ColumnIndex == dgvMoveAGVColumn)
-            {
-                moveRobot(factory: Factory,
-                          robotID: param.RobotID,
-                          nodeID: dgvMove[dgvNodeColumn, e.RowIndex].Value.ToString());
-            }
-            //棚移動をクリック
-            else if (e.ColumnIndex == dgvMovePodColumn)
-            {
-                var podDir = Direction.NoSelect;
-                switch (listBoxPodDirection.SelectedIndex)
-                {
-                    case 0:
-                        podDir = Direction.North;
-                        break;
-                    case 1:
-                        podDir = Direction.East;
-                        break;
-                    case 2:
-                        podDir = Direction.South;
-                        break;
-                    case 3:
-                        podDir = Direction.West;
-                        break;
-                    case 4:
-                        podDir = Direction.NoSelect;
-                        break;
-                }
-
-                movePod(factory: Factory,
-                        robotID: param.RobotID,
-                        nodeID: dgvMove[dgvNodeColumn, e.RowIndex].Value.ToString(),
-                        podID: param.PodID,
-                        podFace: podDir);
-            }
-            //編集をクリック
-            else if (e.ColumnIndex == dgvEditColumn)
-            {
-                var name = dgvMove[dgvNameColumn, e.RowIndex].Value.ToString();
-                var nodeID = dgvMove[dgvNodeColumn, e.RowIndex].Value.ToString();
-
-                var target = param.NodeDatas[e.RowIndex];
-                target.Name = name;
-                target.NodeID = nodeID;
-
-                fileIO.SaveSetting(settingPath, param);
-            }
-            //棚作成をクリック
-            else if (e.ColumnIndex == dgvAddPodColumn)
-            {
-                var nodeID = dgvMove[dgvNodeColumn, e.RowIndex].Value.ToString();
-                if (showCheckMessage($"[{nodeID}]に棚[{param.PodID}]を作成しますか？") != DialogResult.OK)
-                {
-                    return;
-                }
-                addPod(nodeID: nodeID);
-            }
-        }
-        /// <summary>
-        /// 「連続AGV移動」クリック
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void btnCycleMoveRobot_Click(object sender, EventArgs e)
-        {
-            source.Cancel();
-            source = new CancellationTokenSource();
-            if (Factory == null)
-            {
-                Factory = new CommandFactory(param.ServerIP, param.WarehouseID);
-            }
-            param.NodeDatas.ForEach(x =>
-            {
-                if (source.IsCancellationRequested)
-                    return;
-                moveRobot(Factory, param.RobotID, x.NodeID);
-            });
-        }
-        /// <summary>
-        /// 「連続棚移動」クリック
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void btnCycleMovePod_Click(object sender, EventArgs e)
-        {
-            source.Cancel();
-            source = new CancellationTokenSource();
-            if (Factory == null)
-            {
-                Factory = new CommandFactory(param.ServerIP, param.WarehouseID);
-            }
-            param.NodeDatas.ForEach(x =>
-            {
-                if (source.IsCancellationRequested)
-                    return;
-                movePod(factory: Factory,
-                        robotID: param.RobotID,
-                        nodeID: x.NodeID,
-                        podID: param.PodID);
-            });
-        }
-
-        private void chkTurn_CheckedChanged(object sender, EventArgs e)
-        {
-            param.TurnMode = chkTurn.Checked ? ON : OFF;
-        }
-
-        private void chkUnload_CheckedChanged(object sender, EventArgs e)
-        {
-            param.Unload = chkUnload.Checked ? ON : OFF;
-        }
-
-        private void btnCharge_Click(object sender, EventArgs e)
-        {
-            if (Factory == null)
-            {
-                Factory = new CommandFactory(param.ServerIP, param.WarehouseID);
-            }
-            var chargeResult = (ChargeRobotReturnMessage)Factory.Create(new ChargeRobotParam(param.RobotID, param.ChargeZoneID)).DoAction();
-        }
-
-        private void btnTaskCancel_Click(object sender, EventArgs e)
-        {
-            if (Factory == null)
-            {
-                Factory = new CommandFactory(param.ServerIP, param.WarehouseID);
-            }
-            var taskStatusList = new List<TaskStatuses>() { TaskStatuses.Ready, TaskStatuses.Init, TaskStatuses.Running };
-            var getTaskResult = (GetAllTaskSelectStatusFromDBReturnMessage)Factory.Create(new GetAllTaskSelectStatusFromDBParam(taskStatusList)).DoAction();
-            var taskList = getTaskResult.GetAllTaskSelectStatusList
-                .Where(x => x.RobotID == param.RobotID)
-                .ToList();
-
-            taskList.ForEach(x =>
-            {
-                var cancelTaskResult = (CancelTaskReturnMessage)Factory.Create(new CancelTaskParam(x.TaskID)).DoAction();
-            });
-
-        }
-
-        private void btnLiftUp_Click(object sender, EventArgs e)
-        {
-            if (Factory == null)
-            {
-                Factory = new CommandFactory(param.ServerIP, param.WarehouseID);
-            }
-            var (isSuccess, messages) = Command.MapCommands.LiftUpRobot(factory: Factory, robotID: param.RobotID);
-            if (!isSuccess)
-            {
-                showErrorMessageBox(messages);
-            }
-            else
-            {
-                showInfoMessageBox(messages);
-            }
-        }
-
-        private void btnLiftDown_Click(object sender, EventArgs e)
-        {
-            if (Factory == null)
-            {
-                Factory = new CommandFactory(param.ServerIP, param.WarehouseID);
-            }
-            var (isSuccess, messages) = Command.MapCommands.LiftDownRobot(factory: Factory, robotID: param.RobotID);
-            if (!isSuccess)
-            {
-                showErrorMessageBox(messages);
-            }
-            else
-            {
-                showInfoMessageBox(messages);
-            }
-        }
-
-        private void mnuOpenLog_Click(object sender, EventArgs e)
-        {
-            if (!Directory.Exists(logDirPath))
-            {
-                showErrorMessageBox($"{Path.GetFullPath(logDirPath)}が見つかりません。");
-                return;
-            }
-            System.Diagnostics.Process.Start("EXPLORER.EXE", logDirPath);
-        }
-
-        private void btnGetAGVData_Click(object sender, EventArgs e)
-        {
-            try
-            {
-                if (Factory == null)
-                {
-                    Factory = new CommandFactory(rcsIP: param.ServerIP, warehouseID: param.WarehouseID);
-                }
-
-                var getRobotListRet = (GetRobotListFromDBReturnMessage)Factory.Create(new GetRobotListFromDBParam(isOnlineRobotOnly: true)).DoAction();
-
-                var rbList = getRobotListRet.Data?.RobotList;
-                var message = new StringBuilder();
-                rbList.ForEach(x =>
-                {
-                    message.AppendLine($"AGV[{x.RobotID}] TaskID[{x.TaskID}] TaskType[{x.TaskType}] TaskStatus[{x.TaskStatus}]");
-                });
-                showInfoMessageBox(message.ToString());
-
-            }
-            catch (Exception ex)
-            {
-                showErrorMessageBox(ex.ToString());
-            }
-        }
-
-        private void chkAllSet_CheckedChanged(object sender, EventArgs e)
-        {
-            try
-            {
-                if (Factory == null)
-                {
-                    Factory = new CommandFactory(param.ServerIP, param.WarehouseID);
-                }
-                if (!chkAllSet.Checked)
-                {
-                    chkAllSet.Text = "全占有解除";
-                    chkAllSet.BackColor = Color.Red;
-
-                    var a = Command.MapCommands.SetOwnerAll(Factory);
-                }
-                else
-                {
-                    chkAllSet.Text = "全占有";
-                    chkAllSet.BackColor = Color.GreenYellow;
-                    var a = Command.MapCommands.UnsetOwnerAll(Factory);
-                }
-            }
-            catch (Exception ex)
-            {
-                showErrorMessageBox(ex.ToString());
-            }
-        }
-
-        private void mnuOpenDGV_Click(object sender, EventArgs e)
-        {
-            if (Factory == null)
-            {
-                Factory = new CommandFactory(param.ServerIP, param.WarehouseID);
-            }
-            var frm = new frmDGV(Factory);
-            frm.Show();
-        }
-        private void btnLoadNodeData_Click(object sender, EventArgs e)
-        {
-            var filePath = string.Empty;
-
-            var openFileDialog = new OpenFileDialog
-            {
-                Title = "ノード設定ファイルを選択",
-                InitialDirectory = Path.GetDirectoryName($"NodeDataSample/設備とノード.csv"),
-                Filter = "CSVファイル|*.csv|すべてのファイル|*.*"
-            };
-
-            if (openFileDialog.ShowDialog() == DialogResult.OK)
-            {
-                filePath = openFileDialog.FileName;
-                try
-                {
-                    var nodeDatas = new List<NodeData>();
-                    var enc = GetEncoding(filePath);
-                    var allLines = File.ReadAllLines(filePath, enc).ToList();
-                    allLines.ForEach(x =>
-                    {
-                        var splitX = x.Split(',').ToList();
-                        nodeDatas.Add(new NodeData(name: splitX[0], nodeID: splitX[1].Trim()));
-                    });
-                    param.NodeDatas = nodeDatas;
-                    updateDgvMove(param.NodeDatas);
-                    showInfoMessageBox($"ノードデータを更新しました。[{filePath}]");
-                }
-                catch (Exception ex)
-                {
-                    showErrorMessageBox($"ノードデータ読込時にエラーが発生しました。{ex.ToString()}");
-                }
-            }
-            else
-            {
-                logger.Info("設定ファイルの選択がキャンセルされました。");
-            }
-            openFileDialog.Dispose();
-        }
         /// <summary>
         /// 指定したファイルのエンコーディングを判別して取得します。
         /// </summary>
-        /// <param name="filename"></param>
-        /// <returns></returns>
-        public static Encoding GetEncoding(string filename)
+        /// <param name="filename">ファイルパス</param>
+        /// <returns>エンコーディング</returns>
+        private static Encoding GetEncoding(string filename)
         {
             // BOMを取得
             var bom = new byte[4];
@@ -935,60 +1006,21 @@ namespace MujinAGVDemo
             }
 
             // BOMを解析
-            if (bom[0] == 0x2b && bom[1] == 0x2f && bom[2] == 0x76) return Encoding.UTF7;                             // UTF-7
-            if (bom[0] == 0xef && bom[1] == 0xbb && bom[2] == 0xbf) return Encoding.UTF8;                             // UTF-8
-            if (bom[0] == 0xff && bom[1] == 0xfe) return Encoding.Unicode;                                            // UTF-16LE
-            if (bom[0] == 0xfe && bom[1] == 0xff) return Encoding.BigEndianUnicode;                                   // UTF-16BE
-            if (bom[0] == 0xff && bom[1] == 0xfe && bom[2] == 0x00 && bom[3] == 0x00) return Encoding.Unicode;        // UTF-32LE
-            if (bom[0] == 0 && bom[1] == 0 && bom[2] == 0xfe && bom[3] == 0xff) return new UTF32Encoding(true, true); // UTF-32BE
-            //return Encoding.ASCII;
-            //return Encoding.Default;
-            return Encoding.GetEncoding("Shift_Jis");
-        }
 
-        private async void btnExchangePod_ClickAsync(object sender, EventArgs e)
-        {
-            if (Factory == null)
-            {
-                Factory = new CommandFactory(param.ServerIP, param.WarehouseID);
-            }
-
-            try
-            {
-                var podID1 = txtPod1.Text;
-                var nodeID1 = txtNode1.Text;
-                var nodeIDTemp1 = txtTempNode1.Text;
-                var pod1Param = new ExchangePodParam(podID1, nodeIDTemp1, nodeID1);
-
-                var podID2 = txtPod2.Text;
-                var nodeID2 = txtNode2.Text;
-                //var nodeIDTemp2 = txtTempNode2.Text;
-                var pod2Param = new ExchangePodParam(podID2, string.Empty, nodeID2);
-
-                var startTime = DateTime.Now;
-
-                await ExchangePod(
-                    factory: Factory,
-                    groupID: "c1665124782852",
-                    pod1Param: pod1Param,
-                    pod2Param: pod2Param
-                    );
-                var endTime = DateTime.Now;
-                var movingTime = endTime - startTime;
-
-                showInfoMessageBox($"棚交換が完了しました。経過時間[{movingTime.ToString(@"hh\時\間mm\分ss\秒ff")}]");
-            }
-            catch (Exception ex)
-            {
-                showErrorMessageBox($"棚交換でエラーが発生しました。{ex.ToString()}");
-            }
-        }
-
-        private void btnChangePodID_Click(object sender, EventArgs e)
-        {
-            var temp = txtPod1.Text;
-            txtPod1.Text = txtPod2.Text;
-            txtPod2.Text = temp;
+            // UTF-7
+            if (bom[0] == 0x2b && bom[1] == 0x2f && bom[2] == 0x76) return Encoding.UTF7;
+            // UTF-8
+            if (bom[0] == 0xef && bom[1] == 0xbb && bom[2] == 0xbf) return Encoding.UTF8;
+            // UTF-16LE
+            if (bom[0] == 0xff && bom[1] == 0xfe) return Encoding.Unicode;
+            // UTF-16BE
+            if (bom[0] == 0xfe && bom[1] == 0xff) return Encoding.BigEndianUnicode;
+            // UTF-32LE
+            if (bom[0] == 0xff && bom[1] == 0xfe && bom[2] == 0x00 && bom[3] == 0x00) return Encoding.Unicode;
+            // UTF-32BE
+            return bom[0] == 0 && bom[1] == 0 && bom[2] == 0xfe && bom[3] == 0xff
+                ? new UTF32Encoding(true, true)
+                : Encoding.GetEncoding("Shift_Jis");
         }
         /// <summary>
         /// 棚交換タスク
@@ -1000,14 +1032,13 @@ namespace MujinAGVDemo
         /// <param name="pod1Param">棚1(空)のパラメータ</param>
         /// <param name="pod2Param">棚2(充)のパラメータ</param>
         /// <returns>棚交換タスク</returns>
-        public async Task ExchangePod(CommandFactory factory, string groupID, ExchangePodParam pod1Param, ExchangePodParam pod2Param)
+        private async Task ExchangePod(CommandFactory factory, string groupID, ExchangePodParam pod1Param, ExchangePodParam pod2Param)
         {
             if (pod1Param.TempNodeID != string.Empty)
             {
                 var tempParam1 = new MovePodAutoSelectAGVParam(robotGroupID: groupID,
                                                              podID: pod1Param.PodID,
                                                              desMode: DestinationModes.StorageID,
-                                                             //turnMode:param.TurnMode,
                                                              unload: 0,
                                                              desID: pod1Param.TempNodeID
                                                              );
@@ -1017,15 +1048,11 @@ namespace MujinAGVDemo
             var moveParam2 = new MovePodAutoSelectAGVParam(robotGroupID: groupID,
                                                                  podID: pod2Param.PodID,
                                                                  desMode: DestinationModes.StorageID,
-                                                                 //turnMode:param.TurnMode,
-                                                                 //unload:param.Unload,
                                                                  desID: pod2Param.NodeID);
 
             var moveParam1 = new MovePodAutoSelectAGVParam(robotGroupID: groupID,
                                                              podID: pod1Param.PodID,
                                                              desMode: DestinationModes.StorageID,
-                                                             //turnMode:param.TurnMode,
-                                                             //unload:param.Unload,
                                                              desID: pod1Param.NodeID
                                                              );
 
@@ -1047,6 +1074,9 @@ namespace MujinAGVDemo
             await moveTask.ConfigureAwait(true);
             return;
         }
+        #endregion Method
+
+        #region Class
         /// <summary>
         /// 棚毎の棚交換タスク用パラメータ
         /// </summary>
@@ -1077,39 +1107,6 @@ namespace MujinAGVDemo
                 NodeID = nodeID;
             }
         }
-
-        private void cmbTempNode_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            var node = param.NodeDatas.Where(x => x.Name == cmbTempNode.SelectedItem.ToString()).FirstOrDefault();
-            if (node == null)
-                return;
-            else
-            {
-                txtTempNode1.Text = node.NodeID;
-            }
-        }
-
-        private void cmbNode1_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            var node = param.NodeDatas.Where(x => x.Name == cmbNode1.SelectedItem.ToString()).FirstOrDefault();
-            if (node == null)
-                return;
-            else
-            {
-                txtNode1.Text = node.NodeID;
-            }
-        }
-
-        private void cmbNode2_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            var node = param.NodeDatas.Where(x => x.Name == cmbNode2.SelectedItem.ToString()).FirstOrDefault();
-            if (node == null)
-                return;
-            else
-            {
-                txtNode2.Text = node.NodeID;
-            }
-        }
+        #endregion Class
     }
-
 }
