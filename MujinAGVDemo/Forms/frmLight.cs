@@ -287,7 +287,7 @@ namespace MujinAGVDemo
             openFileDialog.Dispose();
         }
 
-        
+
         /// <summary>
         /// 通常版フォームを開きます
         /// </summary>
@@ -606,7 +606,7 @@ namespace MujinAGVDemo
             }
             openFileDialog.Dispose();
         }
-        
+
         private async void btnExchangePod_ClickAsync(object sender, EventArgs e)
         {
             if (Factory == null)
@@ -625,11 +625,13 @@ namespace MujinAGVDemo
                 var nodeID2 = txtNode2.Text;
                 var pod2Param = new ExchangePodParam(podID2, string.Empty, nodeID2);
 
+                var groupID = textBoxGroupID.Text;
+
                 var startTime = DateTime.Now;
 
                 await ExchangePod(
                     factory: Factory,
-                    groupID: "c1665124782852",
+                    groupID: groupID,
                     pod1Param: pod1Param,
                     pod2Param: pod2Param
                     );
@@ -650,7 +652,7 @@ namespace MujinAGVDemo
             txtPod1.Text = txtPod2.Text;
             txtPod2.Text = temp;
         }
-        
+
         private void cmbTempNode_SelectedIndexChanged(object sender, EventArgs e)
         {
             var node = param.NodeDatas.Where(x => x.Name == cmbTempNode.SelectedItem.ToString()).FirstOrDefault();
