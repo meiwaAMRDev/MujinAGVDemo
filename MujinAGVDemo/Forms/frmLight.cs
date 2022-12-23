@@ -557,16 +557,7 @@ namespace MujinAGVDemo
                 showErrorMessageBox(ex.ToString());
             }
         }
-
-        private void mnuOpenDGV_Click(object sender, EventArgs e)
-        {
-            if (Factory == null)
-            {
-                Factory = new CommandFactory(param.ServerIP, param.WarehouseID);
-            }
-            var frm = new frmDGV(Factory);
-            frm.Show();
-        }
+                
         private void btnLoadNodeData_Click(object sender, EventArgs e)
         {
             var filePath = string.Empty;
@@ -1076,6 +1067,71 @@ namespace MujinAGVDemo
             await moveTask.ConfigureAwait(true);
             return;
         }
+
+        private void MoveCT()
+        {
+            source.Cancel();
+            source = new CancellationTokenSource();
+            if (Factory == null)
+            {
+                Factory = new CommandFactory(param.ServerIP, param.WarehouseID);
+            }
+            if (source.IsCancellationRequested)
+                return;
+            //空パレ位置
+            var node1 = "166598818737";
+            //回転位置
+            var node2 = "166598818752";
+            //退避先
+            var node3 = "166598818782";
+            //充パレ位置
+            var node4 = "166598818766";
+            //空パレ回収位置
+            var node5 = "166598818781";
+            try
+            {
+                var preStartTime = DateTime.Now;
+                logger.Info($"準備開始");
+                //0
+                Factory.Create(new MoveRobotParam(param.RobotID, DestinationModes.NodeID, node1, robotFace: Direction.East) {
+                    CachingCall = (obj, e) =>
+                    {
+                    }
+                }).DoAction();
+                logger.Info($"準備終了");
+                var startTime = DateTime.Now;
+                logger.Info($"本番動作開始");
+                //1
+                Factory.Create(new MovePodParam(param.RobotID, txtPod1.Text, DestinationModes.StorageID, node1, unload: 0)).DoAction();
+                //2,3
+                Factory.Create(new MovePodParam(param.RobotID, txtPod1.Text, DestinationModes.StorageID, node2, podFace: Direction.East, unload: 0)).DoAction();
+                //4,5
+                Factory.Create(new MovePodParam(param.RobotID, txtPod1.Text, DestinationModes.StorageID, node3, unload: 1)).DoAction();
+                //6
+                Factory.Create(new MovePodParam(param.RobotID, txtPod2.Text, DestinationModes.StorageID, node4, unload: 0)).DoAction();
+                //7,8
+                Factory.Create(new MovePodParam(param.RobotID, txtPod2.Text, DestinationModes.StorageID, node2, podFace: Direction.East, unload: 0)).DoAction();
+                //9,10
+                Factory.Create(new MovePodParam(param.RobotID, txtPod2.Text, DestinationModes.StorageID, node1, unload: 1)).DoAction();
+                logger.Info($"本番動作終了");
+                var endTime = DateTime.Now;
+                logger.Info($"回収開始");
+                //11,12,13
+                Factory.Create(new MovePodParam(param.RobotID, txtPod1.Text, DestinationModes.StorageID, node5, unload: 1)).DoAction();
+                logger.Info($"回収終了");
+                var afterEndTime = DateTime.Now;
+
+                var span = endTime - startTime;
+                showInfoMessageBox($"動作が完了しました。" +
+                    $"\n準備動作[{(startTime-preStartTime).ToString(@"hh\時\間mm\分ss\秒ff")}]" +
+                    $"\n本番動作[{span.ToString(@"hh\時\間mm\分ss\秒ff")}]" +
+                    $"\n回収動作[{ (afterEndTime - endTime).ToString(@"hh\時\間mm\分ss\秒ff")}]");
+            }
+            catch(Exception ex)
+            {
+                showErrorMessageBox($"動作でエラーが発生しました。{ex.ToString()}");
+            }            
+        }
         #endregion Method
 
         #region Class
@@ -1110,5 +1166,21 @@ namespace MujinAGVDemo
             }
         }
         #endregion Class
+
+
+        private void mnuOpenTaskInfo_Click(object sender, EventArgs e)
+        {
+            if (Factory == null)
+            {
+                Factory = new CommandFactory(param.ServerIP, param.WarehouseID);
+            }
+            var frm = new frmDGV(Factory);
+            frm.Show();
+        }
+
+        private void mnuMoveCT_Click(object sender, EventArgs e)
+        {
+            MoveCT();
+        }
     }
 }

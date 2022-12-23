@@ -60,7 +60,6 @@ namespace MujinAGVDemo
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.mnuOpenMainForm = new System.Windows.Forms.ToolStripMenuItem();
             this.mnuOpenLog = new System.Windows.Forms.ToolStripMenuItem();
-            this.mnuOpenDGV = new System.Windows.Forms.ToolStripMenuItem();
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabMove = new System.Windows.Forms.TabPage();
             this.btnLoadNodeData = new System.Windows.Forms.Button();
@@ -105,6 +104,9 @@ namespace MujinAGVDemo
             this.btnLiftDown = new System.Windows.Forms.Button();
             this.btnGetAGVData = new System.Windows.Forms.Button();
             this.chkAllSet = new System.Windows.Forms.CheckBox();
+            this.デバッグToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.mnuOpenTaskInfo = new System.Windows.Forms.ToolStripMenuItem();
+            this.mnuMoveCT = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.tabControl1.SuspendLayout();
             this.tabMove.SuspendLayout();
@@ -364,7 +366,7 @@ namespace MujinAGVDemo
             this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.mnuOpenMainForm,
             this.mnuOpenLog,
-            this.mnuOpenDGV});
+            this.デバッグToolStripMenuItem});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
             this.menuStrip1.Size = new System.Drawing.Size(800, 24);
@@ -384,13 +386,6 @@ namespace MujinAGVDemo
             this.mnuOpenLog.Size = new System.Drawing.Size(37, 20);
             this.mnuOpenLog.Text = "ログ";
             this.mnuOpenLog.Click += new System.EventHandler(this.mnuOpenLog_Click);
-            // 
-            // mnuOpenDGV
-            // 
-            this.mnuOpenDGV.Name = "mnuOpenDGV";
-            this.mnuOpenDGV.Size = new System.Drawing.Size(42, 20);
-            this.mnuOpenDGV.Text = "DGV";
-            this.mnuOpenDGV.Click += new System.EventHandler(this.mnuOpenDGV_Click);
             // 
             // tabControl1
             // 
@@ -860,6 +855,29 @@ namespace MujinAGVDemo
             this.chkAllSet.UseVisualStyleBackColor = false;
             this.chkAllSet.CheckedChanged += new System.EventHandler(this.chkAllSet_CheckedChanged);
             // 
+            // デバッグToolStripMenuItem
+            // 
+            this.デバッグToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.mnuOpenTaskInfo,
+            this.mnuMoveCT});
+            this.デバッグToolStripMenuItem.Name = "デバッグToolStripMenuItem";
+            this.デバッグToolStripMenuItem.Size = new System.Drawing.Size(55, 20);
+            this.デバッグToolStripMenuItem.Text = "デバッグ";
+            // 
+            // mnuOpenTaskInfo
+            // 
+            this.mnuOpenTaskInfo.Name = "mnuOpenTaskInfo";
+            this.mnuOpenTaskInfo.Size = new System.Drawing.Size(180, 22);
+            this.mnuOpenTaskInfo.Text = "AGVタスク情報";
+            this.mnuOpenTaskInfo.Click += new System.EventHandler(this.mnuOpenTaskInfo_Click);
+            // 
+            // mnuMoveCT
+            // 
+            this.mnuMoveCT.Name = "mnuMoveCT";
+            this.mnuMoveCT.Size = new System.Drawing.Size(180, 22);
+            this.mnuMoveCT.Text = "CT検証";
+            this.mnuMoveCT.Click += new System.EventHandler(this.mnuMoveCT_Click);
+            // 
             // frmLight
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
@@ -956,7 +974,6 @@ namespace MujinAGVDemo
         private System.Windows.Forms.DataGridViewButtonColumn colEdit;
         private System.Windows.Forms.Button btnGetAGVData;
         private System.Windows.Forms.CheckBox chkAllSet;
-        private System.Windows.Forms.ToolStripMenuItem mnuOpenDGV;
         private System.Windows.Forms.Button btnLoadNodeData;
         private System.Windows.Forms.TabPage tabExchange;
         private System.Windows.Forms.Button btnExchangePod;
@@ -977,5 +994,8 @@ namespace MujinAGVDemo
         private System.Windows.Forms.ComboBox cmbTempNode;
         private System.Windows.Forms.ComboBox cmbNode2;
         private System.Windows.Forms.ComboBox cmbNode1;
+        private System.Windows.Forms.ToolStripMenuItem デバッグToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem mnuOpenTaskInfo;
+        private System.Windows.Forms.ToolStripMenuItem mnuMoveCT;
     }
 }
