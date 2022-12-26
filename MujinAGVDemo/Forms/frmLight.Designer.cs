@@ -60,6 +60,9 @@ namespace MujinAGVDemo
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.mnuOpenMainForm = new System.Windows.Forms.ToolStripMenuItem();
             this.mnuOpenLog = new System.Windows.Forms.ToolStripMenuItem();
+            this.デバッグToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.mnuOpenTaskInfo = new System.Windows.Forms.ToolStripMenuItem();
+            this.mnuMoveCT = new System.Windows.Forms.ToolStripMenuItem();
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabMove = new System.Windows.Forms.TabPage();
             this.btnLoadNodeData = new System.Windows.Forms.Button();
@@ -104,9 +107,9 @@ namespace MujinAGVDemo
             this.btnLiftDown = new System.Windows.Forms.Button();
             this.btnGetAGVData = new System.Windows.Forms.Button();
             this.chkAllSet = new System.Windows.Forms.CheckBox();
-            this.デバッグToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.mnuOpenTaskInfo = new System.Windows.Forms.ToolStripMenuItem();
-            this.mnuMoveCT = new System.Windows.Forms.ToolStripMenuItem();
+            this.cmbPodFace = new System.Windows.Forms.ComboBox();
+            this.cmbRobotFace = new System.Windows.Forms.ComboBox();
+            this.label15 = new System.Windows.Forms.Label();
             this.menuStrip1.SuspendLayout();
             this.tabControl1.SuspendLayout();
             this.tabMove.SuspendLayout();
@@ -387,6 +390,29 @@ namespace MujinAGVDemo
             this.mnuOpenLog.Text = "ログ";
             this.mnuOpenLog.Click += new System.EventHandler(this.mnuOpenLog_Click);
             // 
+            // デバッグToolStripMenuItem
+            // 
+            this.デバッグToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.mnuOpenTaskInfo,
+            this.mnuMoveCT});
+            this.デバッグToolStripMenuItem.Name = "デバッグToolStripMenuItem";
+            this.デバッグToolStripMenuItem.Size = new System.Drawing.Size(55, 20);
+            this.デバッグToolStripMenuItem.Text = "デバッグ";
+            // 
+            // mnuOpenTaskInfo
+            // 
+            this.mnuOpenTaskInfo.Name = "mnuOpenTaskInfo";
+            this.mnuOpenTaskInfo.Size = new System.Drawing.Size(148, 22);
+            this.mnuOpenTaskInfo.Text = "AGVタスク情報";
+            this.mnuOpenTaskInfo.Click += new System.EventHandler(this.mnuOpenTaskInfo_Click);
+            // 
+            // mnuMoveCT
+            // 
+            this.mnuMoveCT.Name = "mnuMoveCT";
+            this.mnuMoveCT.Size = new System.Drawing.Size(148, 22);
+            this.mnuMoveCT.Text = "CT検証";
+            this.mnuMoveCT.Click += new System.EventHandler(this.mnuMoveCT_Click);
+            // 
             // tabControl1
             // 
             this.tabControl1.Controls.Add(this.tabMove);
@@ -511,8 +537,10 @@ namespace MujinAGVDemo
             // 
             // tabSetting
             // 
+            this.tabSetting.Controls.Add(this.cmbRobotFace);
+            this.tabSetting.Controls.Add(this.label15);
+            this.tabSetting.Controls.Add(this.cmbPodFace);
             this.tabSetting.Controls.Add(this.label7);
-            this.tabSetting.Controls.Add(this.listBoxPodDirection);
             this.tabSetting.Controls.Add(this.label6);
             this.tabSetting.Controls.Add(this.textBoxChargeZoneID);
             this.tabSetting.Controls.Add(this.chkUnload);
@@ -560,10 +588,11 @@ namespace MujinAGVDemo
             "南",
             "西",
             "指定しない"});
-            this.listBoxPodDirection.Location = new System.Drawing.Point(302, 87);
+            this.listBoxPodDirection.Location = new System.Drawing.Point(738, 134);
             this.listBoxPodDirection.Name = "listBoxPodDirection";
-            this.listBoxPodDirection.Size = new System.Drawing.Size(50, 52);
+            this.listBoxPodDirection.Size = new System.Drawing.Size(50, 16);
             this.listBoxPodDirection.TabIndex = 70;
+            this.listBoxPodDirection.Visible = false;
             // 
             // label6
             // 
@@ -855,28 +884,44 @@ namespace MujinAGVDemo
             this.chkAllSet.UseVisualStyleBackColor = false;
             this.chkAllSet.CheckedChanged += new System.EventHandler(this.chkAllSet_CheckedChanged);
             // 
-            // デバッグToolStripMenuItem
+            // cmbPodFace
             // 
-            this.デバッグToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.mnuOpenTaskInfo,
-            this.mnuMoveCT});
-            this.デバッグToolStripMenuItem.Name = "デバッグToolStripMenuItem";
-            this.デバッグToolStripMenuItem.Size = new System.Drawing.Size(55, 20);
-            this.デバッグToolStripMenuItem.Text = "デバッグ";
+            this.cmbPodFace.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cmbPodFace.FormattingEnabled = true;
+            this.cmbPodFace.Items.AddRange(new object[] {
+            "北",
+            "東",
+            "南",
+            "西",
+            "指定しない"});
+            this.cmbPodFace.Location = new System.Drawing.Point(312, 86);
+            this.cmbPodFace.Name = "cmbPodFace";
+            this.cmbPodFace.Size = new System.Drawing.Size(90, 20);
+            this.cmbPodFace.TabIndex = 72;
             // 
-            // mnuOpenTaskInfo
+            // cmbRobotFace
             // 
-            this.mnuOpenTaskInfo.Name = "mnuOpenTaskInfo";
-            this.mnuOpenTaskInfo.Size = new System.Drawing.Size(180, 22);
-            this.mnuOpenTaskInfo.Text = "AGVタスク情報";
-            this.mnuOpenTaskInfo.Click += new System.EventHandler(this.mnuOpenTaskInfo_Click);
+            this.cmbRobotFace.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cmbRobotFace.FormattingEnabled = true;
+            this.cmbRobotFace.Items.AddRange(new object[] {
+            "北",
+            "東",
+            "南",
+            "西",
+            "指定しない"});
+            this.cmbRobotFace.Location = new System.Drawing.Point(312, 112);
+            this.cmbRobotFace.Name = "cmbRobotFace";
+            this.cmbRobotFace.Size = new System.Drawing.Size(90, 20);
+            this.cmbRobotFace.TabIndex = 74;
             // 
-            // mnuMoveCT
+            // label15
             // 
-            this.mnuMoveCT.Name = "mnuMoveCT";
-            this.mnuMoveCT.Size = new System.Drawing.Size(180, 22);
-            this.mnuMoveCT.Text = "CT検証";
-            this.mnuMoveCT.Click += new System.EventHandler(this.mnuMoveCT_Click);
+            this.label15.AutoSize = true;
+            this.label15.Location = new System.Drawing.Point(245, 115);
+            this.label15.Name = "label15";
+            this.label15.Size = new System.Drawing.Size(60, 12);
+            this.label15.TabIndex = 73;
+            this.label15.Text = "AGVの向き";
             // 
             // frmLight
             // 
@@ -887,6 +932,7 @@ namespace MujinAGVDemo
             this.Controls.Add(this.btnGetAGVData);
             this.Controls.Add(this.btnLiftDown);
             this.Controls.Add(this.btnLiftUp);
+            this.Controls.Add(this.listBoxPodDirection);
             this.Controls.Add(this.btnTaskCancel);
             this.Controls.Add(this.btnCharge);
             this.Controls.Add(this.tabControl1);
@@ -997,5 +1043,8 @@ namespace MujinAGVDemo
         private System.Windows.Forms.ToolStripMenuItem デバッグToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem mnuOpenTaskInfo;
         private System.Windows.Forms.ToolStripMenuItem mnuMoveCT;
+        private System.Windows.Forms.ComboBox cmbPodFace;
+        private System.Windows.Forms.ComboBox cmbRobotFace;
+        private System.Windows.Forms.Label label15;
     }
 }
