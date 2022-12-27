@@ -322,126 +322,132 @@ namespace MujinAGVDemo
             {
                 Factory = new CommandFactory(param.ServerIP, param.WarehouseID);
             }
-            //AGV移動をクリック
-            if (e.ColumnIndex == dgvMoveAGVColumn)
+            try
             {
-                //moveRobot(factory: Factory,
-                //          robotID: param.RobotID,
-                //          nodeID: dgvMove[dgvNodeColumn, e.RowIndex].Value.ToString());
-
-
-                var robotFace = Direction.NoSelect;
-                switch (cmbRobotFace.SelectedIndex)
+                //AGV移動をクリック
+                if (e.ColumnIndex == dgvMoveAGVColumn)
                 {
-                    case 0:
-                        robotFace = Direction.North;
-                        break;
-                    case 1:
-                        robotFace = Direction.East;
-                        break;
-                    case 2:
-                        robotFace = Direction.South;
-                        break;
-                    case 3:
-                        robotFace = Direction.West;
-                        break;
-                    case 4:
-                        robotFace = Direction.NoSelect;
-                        break;
+                    //moveRobot(factory: Factory,
+                    //          robotID: param.RobotID,
+                    //          nodeID: dgvMove[dgvNodeColumn, e.RowIndex].Value.ToString());
+                    source = new CancellationTokenSource();
+
+                    var robotFace = Direction.NoSelect;
+                    switch (cmbRobotFace.SelectedIndex)
+                    {
+                        case 0:
+                            robotFace = Direction.North;
+                            break;
+                        case 1:
+                            robotFace = Direction.East;
+                            break;
+                        case 2:
+                            robotFace = Direction.South;
+                            break;
+                        case 3:
+                            robotFace = Direction.West;
+                            break;
+                        case 4:
+                            robotFace = Direction.NoSelect;
+                            break;
+                    }
+
+                    var task = AsyncCommands.MoveRobot(token: source.Token,
+                                                       factory: Factory,
+                                                       robotID: param.RobotID,
+                                                       nodeID: dgvMove[dgvNodeColumn, e.RowIndex].Value.ToString(),
+                                                       robotFace: robotFace);
+                    await task;
+
+                    showMessageBox(task.Result.Item1, task.Result.Item2);
                 }
+                //棚移動をクリック
+                else if (e.ColumnIndex == dgvMovePodColumn)
+                {
+                    source = new CancellationTokenSource();
+                    var robotFace = Direction.NoSelect;
+                    switch (cmbRobotFace.SelectedIndex)
+                    {
+                        case 0:
+                            robotFace = Direction.North;
+                            break;
+                        case 1:
+                            robotFace = Direction.East;
+                            break;
+                        case 2:
+                            robotFace = Direction.South;
+                            break;
+                        case 3:
+                            robotFace = Direction.West;
+                            break;
+                        case 4:
+                            robotFace = Direction.NoSelect;
+                            break;
+                    }
+                    var podFace = Direction.NoSelect;
+                    switch (cmbPodFace.SelectedIndex)
+                    {
+                        case 0:
+                            podFace = Direction.North;
+                            break;
+                        case 1:
+                            podFace = Direction.East;
+                            break;
+                        case 2:
+                            podFace = Direction.South;
+                            break;
+                        case 3:
+                            podFace = Direction.West;
+                            break;
+                        case 4:
+                            podFace = Direction.NoSelect;
+                            break;
+                    }
 
-                var task = AsyncCommands.MoveRobot(token: source.Token,
-                                                   factory: Factory,
-                                                   robotID: param.RobotID,
-                                                   nodeID: dgvMove[dgvNodeColumn, e.RowIndex].Value.ToString(),
-                                                   robotFace: robotFace);
-                task.Start();
-                await task.ConfigureAwait(true);
+                    //movePod(factory: Factory,
+                    //        robotID: param.RobotID,
+                    //        nodeID: dgvMove[dgvNodeColumn, e.RowIndex].Value.ToString(),
+                    //        podID: param.PodID,
+                    //        podFace: podDir);
 
-                showMessageBox(task.Result.Item1, task.Result.Item2);
+                    var task = AsyncCommands.MovePod(token: source.Token,
+                                                     factory: Factory,
+                                                     robotID: param.RobotID,
+                                                     nodeID: dgvMove[dgvNodeColumn, e.RowIndex].Value.ToString(),
+                                                     podID: param.PodID,
+                                                     robotFace: robotFace,
+                                                     podFace: podFace,
+                                                     unload: param.Unload);
+                    await task;
+
+                    showMessageBox(task.Result.Item1, task.Result.Item2);
+                }
+                //編集をクリック
+                else if (e.ColumnIndex == dgvEditColumn)
+                {
+                    var name = dgvMove[dgvNameColumn, e.RowIndex].Value.ToString();
+                    var nodeID = dgvMove[dgvNodeColumn, e.RowIndex].Value.ToString();
+
+                    var target = param.NodeDatas[e.RowIndex];
+                    target.Name = name;
+                    target.NodeID = nodeID;
+
+                    fileIO.SaveSetting(settingPath, param);
+                }
+                //棚作成をクリック
+                else if (e.ColumnIndex == dgvAddPodColumn)
+                {
+                    var nodeID = dgvMove[dgvNodeColumn, e.RowIndex].Value.ToString();
+                    if (showCheckMessage($"[{nodeID}]に棚[{param.PodID}]を作成しますか？") != DialogResult.OK)
+                    {
+                        return;
+                    }
+                    addPod(nodeID: nodeID);
+                }
             }
-            //棚移動をクリック
-            else if (e.ColumnIndex == dgvMovePodColumn)
+            catch (Exception ex)
             {
-                var robotFace = Direction.NoSelect;
-                switch (cmbRobotFace.SelectedIndex)
-                {
-                    case 0:
-                        robotFace = Direction.North;
-                        break;
-                    case 1:
-                        robotFace = Direction.East;
-                        break;
-                    case 2:
-                        robotFace = Direction.South;
-                        break;
-                    case 3:
-                        robotFace = Direction.West;
-                        break;
-                    case 4:
-                        robotFace = Direction.NoSelect;
-                        break;
-                }
-                var podFace = Direction.NoSelect;
-                switch (cmbPodFace.SelectedIndex)
-                {
-                    case 0:
-                        podFace = Direction.North;
-                        break;
-                    case 1:
-                        podFace = Direction.East;
-                        break;
-                    case 2:
-                        podFace = Direction.South;
-                        break;
-                    case 3:
-                        podFace = Direction.West;
-                        break;
-                    case 4:
-                        podFace = Direction.NoSelect;
-                        break;
-                }
-
-                //movePod(factory: Factory,
-                //        robotID: param.RobotID,
-                //        nodeID: dgvMove[dgvNodeColumn, e.RowIndex].Value.ToString(),
-                //        podID: param.PodID,
-                //        podFace: podDir);
-
-                var task = AsyncCommands.MovePod(token: source.Token,
-                                                 factory: Factory,
-                                                 robotID: param.RobotID,
-                                                 nodeID: dgvMove[dgvNodeColumn, e.RowIndex].Value.ToString(),
-                                                 podID: param.PodID,
-                                                 robotFace: robotFace,
-                                                 podFace: podFace,
-                                                 unload: param.Unload);
-                task.Start();
-                await task.ConfigureAwait(true);
-
-                showMessageBox(task.Result.Item1, task.Result.Item2);
-            }
-            //編集をクリック
-            else if (e.ColumnIndex == dgvEditColumn)
-            {
-                var name = dgvMove[dgvNameColumn, e.RowIndex].Value.ToString();
-                var nodeID = dgvMove[dgvNodeColumn, e.RowIndex].Value.ToString();
-
-                var target = param.NodeDatas[e.RowIndex];
-                target.Name = name;
-                target.NodeID = nodeID;
-
-                fileIO.SaveSetting(settingPath, param);
-            }
-            //棚作成をクリック
-            else if (e.ColumnIndex == dgvAddPodColumn)
-            {
-                var nodeID = dgvMove[dgvNodeColumn, e.RowIndex].Value.ToString();
-                if (showCheckMessage($"[{nodeID}]に棚[{param.PodID}]を作成しますか？") != DialogResult.OK)
-                {
-                    return;
-                }
-                addPod(nodeID: nodeID);
+                showErrorMessageBox($"エラーが発生しました。{ex.ToString()}");
             }
         }
         /// <summary>
@@ -457,12 +463,21 @@ namespace MujinAGVDemo
             {
                 Factory = new CommandFactory(param.ServerIP, param.WarehouseID);
             }
-            param.NodeDatas.ForEach(x =>
+
+            try
             {
-                if (source.IsCancellationRequested)
-                    return;
-                moveRobot(Factory, param.RobotID, x.NodeID);
-            });
+                param.NodeDatas.ForEach(x =>
+                {
+                    if (source.IsCancellationRequested)
+                        return;
+                    moveRobot(Factory, param.RobotID, x.NodeID);
+                });
+                showInfoMessageBox("移動終了しました。");
+            }
+            catch (Exception ex)
+            {
+                showErrorMessageBox($"エラーが発生しました。{ex.ToString()}");
+            }
         }
         /// <summary>
         /// 「連続棚移動」クリック
@@ -735,6 +750,25 @@ namespace MujinAGVDemo
             {
                 txtNode2.Text = node.NodeID;
             }
+        }
+        private void mnuOpenTaskInfo_Click(object sender, EventArgs e)
+        {
+            if (Factory == null)
+            {
+                Factory = new CommandFactory(param.ServerIP, param.WarehouseID);
+            }
+            var frm = new frmDGV(Factory);
+            frm.Show();
+        }
+
+        private void mnuMoveCT_Click(object sender, EventArgs e)
+        {
+            MoveCT();
+        }
+
+        private void btnMoveCancel_Click(object sender, EventArgs e)
+        {
+            source.Cancel();
         }
 
         #endregion Event
@@ -1233,21 +1267,5 @@ namespace MujinAGVDemo
             }
         }
         #endregion Class
-
-
-        private void mnuOpenTaskInfo_Click(object sender, EventArgs e)
-        {
-            if (Factory == null)
-            {
-                Factory = new CommandFactory(param.ServerIP, param.WarehouseID);
-            }
-            var frm = new frmDGV(Factory);
-            frm.Show();
-        }
-
-        private void mnuMoveCT_Click(object sender, EventArgs e)
-        {
-            MoveCT();
-        }
     }
 }

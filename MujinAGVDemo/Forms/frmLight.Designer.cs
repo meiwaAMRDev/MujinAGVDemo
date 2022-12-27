@@ -76,8 +76,10 @@ namespace MujinAGVDemo
             this.colAddPod = new System.Windows.Forms.DataGridViewButtonColumn();
             this.colEdit = new System.Windows.Forms.DataGridViewButtonColumn();
             this.tabSetting = new System.Windows.Forms.TabPage();
+            this.cmbRobotFace = new System.Windows.Forms.ComboBox();
+            this.label15 = new System.Windows.Forms.Label();
+            this.cmbPodFace = new System.Windows.Forms.ComboBox();
             this.label7 = new System.Windows.Forms.Label();
-            this.listBoxPodDirection = new System.Windows.Forms.ListBox();
             this.label6 = new System.Windows.Forms.Label();
             this.textBoxChargeZoneID = new System.Windows.Forms.TextBox();
             this.chkUnload = new System.Windows.Forms.CheckBox();
@@ -101,15 +103,14 @@ namespace MujinAGVDemo
             this.txtTempNode1 = new System.Windows.Forms.TextBox();
             this.txtPod1 = new System.Windows.Forms.TextBox();
             this.btnExchangePod = new System.Windows.Forms.Button();
+            this.listBoxPodDirection = new System.Windows.Forms.ListBox();
             this.btnCharge = new System.Windows.Forms.Button();
             this.btnTaskCancel = new System.Windows.Forms.Button();
             this.btnLiftUp = new System.Windows.Forms.Button();
             this.btnLiftDown = new System.Windows.Forms.Button();
             this.btnGetAGVData = new System.Windows.Forms.Button();
             this.chkAllSet = new System.Windows.Forms.CheckBox();
-            this.cmbPodFace = new System.Windows.Forms.ComboBox();
-            this.cmbRobotFace = new System.Windows.Forms.ComboBox();
-            this.label15 = new System.Windows.Forms.Label();
+            this.btnMoveCancel = new System.Windows.Forms.Button();
             this.menuStrip1.SuspendLayout();
             this.tabControl1.SuspendLayout();
             this.tabMove.SuspendLayout();
@@ -426,6 +427,7 @@ namespace MujinAGVDemo
             // 
             // tabMove
             // 
+            this.tabMove.Controls.Add(this.btnMoveCancel);
             this.tabMove.Controls.Add(this.btnLoadNodeData);
             this.tabMove.Controls.Add(this.btnCycleMovePod);
             this.tabMove.Controls.Add(this.btnCycleMoveRobot);
@@ -569,6 +571,45 @@ namespace MujinAGVDemo
             this.tabSetting.Text = "基本設定";
             this.tabSetting.UseVisualStyleBackColor = true;
             // 
+            // cmbRobotFace
+            // 
+            this.cmbRobotFace.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cmbRobotFace.FormattingEnabled = true;
+            this.cmbRobotFace.Items.AddRange(new object[] {
+            "北",
+            "東",
+            "南",
+            "西",
+            "指定しない"});
+            this.cmbRobotFace.Location = new System.Drawing.Point(312, 112);
+            this.cmbRobotFace.Name = "cmbRobotFace";
+            this.cmbRobotFace.Size = new System.Drawing.Size(90, 20);
+            this.cmbRobotFace.TabIndex = 74;
+            // 
+            // label15
+            // 
+            this.label15.AutoSize = true;
+            this.label15.Location = new System.Drawing.Point(245, 115);
+            this.label15.Name = "label15";
+            this.label15.Size = new System.Drawing.Size(60, 12);
+            this.label15.TabIndex = 73;
+            this.label15.Text = "AGVの向き";
+            // 
+            // cmbPodFace
+            // 
+            this.cmbPodFace.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cmbPodFace.FormattingEnabled = true;
+            this.cmbPodFace.Items.AddRange(new object[] {
+            "北",
+            "東",
+            "南",
+            "西",
+            "指定しない"});
+            this.cmbPodFace.Location = new System.Drawing.Point(312, 86);
+            this.cmbPodFace.Name = "cmbPodFace";
+            this.cmbPodFace.Size = new System.Drawing.Size(90, 20);
+            this.cmbPodFace.TabIndex = 72;
+            // 
             // label7
             // 
             this.label7.AutoSize = true;
@@ -577,22 +618,6 @@ namespace MujinAGVDemo
             this.label7.Size = new System.Drawing.Size(48, 12);
             this.label7.TabIndex = 71;
             this.label7.Text = "棚の向き";
-            // 
-            // listBoxPodDirection
-            // 
-            this.listBoxPodDirection.FormattingEnabled = true;
-            this.listBoxPodDirection.ItemHeight = 12;
-            this.listBoxPodDirection.Items.AddRange(new object[] {
-            "北",
-            "東",
-            "南",
-            "西",
-            "指定しない"});
-            this.listBoxPodDirection.Location = new System.Drawing.Point(738, 134);
-            this.listBoxPodDirection.Name = "listBoxPodDirection";
-            this.listBoxPodDirection.Size = new System.Drawing.Size(50, 16);
-            this.listBoxPodDirection.TabIndex = 70;
-            this.listBoxPodDirection.Visible = false;
             // 
             // label6
             // 
@@ -820,6 +845,22 @@ namespace MujinAGVDemo
             this.btnExchangePod.UseVisualStyleBackColor = true;
             this.btnExchangePod.Click += new System.EventHandler(this.btnExchangePod_ClickAsync);
             // 
+            // listBoxPodDirection
+            // 
+            this.listBoxPodDirection.FormattingEnabled = true;
+            this.listBoxPodDirection.ItemHeight = 12;
+            this.listBoxPodDirection.Items.AddRange(new object[] {
+            "北",
+            "東",
+            "南",
+            "西",
+            "指定しない"});
+            this.listBoxPodDirection.Location = new System.Drawing.Point(738, 134);
+            this.listBoxPodDirection.Name = "listBoxPodDirection";
+            this.listBoxPodDirection.Size = new System.Drawing.Size(50, 16);
+            this.listBoxPodDirection.TabIndex = 70;
+            this.listBoxPodDirection.Visible = false;
+            // 
             // btnCharge
             // 
             this.btnCharge.Location = new System.Drawing.Point(628, 99);
@@ -884,44 +925,15 @@ namespace MujinAGVDemo
             this.chkAllSet.UseVisualStyleBackColor = false;
             this.chkAllSet.CheckedChanged += new System.EventHandler(this.chkAllSet_CheckedChanged);
             // 
-            // cmbPodFace
+            // btnMoveCancel
             // 
-            this.cmbPodFace.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.cmbPodFace.FormattingEnabled = true;
-            this.cmbPodFace.Items.AddRange(new object[] {
-            "北",
-            "東",
-            "南",
-            "西",
-            "指定しない"});
-            this.cmbPodFace.Location = new System.Drawing.Point(312, 86);
-            this.cmbPodFace.Name = "cmbPodFace";
-            this.cmbPodFace.Size = new System.Drawing.Size(90, 20);
-            this.cmbPodFace.TabIndex = 72;
-            // 
-            // cmbRobotFace
-            // 
-            this.cmbRobotFace.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.cmbRobotFace.FormattingEnabled = true;
-            this.cmbRobotFace.Items.AddRange(new object[] {
-            "北",
-            "東",
-            "南",
-            "西",
-            "指定しない"});
-            this.cmbRobotFace.Location = new System.Drawing.Point(312, 112);
-            this.cmbRobotFace.Name = "cmbRobotFace";
-            this.cmbRobotFace.Size = new System.Drawing.Size(90, 20);
-            this.cmbRobotFace.TabIndex = 74;
-            // 
-            // label15
-            // 
-            this.label15.AutoSize = true;
-            this.label15.Location = new System.Drawing.Point(245, 115);
-            this.label15.Name = "label15";
-            this.label15.Size = new System.Drawing.Size(60, 12);
-            this.label15.TabIndex = 73;
-            this.label15.Text = "AGVの向き";
+            this.btnMoveCancel.Location = new System.Drawing.Point(443, 118);
+            this.btnMoveCancel.Name = "btnMoveCancel";
+            this.btnMoveCancel.Size = new System.Drawing.Size(75, 23);
+            this.btnMoveCancel.TabIndex = 81;
+            this.btnMoveCancel.Text = "キャンセル";
+            this.btnMoveCancel.UseVisualStyleBackColor = true;
+            this.btnMoveCancel.Click += new System.EventHandler(this.btnMoveCancel_Click);
             // 
             // frmLight
             // 
@@ -1046,5 +1058,6 @@ namespace MujinAGVDemo
         private System.Windows.Forms.ComboBox cmbPodFace;
         private System.Windows.Forms.ComboBox cmbRobotFace;
         private System.Windows.Forms.Label label15;
+        private System.Windows.Forms.Button btnMoveCancel;
     }
 }
