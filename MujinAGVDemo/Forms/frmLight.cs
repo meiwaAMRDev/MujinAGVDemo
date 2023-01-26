@@ -72,7 +72,7 @@ namespace MujinAGVDemo
         private ParamSettings param;
         private bool isStop = false;
         private readonly FileIO fileIO = new FileIO();
-        private readonly Logger logger = LogManager.GetLogger("ProgramLogger");
+        public readonly Logger logger = LogManager.GetLogger("ProgramLogger");
         private CancellationTokenSource source = new CancellationTokenSource();
         private List<string> nodeNames = new List<string>();
         #endregion Private Parameter
@@ -80,6 +80,9 @@ namespace MujinAGVDemo
         #region Public Paramater
 
         public CommandFactory Factory;
+        private int turnModeIndex = 1;
+        private int unloadModeIndex = 2;
+        private int nodeIDIndex = 0;
 
         #endregion Public Paramater
 
@@ -911,10 +914,33 @@ namespace MujinAGVDemo
         /// AGVの占有状態を解除します
         /// </summary>
         /// <param name="robotID">AGVの号機</param>
-        private void unsetOwner(string robotID)
+        private async void unsetOwner(string robotID, int repeat = 5)
         {
             var factory = new CommandFactory(param.ServerIP, param.WarehouseID);
-            var (isSuccess, message) = Command.MapCommands.UnsetOwner(factory, robotID);
+            source = new CancellationTokenSource();
+            //var (isSuccess, message) = Command.MapCommands.UnsetOwner(factory, robotID);
+
+            bool isSuccess = false;
+            string message = string.Empty;
+            int count = 0;
+            do
+            {
+                count++;
+                var task = AsyncCommands.UnsetOwner(factory, robotID);
+                var result = await task;
+                //(isSuccess, message) = Command.MapCommands.UnsetOwner(factory, robotID);
+                isSuccess = result.Item1;
+                message = result.Item2;
+                if (!isSuccess)
+                {
+                    logger.Info($"[{count}回目]{message}");
+                    await Task.Delay(1000);
+                }
+
+            } while (!isSuccess
+            && !source.Token.IsCancellationRequested
+            && count < repeat);
+
             showMessageBox(isSuccess, message);
 
         }
@@ -1267,5 +1293,192 @@ namespace MujinAGVDemo
             }
         }
         #endregion Class
+
+        private async void btnMoveCSV_Click(object sender, EventArgs e)
+        {
+            logger.Info("連続動作開始");
+            //stopwatch.Restart();
+            //dispatcherTimer.Start();
+            var stationListPath = param.StationListPath;
+            var paramSetting = this.param;
+            var robotID = param.RobotID;
+            var podID = param.PodID;
+            updateParam();
+            await movePodRotate(stationListPath, paramSetting, podID);
+            Task.Delay(1000);
+            unsetOwner(robotID);
+
+            //if (dispatcherTimer.IsEnabled)
+            //    dispatcherTimer.Stop();
+            //if (stopwatch.IsRunning)
+            //    stopwatch.Stop();
+        }
+
+        private async Task movePodRotate(string stationListPath, ParamSettings paramSetting, string podID)
+        {
+            source = new CancellationTokenSource();
+            var token = source.Token;
+
+            if (!fileIO.TryGetAllLines(stationListPath, out var orderList))
+            {
+                showErrorMessageBox("CSVファイルの読込に失敗しました。");
+                return;
+            }
+            // ヘッダー行を取り除く処理
+            orderList.RemoveAt(0);
+            await movePodRotate(paramSetting, orderList, token, podID);
+        }
+
+        private async Task movePodRotate(ParamSettings param, List<string> allLines
+            , CancellationToken cancelToken, string podID)
+        {
+            var nowCount = 1;
+            var isInfinityLoop = param.RepeatCount == 0;
+            var isRunning =
+                //無限ループモードまたは実行回数が繰り返し回数未満
+                (isInfinityLoop || nowCount < param.RepeatCount)
+                //かつキャンセルされていない
+                && !cancelToken.IsCancellationRequested;
+            do
+            {
+                if (Factory == null)
+                {
+                    Factory = new CommandFactory(param.ServerIP, param.WarehouseID);
+                }
+
+                if (cancelToken.IsCancellationRequested)
+                {
+                    //lblCurrentLineProcess.Text = "連続動作完了";
+                    //showInfoMessageBox($"連続動作完了:{lblRunningTime.Text}");
+                    return;
+                }
+                if (!isInfinityLoop)
+                {
+
+                    //var percent = (int)((double)nowCount / (double)param.RepeatCount * 100);
+                    //prgRepeartCount.Value = percent > 100 ? 100 : percent;
+                }
+
+                //lblProgress.Text = $"繰り返し回数 {nowCount}/{param.RepeatCount}";
+                logger.Info(string.Format("{0}回目開始", nowCount));
+                var robotFace = Direction.NoSelect;
+                switch (cmbRobotFace.SelectedIndex)
+                {
+                    case 0:
+                        robotFace = Direction.North;
+                        break;
+                    case 1:
+                        robotFace = Direction.East;
+                        break;
+                    case 2:
+                        robotFace = Direction.South;
+                        break;
+                    case 3:
+                        robotFace = Direction.West;
+                        break;
+                    case 4:
+                        robotFace = Direction.NoSelect;
+                        break;
+                }
+                //var podFace = Direction.NoSelect;
+                //switch (cmbPodFace.SelectedIndex)
+                //{
+                //    case 0:
+                //        podFace = Direction.North;
+                //        break;
+                //    case 1:
+                //        podFace = Direction.East;
+                //        break;
+                //    case 2:
+                //        podFace = Direction.South;
+                //        break;
+                //    case 3:
+                //        podFace = Direction.West;
+                //        break;
+                //    case 4:
+                //        podFace = Direction.NoSelect;
+                //        break;
+                //}
+                for (var rowCount = 0; rowCount < allLines.Count; rowCount++)
+                {
+                    //lblRunLineIndex.Text = $"実行行数 {rowCount + 1}/{allLines.Count}";
+                    var splitLine = allLines[rowCount].Split(',').ToList();
+
+                    if (!int.TryParse(splitLine[turnModeIndex], out var turnMode))
+                    {
+                        logger.Error("turnModeが読み込めません：{0}", splitLine[turnModeIndex]);
+                        continue;
+                    }
+                    if (!int.TryParse(splitLine[unloadModeIndex], out var unload))
+                    {
+                        logger.Error("unloadが読み込めません：{0}", splitLine[unloadModeIndex]);
+                        continue;
+                    }
+
+                    var nodeID = splitLine[nodeIDIndex];
+
+                    try
+                    {
+
+                        //棚IDが空白の場合、棚なしAGVのみで移動する
+                        if (podID == string.Empty)
+                        {
+                            //var task = AsyncCommands.MoveRobot(token: source.Token,
+                            //                           factory: Factory,
+                            //                           robotID: param.RobotID,
+                            //                           nodeID: nodeID,
+                            //                           robotFace: robotFace);
+                            //await task;
+
+                            //logger.Info($"[{task.Result.Item1}]{task.Result.Item2}");
+
+                            await AsyncCommands.MoveRobotWithoutMessage(param.ServerIP,
+                                                                        param.WarehouseID,
+                                                                        param.RobotID,
+                                                                        nodeID,
+                                                                        robotFaceIndex: cmbRobotFace.SelectedIndex,
+                                                                        cancelToken);
+                            logger.Info($"AGV移動完了[{param.RobotID}号機]行先[{nodeID}]");
+                        }
+                        else
+                        {
+                            await AsyncCommands.MovePodWithoutMessage(param.ServerIP,
+                                                                      param.WarehouseID,
+                                                                      podID,
+                                                                      nodeID,
+                                                                      param.RobotID,
+                                                                      turnMode,
+                                                                      unload,
+                                                                      cmbRobotFace.SelectedIndex,
+                                                                      cmbPodFace.SelectedIndex,
+                                                                      cancelToken);
+                            logger.Info($"棚移動完了[{param.RobotID}号機]棚[{podID}]行先[{nodeID}]");
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        logger.Info($"移動失敗[{param.RobotID}号機]棚[{podID}]行先[{nodeID}]{ex.ToString()}");
+                    }
+
+                }
+
+
+                if (!isInfinityLoop)
+                {
+                    nowCount++;
+                    if (nowCount > param.RepeatCount)
+                        isRunning = false;
+                }
+            }
+            //while (nowCount != param.RepeatCount && !cancelToken.IsCancellationRequested);
+            while (isRunning);
+            //dispatcherTimer.Stop();
+            //stopwatch.Stop();
+            //lblCurrentLineProcess.Text = "連続動作完了";
+            //showInfoMessageBox($"連続動作完了:{lblRunningTime.Text}");
+            logger.Info("連続動作完了");
+        }
     }
+
+
 }

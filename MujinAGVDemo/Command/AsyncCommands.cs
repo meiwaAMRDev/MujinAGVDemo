@@ -329,5 +329,248 @@ namespace MujinAGVDemo.Command
             }
             return await MovePod(token, factory, param);
         }
+
+        /// <summary>
+        /// AGVの占有状態を解除します
+        /// </summary>
+        /// <param name="factory">ファクトリ</param>
+        /// <param name="robotID">AGVの号機</param>
+        /// <returns>isSuccess=成功=true 失敗=false,　messages=応答メッセージ</returns>
+        public static async Task<(bool, string)> UnsetOwner(CommandFactory factory, string robotID)
+        {
+            var task = new Task<(bool, string)>(() =>
+            {
+                //var result = factory.Create(param).DoAction() as MovePodReturnMessage;
+                //var logMessage = $"棚移動結果:[{result.ReturnMsg}] リターンコード:[{result.ReturnCode}] robotGroupID:[{param.RobotGroupID}] podID:[{param.PodID}] 移動先:[{param.DesID}]";
+                //return (result.ReturnMsg == "succ", result.ReturnMsg);
+
+                var robotList = (GetRobotListReturnMessage)factory.Create(new GetRobotListParam()).DoAction();
+                var rb = robotList.Data.RobotList.Where(x => x.RobotID == robotID).FirstOrDefault();
+                if (rb == null)
+                {
+                    return (true, $"AGV[{robotID}]が見つからないためunsetOwnerは行いません。");
+                }
+                if (rb.Owner == "TES")
+                {
+                    return (true, $"AGV[{robotID}]の所有者はTESのためunsetOwnerは行いません。");
+                }
+
+                var unsetOwnerResult = factory.Create(new UnsetOwnerParam(robotID)).DoAction();
+
+                return unsetOwnerResult.ReturnMsg != "succ"
+                    ? (false, $"AGV[{robotID}]に対してUnsetOwnerが失敗しました。[{unsetOwnerResult.ReturnCode}]{unsetOwnerResult.ReturnMsg}")
+                    : (true, $"AGV[{robotID}]に対してUnsetOwnerが成功しました。");
+            });
+            task.Start();
+            await task.ConfigureAwait(true);
+            return task.Result;
+        }
+
+        public static async Task MoveRobotWithoutMessage(string serverIP, string warehouseID, string robotID, string nodeID, int robotFaceIndex, CancellationToken token)
+        {
+            if (token.IsCancellationRequested)
+            {
+                return;
+            }
+
+            var factory = new CommandFactory(serverIP, warehouseID);
+            if (!factory.IsConnectedTESServer())
+            {
+                return;
+            }
+
+
+            var moveTask = new Task(async () =>
+            {
+                var isSuccess = false;
+
+                var moveRobotParam = GetMoveRobotParam(robotID, nodeID, robotFaceIndex: robotFaceIndex);
+                do
+                {
+
+                
+                
+                
+
+                //var t = MoveRobot(token, factory, moveRobotParam);
+
+                var moveRobotResult = (MoveRobotReturnMessage)factory.Create(moveRobotParam).DoAction();
+
+                if (moveRobotResult == null || moveRobotResult?.Data == null || moveRobotResult?.Data?.TaskID == null|| moveRobotResult?.Data?.TaskID == string.Empty)
+                {
+
+                }
+                else
+                {
+                    var taskID = moveRobotResult?.Data?.TaskID;
+                    
+                    do
+                    {
+                        var ret = (GetTaskDetailReturnMessage)factory.Create(new GetTaskDetailParam(taskID)).DoAction();
+                        var detail = ret?.Data?.Detail;
+                        if (detail != null)
+                        {
+                            //Console.WriteLine($"{DateTime.Now}[{detail.Status}]");
+                            if (detail.Status == TaskStatuses.Success
+                                || detail.Status == TaskStatuses.Canceled)
+                            {
+                                //Console.WriteLine($"{DateTime.Now}[{detail.Status}]");
+                                isSuccess = true;
+                            }
+                            else if(detail.Status==TaskStatuses.Running)
+                            {
+                                
+                            }
+                        }
+                        else
+                        {
+                            Console.WriteLine($"{DateTime.Now}[detail is null]");
+                        }
+                    } while (!isSuccess&&!token.IsCancellationRequested);                    
+                }
+                } while (!isSuccess && !token.IsCancellationRequested) ;
+            }, token);
+            if (token.IsCancellationRequested)
+            {
+                return;
+            }
+            moveTask.Start();
+            await moveTask.ConfigureAwait(true);
+
+        }
+
+        public static async Task MovePodWithoutMessage(string serverIP, string warehouseID, string podID
+            , string nodeID, string robotID, int turnMode, int unload, int robotFaceIndex, int podFaceIndex, CancellationToken cancelToken)
+        {
+            var movePodParam = GetMovePodParam(robotID, nodeID, podID, turnMode, unload, robotFaceIndex, podFaceIndex);
+
+            if (cancelToken.IsCancellationRequested)
+                return;
+            var factory = new CommandFactory(serverIP, warehouseID);
+            if (!factory.IsConnectedTESServer())
+            {
+                return;
+            }
+            //棚を下ろす際はシンクロターンできないようにする
+            if (unload == ON)
+            {
+                turnMode = OFF;
+            }
+            var moveTask = new Task(() =>
+            {
+                var movePodResult = (MovePodReturnMessage)factory.Create(movePodParam).DoAction();
+            }, cancelToken);
+            if (cancelToken.IsCancellationRequested)
+                return;
+
+            moveTask.Start();
+            await moveTask.ConfigureAwait(true);
+        }
+
+
+        public static MoveRobotParam GetMoveRobotParam(string robotID,
+                                                       string nodeID,
+                                                       //bool isEndWait = true,
+                                                       //bool ownerRegist = false,
+                                                       int robotFaceIndex = 4)
+        {
+            var robotFace = Direction.NoSelect;
+            switch (robotFaceIndex)
+            {
+                case 0:
+                    robotFace = Direction.North;
+                    break;
+                case 1:
+                    robotFace = Direction.East;
+                    break;
+                case 2:
+                    robotFace = Direction.South;
+                    break;
+                case 3:
+                    robotFace = Direction.West;
+                    break;
+                case 4:
+                    robotFace = Direction.NoSelect;
+                    break;
+            }
+
+            var moveRobotParam = new MoveRobotParam(
+                            robotID,
+                            DestinationModes.NodeID,
+                            nodeID,
+                            //isEndWait: isEndWait,
+                            //ownerRegist: ownerRegist,
+                            robotFace: robotFace
+                            )
+            {
+                //CachingCallがnullだと例外が発生するため何もしないイベントを追加
+                CachingCall = (obj, e) =>
+                {
+                }
+            };
+            return moveRobotParam;
+        }
+
+        public static MovePodParam GetMovePodParam(
+                                                  string robotID,
+                                                  string nodeID,
+                                                  string podID,
+                                                  int turnMode = OFF,
+                                                  int unload = ON,
+                                                  int robotFaceIndex = 4,
+                                                  int podFaceIndex = 4)
+        {
+            var robotFace = Direction.NoSelect;
+            switch (robotFaceIndex)
+            {
+                case 0:
+                    robotFace = Direction.North;
+                    break;
+                case 1:
+                    robotFace = Direction.East;
+                    break;
+                case 2:
+                    robotFace = Direction.South;
+                    break;
+                case 3:
+                    robotFace = Direction.West;
+                    break;
+                case 4:
+                    robotFace = Direction.NoSelect;
+                    break;
+            }
+            var podFace = Direction.NoSelect;
+            switch (podFaceIndex)
+            {
+                case 0:
+                    podFace = Direction.North;
+                    break;
+                case 1:
+                    podFace = Direction.East;
+                    break;
+                case 2:
+                    podFace = Direction.South;
+                    break;
+                case 3:
+                    podFace = Direction.West;
+                    break;
+                case 4:
+                    podFace = Direction.NoSelect;
+                    break;
+            }
+            var param = new MovePodParam(
+                robotID: robotID,
+                podID: podID,
+                desMode: DestinationModes.StorageID,
+                desID: nodeID,
+                turnMode: turnMode,
+                unload: unload,
+                robotFace: robotFace,
+                podFace: podFace
+                )
+            {
+            };
+            return param;
+        }
     }
 }

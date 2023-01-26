@@ -111,6 +111,7 @@ namespace MujinAGVDemo
             this.btnGetAGVData = new System.Windows.Forms.Button();
             this.chkAllSet = new System.Windows.Forms.CheckBox();
             this.btnMoveCancel = new System.Windows.Forms.Button();
+            this.btnMoveCSV = new System.Windows.Forms.Button();
             this.menuStrip1.SuspendLayout();
             this.tabControl1.SuspendLayout();
             this.tabMove.SuspendLayout();
@@ -427,6 +428,7 @@ namespace MujinAGVDemo
             // 
             // tabMove
             // 
+            this.tabMove.Controls.Add(this.btnMoveCSV);
             this.tabMove.Controls.Add(this.btnMoveCancel);
             this.tabMove.Controls.Add(this.btnLoadNodeData);
             this.tabMove.Controls.Add(this.btnCycleMovePod);
@@ -935,6 +937,16 @@ namespace MujinAGVDemo
             this.btnMoveCancel.UseVisualStyleBackColor = true;
             this.btnMoveCancel.Click += new System.EventHandler(this.btnMoveCancel_Click);
             // 
+            // btnMoveCSV
+            // 
+            this.btnMoveCSV.Location = new System.Drawing.Point(304, 118);
+            this.btnMoveCSV.Name = "btnMoveCSV";
+            this.btnMoveCSV.Size = new System.Drawing.Size(90, 23);
+            this.btnMoveCSV.TabIndex = 81;
+            this.btnMoveCSV.Text = "CSV連続移動";
+            this.btnMoveCSV.UseVisualStyleBackColor = true;
+            this.btnMoveCSV.Click += new System.EventHandler(this.btnMoveCSV_Click);
+            // 
             // frmLight
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
@@ -1059,5 +1071,6 @@ namespace MujinAGVDemo
         private System.Windows.Forms.ComboBox cmbRobotFace;
         private System.Windows.Forms.Label label15;
         private System.Windows.Forms.Button btnMoveCancel;
+        private System.Windows.Forms.Button btnMoveCSV;
     }
 }
