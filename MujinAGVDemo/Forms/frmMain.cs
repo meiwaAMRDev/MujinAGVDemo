@@ -53,6 +53,10 @@ namespace MujinAGVDemo
         /// CSVファイルの中のunloadのインデックス
         /// </summary>
         private const int unloadModeIndex = 2;
+        /// <summary>
+        /// CSVファイルの中の棚を使用するかのインデックス
+        /// </summary>
+        private const int withPodIndex = 3;
         private const int ON = 1;
         private const int OFF = 0;
         /// <summary>
@@ -717,6 +721,22 @@ namespace MujinAGVDemo
                     }
 
                     var nodeID = splitLine[nodeIDIndex];
+
+
+                    if (withPodIndex < splitLine.Count)
+                    {
+                        if (!int.TryParse(splitLine[withPodIndex], out var withPod))
+                        {
+                            logger.Error("withPodが読み込めません：{0}", splitLine[withPodIndex]);
+                            continue;
+                        }
+
+                        if (withPod == 0)
+                        {
+                            podID = string.Empty;
+                        }
+                    }
+
                     //棚IDが空白の場合、棚なしAGVのみで移動する
                     if (podID == string.Empty)
                     {
