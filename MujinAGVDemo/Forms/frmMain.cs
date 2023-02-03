@@ -53,6 +53,10 @@ namespace MujinAGVDemo
         /// CSVファイルの中のunloadのインデックス
         /// </summary>
         private const int unloadModeIndex = 2;
+        /// <summary>
+        /// CSVファイルの中の棚を使用するかのインデックス
+        /// </summary>
+        private const int withPodIndex = 3;
         private const int ON = 1;
         private const int OFF = 0;
         /// <summary>
@@ -187,8 +191,8 @@ namespace MujinAGVDemo
                 showErrorMessageBox("CSVファイルの読込に失敗しました。");
                 return;
             }
-            // ヘッダー行を取り除く処理
-            orderList.RemoveAt(0);
+            //// ヘッダー行を取り除く処理
+            //orderList.RemoveAt(0);
             await movePodRotate(paramSetting, orderList, token, robotID, podID);
         }
 
@@ -703,7 +707,14 @@ namespace MujinAGVDemo
                 for (var rowCount = 0; rowCount < allLines.Count; rowCount++)
                 {
                     lblRunLineIndex.Text = $"実行行数 {rowCount + 1}/{allLines.Count}";
-                    var splitLine = allLines[rowCount].Split(',').ToList();
+                    var splitLine = allLines[rowCount].Trim().Split(',').ToList();
+                    var nodeID = splitLine[nodeIDIndex];
+                    if (!nodeID.All(char.IsDigit))
+                    {
+                        logger.Info($"nodeID=[{nodeID}]:数値ではないため行を飛ばします。");
+                        continue;
+                    }
+
 
                     if (!int.TryParse(splitLine[turnModeIndex], out var turnMode))
                     {
@@ -716,7 +727,23 @@ namespace MujinAGVDemo
                         continue;
                     }
 
-                    var nodeID = splitLine[nodeIDIndex];
+                    
+
+
+                    if (withPodIndex < splitLine.Count)
+                    {
+                        if (!int.TryParse(splitLine[withPodIndex], out var withPod))
+                        {
+                            logger.Error("withPodが読み込めません：{0}", splitLine[withPodIndex]);
+                            continue;
+                        }
+
+                        if (withPod == 0)
+                        {
+                            podID = string.Empty;
+                        }
+                    }
+
                     //棚IDが空白の場合、棚なしAGVのみで移動する
                     if (podID == string.Empty)
                     {
@@ -784,7 +811,14 @@ namespace MujinAGVDemo
                             nodeID,
                             isEndWait: true,
                             ownerRegist: false
-                            );
+                            )
+                    {
+                        //CachingCallがnullだと例外が発生するため何もしないイベントを追加
+                        CachingCall = (obj, e) =>
+                        {
+                        }
+                    };
+
 
                     //switch (listBoxDirection.SelectedIndex)
                     switch (directionIndex)

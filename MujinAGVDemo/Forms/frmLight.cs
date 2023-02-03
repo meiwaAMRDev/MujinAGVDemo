@@ -664,7 +664,11 @@ namespace MujinAGVDemo
                     allLines.ForEach(x =>
                     {
                         var splitX = x.Split(',').ToList();
-                        nodeDatas.Add(new NodeData(name: splitX[0], nodeID: splitX[1].Trim()));
+                        var nodeID = splitX[1].Trim();
+                        if(nodeID.All(char.IsDigit))
+                        {
+                            nodeDatas.Add(new NodeData(name: splitX[0], nodeID: nodeID));
+                        }                        
                     });
                     param.NodeDatas = nodeDatas;
                     updateDgvMove(param.NodeDatas);
