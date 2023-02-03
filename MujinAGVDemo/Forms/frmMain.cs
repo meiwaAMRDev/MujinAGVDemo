@@ -804,7 +804,14 @@ namespace MujinAGVDemo
                             nodeID,
                             isEndWait: true,
                             ownerRegist: false
-                            );
+                            )
+                    {
+                        //CachingCallがnullだと例外が発生するため何もしないイベントを追加
+                        CachingCall = (obj, e) =>
+                        {
+                        }
+                    };
+
 
                     //switch (listBoxDirection.SelectedIndex)
                     switch (directionIndex)
