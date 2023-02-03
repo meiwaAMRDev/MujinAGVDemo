@@ -191,8 +191,8 @@ namespace MujinAGVDemo
                 showErrorMessageBox("CSVファイルの読込に失敗しました。");
                 return;
             }
-            // ヘッダー行を取り除く処理
-            orderList.RemoveAt(0);
+            //// ヘッダー行を取り除く処理
+            //orderList.RemoveAt(0);
             await movePodRotate(paramSetting, orderList, token, robotID, podID);
         }
 
@@ -707,7 +707,14 @@ namespace MujinAGVDemo
                 for (var rowCount = 0; rowCount < allLines.Count; rowCount++)
                 {
                     lblRunLineIndex.Text = $"実行行数 {rowCount + 1}/{allLines.Count}";
-                    var splitLine = allLines[rowCount].Split(',').ToList();
+                    var splitLine = allLines[rowCount].Trim().Split(',').ToList();
+                    var nodeID = splitLine[nodeIDIndex];
+                    if (!nodeID.All(char.IsDigit))
+                    {
+                        logger.Info($"nodeID=[{nodeID}]:数値ではないため行を飛ばします。");
+                        continue;
+                    }
+
 
                     if (!int.TryParse(splitLine[turnModeIndex], out var turnMode))
                     {
@@ -720,7 +727,7 @@ namespace MujinAGVDemo
                         continue;
                     }
 
-                    var nodeID = splitLine[nodeIDIndex];
+                    
 
 
                     if (withPodIndex < splitLine.Count)
