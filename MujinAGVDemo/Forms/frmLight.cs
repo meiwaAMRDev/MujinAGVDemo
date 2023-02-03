@@ -1483,22 +1483,15 @@ namespace MujinAGVDemo
 
                         if (withPod == 0)
                         {
-                            podID = string.Empty;
-                        }
-                    }
-
-                    //棚IDが空白の場合、棚なしAGVのみで移動する
-                    if (podID == string.Empty)
-                    {
-                        await moveRobotAsync(param.ServerIP,
+                            await moveRobotAsync(param.ServerIP,
                                              param.WarehouseID,
                                              robotID,
                                              nodeID,
                                              cancelToken);
-                    }
-                    else
-                    {
-                        await movePodAsync(param.ServerIP,
+                        }
+                        else
+                        {
+                            await movePodAsync(param.ServerIP,
                                            param.WarehouseID,
                                            podID,
                                            nodeID,
@@ -1506,7 +1499,31 @@ namespace MujinAGVDemo
                                            turnMode,
                                            unload,
                                            cancelToken);
+                        }
                     }
+                    else
+                    {
+                        //棚IDが空白の場合、棚なしAGVのみで移動する
+                        if (podID == string.Empty)
+                        {
+                            await moveRobotAsync(param.ServerIP,
+                                                 param.WarehouseID,
+                                                 robotID,
+                                                 nodeID,
+                                                 cancelToken);
+                        }
+                        else
+                        {
+                            await movePodAsync(param.ServerIP,
+                                               param.WarehouseID,
+                                               podID,
+                                               nodeID,
+                                               robotID,
+                                               turnMode,
+                                               unload,
+                                               cancelToken);
+                        }
+                    }                    
                 }
 
                 if (!isInfinityLoop)
