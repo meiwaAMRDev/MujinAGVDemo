@@ -101,8 +101,10 @@ namespace MujinAGVDemo
         /// CSVファイルの中の棚IDのインデックス
         /// </summary>
         private const int colPodID = 4;
-
-
+        /// <summary>
+        /// CSVファイルの中のタスクペアの終端列のインデックス
+        /// </summary>
+        private const int colIsEnd = 5;
         private int robotFaceIndex = 4;
 
         #endregion Public Paramater
@@ -1464,6 +1466,8 @@ namespace MujinAGVDemo
                     return;
                 }
                 logger.Info(string.Format("{0}回目開始", nowCount));
+                //同時に実行するタスクのリスト
+                var taskList = new List<Task>();
                 for (var rowCount = 0; rowCount < allLines.Count; rowCount++)
                 {
                     var splitLine = allLines[rowCount].Split(',').ToList();
@@ -1493,6 +1497,10 @@ namespace MujinAGVDemo
                         {
                             podID = csvPodID == 0 ? podID : csvPodID.ToString();
                         }
+                    }
+                    if (!bool.TryParse(splitLine[colIsEnd].Trim(), out var isEnd))
+                    {
+                        isEnd = false;
                     }
 
                     //棚搬送するかAGV単体かを読込
@@ -1531,28 +1539,38 @@ namespace MujinAGVDemo
                                     break;
                             }
 
-                            await moveRobotAsync(param.ServerIP,
+                            taskList.Add(moveRobotAsync(param.ServerIP,
                                              param.WarehouseID,
                                              robotID,
                                              nodeID,
-                                             cancelToken);
+                                             cancelToken));
+                            if (isEnd)
+                            {
+                                await Task.WhenAll(taskList);
+                                taskList.Clear();
+                            }
                         }
                         else
                         {
                             if (!isAuto)
                             {
-                                await movePodAsync(param.ServerIP,
+                                taskList.Add(movePodAsync(param.ServerIP,
                                                param.WarehouseID,
                                                podID,
                                                nodeID,
                                                robotID,
                                                turnMode,
                                                unload,
-                                               cancelToken);
+                                               cancelToken));
+                                if (isEnd)
+                                {
+                                    await Task.WhenAll(taskList);
+                                    taskList.Clear();
+                                }
                             }
                             else
                             {
-                                await movePodAsync(param.ServerIP,
+                                taskList.Add(movePodAsync(param.ServerIP,
                                                param.WarehouseID,
                                                podID,
                                                nodeID,
@@ -1560,7 +1578,12 @@ namespace MujinAGVDemo
                                                turnMode,
                                                unload,
                                                cancelToken,
-                                               isAuto);
+                                               isAuto));
+                                if (isEnd)
+                                {
+                                    await Task.WhenAll(taskList);
+                                    taskList.Clear();
+                                }
                             }
                         }
                     }
