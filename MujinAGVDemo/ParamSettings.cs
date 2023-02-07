@@ -76,6 +76,10 @@ namespace MujinAGVDemo
         /// ノード情報のリスト
         /// </summary>
         public List<NodeData> NodeDatas { get; set; }
+        /// <summary>
+        /// グループID　マップエディタの「基本データ」→「能力グループ」→「ID」で確認することができる
+        /// </summary>
+        public string RobotGroupID { get; set; }
         #endregion Property
 
         public ParamSettings()
