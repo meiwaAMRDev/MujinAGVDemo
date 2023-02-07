@@ -93,6 +93,12 @@ namespace MujinAGVDemo
         /// CSVファイルの中の棚を使用するかのインデックス
         /// </summary>
         private const int colWithPod = 3;
+        /// <summary>
+        /// CSVファイルの中の棚IDのインデックス
+        /// </summary>
+        private const int colPodID = 4;
+
+
         private int robotFaceIndex = 4;
 
         #endregion Public Paramater
@@ -1461,18 +1467,28 @@ namespace MujinAGVDemo
                         continue;
                     }
 
-
+                    //シンクロターン設定読込（0:旋回時にAGVだけ回転、1:旋回時に棚とAGVが同じ向きに回転）
                     if (!int.TryParse(splitLine[turnModeIndex].Trim(), out var turnMode))
                     {
                         logger.Error("turnModeが読み込めません：{0}", splitLine[turnModeIndex]);
                         continue;
                     }
+                    //アンロード設定（0:目的地で棚を下ろさない、1:目的地で棚を下ろす）
                     if (!int.TryParse(splitLine[unloadModeIndex].Trim(), out var unload))
                     {
                         logger.Error("unloadが読み込めません：{0}", splitLine[unloadModeIndex]);
                         continue;
                     }
-
+                    //CSVに書かれている棚IDを読込（0または数字に変換できない場合はCSVの棚IDを反映しない）
+                    if (colPodID < splitLine.Count)
+                    {
+                        if(int.TryParse(splitLine[colPodID].Trim(),out var csvPodID))
+                        {
+                            podID = csvPodID == 0 ? podID : csvPodID.ToString();                            
+                        }
+                    }
+                    
+                    //棚搬送するかAGV単体かを読込
                     if (colWithPod < splitLine.Count)
                     {
                         if (!int.TryParse(splitLine[colWithPod].Trim(), out var withPod))
