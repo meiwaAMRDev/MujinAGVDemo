@@ -1474,10 +1474,10 @@ namespace MujinAGVDemo
                     var nodeID = splitLine[nodeIDIndex].Trim();
                     if (!nodeID.All(char.IsDigit))
                     {
-                        logger.Info($"nodeID=[{nodeID}]:数値ではないため行を飛ばします。");
+                        //logger.Info($"nodeID=[{nodeID}]:数値ではないため行を飛ばします。");
                         continue;
                     }
-
+                    //logger.Debug($"[{rowCount}]CSV:{allLines[rowCount]}");
                     //シンクロターン設定読込（0:旋回時にAGVだけ回転、1:旋回時に棚とAGVが同じ向きに回転）
                     if (!int.TryParse(splitLine[turnModeIndex].Trim(), out var turnMode))
                     {
@@ -1538,7 +1538,7 @@ namespace MujinAGVDemo
                                 default:
                                     break;
                             }
-
+                            logger.Debug($"[{rowCount}]MoveRobot:AGV[{robotID}] nodeID[{nodeID}]");
                             taskList.Add(moveRobotAsync(param.ServerIP,
                                              param.WarehouseID,
                                              robotID,
@@ -1554,6 +1554,7 @@ namespace MujinAGVDemo
                         {
                             if (!isAuto)
                             {
+                                logger.Debug($"[{rowCount}]MovePod:AGV[{robotID}] nodeID[{nodeID}] podID[{podID}]");
                                 taskList.Add(movePodAsync(param.ServerIP,
                                                param.WarehouseID,
                                                podID,
@@ -1570,6 +1571,7 @@ namespace MujinAGVDemo
                             }
                             else
                             {
+                                logger.Debug($"[{rowCount}]MovePodAuto:AGVGroup[{param.RobotGroupID}] nodeID[{nodeID}] podID[{podID}]");
                                 taskList.Add(movePodAsync(param.ServerIP,
                                                param.WarehouseID,
                                                podID,
@@ -1721,9 +1723,11 @@ namespace MujinAGVDemo
                     }
                     var moveRobotResult = (MoveRobotReturnMessage)factory.Create(moveRobotParam).DoAction();
 
-                    var logMessage = $"ロボットID {robotID},移動先 {nodeID}";
-                    logger.Info(logMessage);
-                    logger.Info(moveRobotResult.ReturnMsg);
+                    //var logMessage = $"ロボットID {robotID},移動先 {nodeID}";
+                    //logger.Info(logMessage);
+                    //logger.Info(moveRobotResult.ReturnMsg);
+
+                    logger.Info($"MoveRobot終了 AGV[{robotID}] 移動先[{nodeID}] 移動結果[{moveRobotResult.ReturnMsg}]");
 
                     this.Invoke((MethodInvoker)(() =>
                     {
@@ -1803,10 +1807,10 @@ namespace MujinAGVDemo
                     var movePodResult = (MovePodReturnMessage)factory.Create(movePodParam).DoAction();
 
 
-                    var logMessage = $"ロボットID {robotID},棚 {podID},移動先 {nodeID}";
-                    logger.Info(logMessage);
-                    logger.Info($"msg[{movePodResult.ReturnMsg}]returnCode[{movePodResult.ReturnCode}]");
-
+                    //var logMessage = $"ロボットID {robotID},棚 {podID},移動先 {nodeID}";
+                    //logger.Info(logMessage);
+                    //logger.Info($"msg[{movePodResult.ReturnMsg}]returnCode[{movePodResult.ReturnCode}]");
+                    logger.Info($"MovePod終了 AGV[{robotID}] 移動先[{nodeID}] 棚[{podID}] 移動結果[{movePodResult.ReturnMsg}]");
                     //logger.Info(movePodResult.ReturnMsg);
                     this.Invoke((MethodInvoker)(() =>
                     {
@@ -1884,9 +1888,10 @@ namespace MujinAGVDemo
                         var movePodResult = (MovePodReturnMessage)factory.Create(movePodParam).DoAction();
 
 
-                        var logMessage = $"ロボットID {robotID},棚 {podID},移動先 {nodeID}";
-                        logger.Info(logMessage);
-                        logger.Info($"msg[{movePodResult.ReturnMsg}]returnCode[{movePodResult.ReturnCode}]");
+                        //var logMessage = $"ロボットID {robotID},棚 {podID},移動先 {nodeID}";
+                        //logger.Info(logMessage);
+                        //logger.Info($"msg[{movePodResult.ReturnMsg}]returnCode[{movePodResult.ReturnCode}]");
+                        logger.Info($"MovePod終了 AGV[{robotID}] 移動先[{nodeID}] 棚[{podID}] 移動結果[{movePodResult.ReturnMsg}]");
                     }
                     else
                     {
@@ -1920,9 +1925,10 @@ namespace MujinAGVDemo
 
                         var movePodResult = (MovePodAutoSelectAGVReturnMessage)factory.Create(movePodAutoParam).DoAction();
 
-                        var logMessage = $"ロボットID {robotID},棚 {podID},移動先 {nodeID}";
-                        logger.Info(logMessage);
-                        logger.Info($"msg[{movePodResult.ReturnMsg}]returnCode[{movePodResult.ReturnCode}]");
+                        //var logMessage = $"ロボットID {robotID},棚 {podID},移動先 {nodeID}";
+                        //logger.Info(logMessage);
+                        //logger.Info($"msg[{movePodResult.ReturnMsg}]returnCode[{movePodResult.ReturnCode}]");
+                        logger.Info($"MovePodAuto終了 AGVGroup[{robotID}] 移動先[{nodeID}] 棚[{podID}] 移動結果[{movePodResult.ReturnMsg}]");
                     }
                 }, cancelToken);
                 if (cancelToken.IsCancellationRequested)
