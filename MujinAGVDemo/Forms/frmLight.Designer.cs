@@ -76,6 +76,8 @@ namespace MujinAGVDemo
             this.colAddPod = new System.Windows.Forms.DataGridViewButtonColumn();
             this.colEdit = new System.Windows.Forms.DataGridViewButtonColumn();
             this.tabAuto = new System.Windows.Forms.TabPage();
+            this.radMoveAuto = new System.Windows.Forms.RadioButton();
+            this.radMoveRobot = new System.Windows.Forms.RadioButton();
             this.lblRunningTime = new System.Windows.Forms.Label();
             this.btnSaveSampleCSV = new System.Windows.Forms.Button();
             this.label17 = new System.Windows.Forms.Label();
@@ -119,8 +121,6 @@ namespace MujinAGVDemo
             this.btnLiftDown = new System.Windows.Forms.Button();
             this.btnGetAGVData = new System.Windows.Forms.Button();
             this.chkAllSet = new System.Windows.Forms.CheckBox();
-            this.radMoveRobot = new System.Windows.Forms.RadioButton();
-            this.radMoveAuto = new System.Windows.Forms.RadioButton();
             this.menuStrip1.SuspendLayout();
             this.tabControl1.SuspendLayout();
             this.tabMove.SuspendLayout();
@@ -569,6 +569,29 @@ namespace MujinAGVDemo
             this.tabAuto.Text = "連続";
             this.tabAuto.UseVisualStyleBackColor = true;
             // 
+            // radMoveAuto
+            // 
+            this.radMoveAuto.AutoSize = true;
+            this.radMoveAuto.Location = new System.Drawing.Point(370, 37);
+            this.radMoveAuto.Name = "radMoveAuto";
+            this.radMoveAuto.Size = new System.Drawing.Size(85, 16);
+            this.radMoveAuto.TabIndex = 90;
+            this.radMoveAuto.Text = "グループ指定";
+            this.radMoveAuto.UseVisualStyleBackColor = true;
+            // 
+            // radMoveRobot
+            // 
+            this.radMoveRobot.AutoSize = true;
+            this.radMoveRobot.Checked = true;
+            this.radMoveRobot.Location = new System.Drawing.Point(370, 15);
+            this.radMoveRobot.Name = "radMoveRobot";
+            this.radMoveRobot.Size = new System.Drawing.Size(71, 16);
+            this.radMoveRobot.TabIndex = 89;
+            this.radMoveRobot.TabStop = true;
+            this.radMoveRobot.Text = "AGV指定";
+            this.radMoveRobot.UseVisualStyleBackColor = true;
+            this.radMoveRobot.CheckedChanged += new System.EventHandler(this.radMoveRobot_CheckedChanged);
+            // 
             // lblRunningTime
             // 
             this.lblRunningTime.AutoSize = true;
@@ -927,6 +950,7 @@ namespace MujinAGVDemo
             this.txtNode2.Size = new System.Drawing.Size(133, 19);
             this.txtNode2.TabIndex = 5;
             this.txtNode2.Text = "166512197650";
+            this.txtNode2.TextChanged += new System.EventHandler(this.txtNode2_TextChanged);
             // 
             // txtNode1
             // 
@@ -935,6 +959,7 @@ namespace MujinAGVDemo
             this.txtNode1.Size = new System.Drawing.Size(133, 19);
             this.txtNode1.TabIndex = 4;
             this.txtNode1.Text = "166512197651";
+            this.txtNode1.TextChanged += new System.EventHandler(this.txtNode1_TextChanged);
             // 
             // txtPod2
             // 
@@ -951,6 +976,7 @@ namespace MujinAGVDemo
             this.txtTempNode1.Size = new System.Drawing.Size(133, 19);
             this.txtTempNode1.TabIndex = 2;
             this.txtTempNode1.Text = "166512197665";
+            this.txtTempNode1.TextChanged += new System.EventHandler(this.txtTempNode1_TextChanged);
             // 
             // txtPod1
             // 
@@ -1034,29 +1060,6 @@ namespace MujinAGVDemo
             this.chkAllSet.UseVisualStyleBackColor = false;
             this.chkAllSet.CheckedChanged += new System.EventHandler(this.chkAllSet_CheckedChanged);
             // 
-            // radMoveRobot
-            // 
-            this.radMoveRobot.AutoSize = true;
-            this.radMoveRobot.Checked = true;
-            this.radMoveRobot.Location = new System.Drawing.Point(370, 15);
-            this.radMoveRobot.Name = "radMoveRobot";
-            this.radMoveRobot.Size = new System.Drawing.Size(71, 16);
-            this.radMoveRobot.TabIndex = 89;
-            this.radMoveRobot.TabStop = true;
-            this.radMoveRobot.Text = "AGV指定";
-            this.radMoveRobot.UseVisualStyleBackColor = true;
-            this.radMoveRobot.CheckedChanged += new System.EventHandler(this.radMoveRobot_CheckedChanged);
-            // 
-            // radMoveAuto
-            // 
-            this.radMoveAuto.AutoSize = true;
-            this.radMoveAuto.Location = new System.Drawing.Point(370, 37);
-            this.radMoveAuto.Name = "radMoveAuto";
-            this.radMoveAuto.Size = new System.Drawing.Size(85, 16);
-            this.radMoveAuto.TabIndex = 90;
-            this.radMoveAuto.Text = "グループ指定";
-            this.radMoveAuto.UseVisualStyleBackColor = true;
-            // 
             // frmLight
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
@@ -1083,6 +1086,7 @@ namespace MujinAGVDemo
             this.MainMenuStrip = this.menuStrip1;
             this.Name = "frmLight";
             this.Text = "AGVデモソフト（軽量版）";
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.frmLight_FormClosing);
             this.Load += new System.EventHandler(this.frmLight_Load);
             this.menuStrip1.ResumeLayout(false);
             this.menuStrip1.PerformLayout();

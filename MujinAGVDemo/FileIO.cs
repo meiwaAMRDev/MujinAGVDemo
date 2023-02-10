@@ -80,19 +80,33 @@ namespace MujinAGVDemo
         {
             var result = false;
             param = new ParamSettings();
-            if (!File.Exists(filePath))
+            try
             {
-                Messages.Logger.Error(string.Format("ファイルが存在しません。:{0}", filePath));
+
+                if (!File.Exists(filePath))
+                {
+                    Messages.Logger.Error(string.Format("ファイルが存在しません。:{0}", filePath));
+                    return result;
+                }
+
+                var serializer = new System.Xml.Serialization.XmlSerializer(typeof(ParamSettings));
+                using (var sr = new StreamReader(filePath, Encoding.UTF8))
+                {
+                    param = (ParamSettings)serializer.Deserialize(sr);
+                    result = true;
+                }
                 return result;
             }
-
-            var serializer = new System.Xml.Serialization.XmlSerializer(typeof(ParamSettings));
-            using (var sr = new StreamReader(filePath, Encoding.UTF8))
+            catch (Exception ex)
             {
-                param = (ParamSettings)serializer.Deserialize(sr);
-                result = true;
+                do
+                {
+                    Messages.Logger.Error($"設定ファイル読込エラー[{ex.Message}][{ex.StackTrace}]");
+                    ex = ex.InnerException;
+                }
+                while (ex != null);
+                return false;
             }
-            return result;
         }
     }
 }

@@ -127,6 +127,9 @@ namespace MujinAGVDemo
             this.Text = $"AGVデモソフト {Application.ProductVersion}";
             if (!fileIO.TryLoadSetting(settingPath, out param))
             {
+                param = new ParamSettings();
+                fileIO.SaveSetting(defaultSettingPath, param);
+
                 return;
             }
             try
@@ -143,9 +146,20 @@ namespace MujinAGVDemo
                 agvDataControl.Settings.AddAGVHouseDictionary("118", "1629184392168", "原位置", Color.LightGreen);
                 agvDataControl.Settings.AddAGVHouseDictionary("119", "1629184392170", "原位置", Color.LightGreen);
 
-                cmbNode1.SelectedItem = "B1";
-                cmbNode2.SelectedItem = "F1";
-                cmbTempNode.SelectedItem = "C1";
+                txtPod1.Text = param.Pod1Param.PodID;
+                txtTempNode1.Text = param.Pod1Param.TempNodeID;
+                changeCmbItem(txtTempNode1, cmbTempNode);
+                txtNode1.Text = param.Pod1Param.NodeID;
+                changeCmbItem(txtNode1, cmbNode1);
+
+                txtPod2.Text = param.Pod2Param.PodID;
+                changeCmbItem(txtNode2, cmbNode2);
+                txtTempNode2.Text = param.Pod2Param.TempNodeID;
+                txtNode2.Text = param.Pod2Param.NodeID;
+
+                //cmbNode1.SelectedItem = "B1";
+                //cmbNode2.SelectedItem = "F1";
+                //cmbTempNode.SelectedItem = "C1";
                 cmbPodFace.SelectedItem = "指定しない";
                 cmbRobotFace.SelectedItem = "指定しない";
 
@@ -276,6 +290,11 @@ namespace MujinAGVDemo
         }
 
         private void btnSaveSetting_Click(object sender, EventArgs e)
+        {
+            saveSetting();
+        }
+
+        private void saveSetting()
         {
             updateParam();
             if (settingPath != defaultSettingPath)
@@ -730,14 +749,24 @@ namespace MujinAGVDemo
 
             try
             {
-                var podID1 = txtPod1.Text;
-                var nodeID1 = txtNode1.Text;
-                var nodeIDTemp1 = txtTempNode1.Text;
-                var pod1Param = new ExchangePodParam(podID1, nodeIDTemp1, nodeID1);
+                //var podID1 = txtPod1.Text;
+                //var nodeID1 = txtNode1.Text;
+                //var nodeIDTemp1 = txtTempNode1.Text;
+                //var pod1Param = new ExchangePodParam(podID1, nodeIDTemp1, nodeID1);
 
-                var podID2 = txtPod2.Text;
-                var nodeID2 = txtNode2.Text;
-                var pod2Param = new ExchangePodParam(podID2, string.Empty, nodeID2);
+                param.Pod1Param.PodID = txtPod1.Text;
+                param.Pod1Param.NodeID = txtNode1.Text;
+                param.Pod1Param.TempNodeID = txtTempNode1.Text;
+
+
+
+                //var podID2 = txtPod2.Text;
+                //var nodeID2 = txtNode2.Text;
+                //var pod2Param = new ExchangePodParam(podID2, string.Empty, nodeID2);
+
+                param.Pod2Param.PodID = txtPod2.Text;
+                param.Pod2Param.NodeID = txtNode2.Text;
+                param.Pod2Param.TempNodeID = string.Empty;
 
                 var groupID = textBoxGroupID.Text;
 
@@ -746,8 +775,8 @@ namespace MujinAGVDemo
                 await ExchangePod(
                     factory: Factory,
                     groupID: groupID,
-                    pod1Param: pod1Param,
-                    pod2Param: pod2Param
+                    pod1Param: param.Pod1Param,
+                    pod2Param: param.Pod2Param
                     );
                 var endTime = DateTime.Now;
                 var movingTime = endTime - startTime;
@@ -853,6 +882,14 @@ namespace MujinAGVDemo
             param.RepeatCount = (int)numRepeatCount.Value;
             param.ChargeZoneID = textBoxChargeZoneID.Text;
             param.RobotGroupID = textBoxGroupID.Text;
+
+            param.Pod1Param.PodID = txtPod1.Text;
+            param.Pod1Param.NodeID = txtNode1.Text;
+            param.Pod1Param.TempNodeID = txtTempNode1.Text;
+
+            param.Pod2Param.PodID = txtPod2.Text;
+            param.Pod2Param.NodeID = txtNode2.Text;
+            param.Pod2Param.TempNodeID = string.Empty;
         }
         /// <summary>
         /// AGV情報タブのデータを更新します
@@ -1362,39 +1399,19 @@ namespace MujinAGVDemo
                 e.Effect = DragDropEffects.Copy;
             }
         }
+
+        private void changeCmbItem(TextBox textBox, ComboBox comboBox)
+        {
+            var node = param.NodeDatas.Where(x => x.NodeID == textBox.Text).FirstOrDefault();
+            if (node != null)
+            {
+                comboBox.SelectedItem = node.Name;
+            }
+        }
         #endregion Method
 
         #region Class
-        /// <summary>
-        /// 棚毎の棚交換タスク用パラメータ
-        /// </summary>
-        public class ExchangePodParam
-        {
-            /// <summary>
-            /// 棚ID
-            /// </summary>
-            public string PodID { get; set; }
-            /// <summary>
-            /// 退避先ノードID
-            /// </summary>
-            public string TempNodeID { get; set; }
-            /// <summary>
-            /// 目的地ノードID　※P点を指定する
-            /// </summary>
-            public string NodeID { get; set; }
-            /// <summary>
-            /// コンストラクタ
-            /// </summary>
-            /// <param name="podID">棚ID</param>
-            /// <param name="tempNodeID">退避先ノードID</param>
-            /// <param name="nodeID">目的地ノードID</param>
-            public ExchangePodParam(string podID, string tempNodeID, string nodeID)
-            {
-                PodID = podID;
-                TempNodeID = tempNodeID;
-                NodeID = nodeID;
-            }
-        }
+
         #endregion Class
 
         private async void btnMoveCSV_Click(object sender, EventArgs e)
@@ -1510,12 +1527,12 @@ namespace MujinAGVDemo
                         isEnd = true;
                     }
                     //CSVに書かれているタスク後待機時間を読込
-                    if(!int.TryParse(splitLine[colWaitTime].Trim(),out var waitTime))
+                    if (!int.TryParse(splitLine[colWaitTime].Trim(), out var waitTime))
                     {
                         //読み込めない場合は待機時間無しとして扱う
                         waitTime = 0;
                     }
-                    
+
 
                     //棚搬送するかAGV単体かを読込
                     if (colWithPod < splitLine.Count)
@@ -1762,7 +1779,7 @@ namespace MujinAGVDemo
                     logger.Debug($"待機開始:{waitMillisecond}[ms]");
                     await Task.Delay(waitMillisecond);
                     logger.Debug("待機終了");
-                }                
+                }
             }
             //AGVに異常が発生したら例外を出す
             catch (EmergencyException ee)
@@ -2034,6 +2051,30 @@ namespace MujinAGVDemo
         {
             isAuto = radMoveAuto.Checked;
             Console.WriteLine($"isAuto:{isAuto}");
+        }
+
+        private void frmLight_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            source.Cancel();
+            if (showCheckMessage($"設定を保存しますか？") == DialogResult.OK)
+            {
+                saveSetting();
+            }
+        }
+
+        private void txtTempNode1_TextChanged(object sender, EventArgs e)
+        {
+            changeCmbItem(txtTempNode1, cmbTempNode);
+        }
+
+        private void txtNode1_TextChanged(object sender, EventArgs e)
+        {
+            changeCmbItem(txtNode1, cmbNode1);
+        }
+
+        private void txtNode2_TextChanged(object sender, EventArgs e)
+        {
+            changeCmbItem(txtNode2, cmbNode2);
         }
     }
 

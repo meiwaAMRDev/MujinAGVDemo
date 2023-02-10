@@ -87,7 +87,7 @@ namespace MujinAGVDemo
             TurnMode = 0;
             Unload = 1;
             RepeatCount = 1;
-                        
+
             ServerIP = "60.205.92.182";
             WarehouseID = "417071259357020162";
             LayoutID = "c1658124614457";
@@ -107,7 +107,12 @@ namespace MujinAGVDemo
                 //new NodeData("N3", "1649829148140"),
                 //new NodeData("N4", "164982914835"),
             };
+            Pod1Param = new ExchangePodParam(PodID, string.Empty, NodeID);
+            Pod2Param = new ExchangePodParam(PodID, string.Empty, NodeID);
         }
+
+        public ExchangePodParam Pod1Param { get; set; }
+        public ExchangePodParam Pod2Param { get; set; }
     }
     /// <summary>
     /// ノード情報クラス
@@ -139,6 +144,43 @@ namespace MujinAGVDemo
         {
             this.Name = string.Empty;
             this.NodeID = string.Empty;
+        }
+    }
+
+    /// <summary>
+    /// 棚毎の棚交換タスク用パラメータ
+    /// </summary>
+    public class ExchangePodParam
+    {
+        /// <summary>
+        /// 棚ID
+        /// </summary>
+        public string PodID { get; set; }
+        /// <summary>
+        /// 退避先ノードID
+        /// </summary>
+        public string TempNodeID { get; set; }
+        /// <summary>
+        /// 目的地ノードID　※P点を指定する
+        /// </summary>
+        public string NodeID { get; set; }
+        /// <summary>
+        /// コンストラクタ
+        /// </summary>
+        /// <param name="podID">棚ID</param>
+        /// <param name="tempNodeID">退避先ノードID</param>
+        /// <param name="nodeID">目的地ノードID</param>
+        public ExchangePodParam(string podID, string tempNodeID, string nodeID)
+        {
+            PodID = podID;
+            TempNodeID = tempNodeID;
+            NodeID = nodeID;
+        }
+        public ExchangePodParam()
+        {
+            PodID = string.Empty;
+            TempNodeID = string.Empty;
+            NodeID = string.Empty;
         }
     }
 }
