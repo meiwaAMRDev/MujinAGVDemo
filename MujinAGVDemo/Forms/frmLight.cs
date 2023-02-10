@@ -105,6 +105,11 @@ namespace MujinAGVDemo
         /// CSVファイルの中のタスクペアの終端列のインデックス
         /// </summary>
         private const int colIsEnd = 5;
+        /// <summary>
+        /// CSVファイルの中のタスク後待機時間のインデックス
+        /// </summary>
+        private const int colWaitTime = 6;
+
         private int robotFaceIndex = 4;
 
         #endregion Public Paramater
@@ -1498,10 +1503,19 @@ namespace MujinAGVDemo
                             podID = csvPodID == 0 ? podID : csvPodID.ToString();
                         }
                     }
+                    //CSVに書かれているタスクペアの終端かを読込
                     if (!bool.TryParse(splitLine[colIsEnd].Trim(), out var isEnd))
                     {
-                        isEnd = false;
+                        //読み込めない場合は終端として扱う
+                        isEnd = true;
                     }
+                    //CSVに書かれているタスク後待機時間を読込
+                    if(!int.TryParse(splitLine[colWaitTime].Trim(),out var waitTime))
+                    {
+                        //読み込めない場合は待機時間無しとして扱う
+                        waitTime = 0;
+                    }
+                    
 
                     //棚搬送するかAGV単体かを読込
                     if (colWithPod < splitLine.Count)
@@ -1543,7 +1557,8 @@ namespace MujinAGVDemo
                                              param.WarehouseID,
                                              robotID,
                                              nodeID,
-                                             cancelToken));
+                                             cancelToken,
+                                             waitTime));
                             if (isEnd)
                             {
                                 await Task.WhenAll(taskList);
@@ -1562,7 +1577,8 @@ namespace MujinAGVDemo
                                                robotID,
                                                turnMode,
                                                unload,
-                                               cancelToken));
+                                               cancelToken,
+                                               waitTime));
                                 if (isEnd)
                                 {
                                     await Task.WhenAll(taskList);
@@ -1580,7 +1596,8 @@ namespace MujinAGVDemo
                                                turnMode,
                                                unload,
                                                cancelToken,
-                                               isAuto));
+                                               isAuto,
+                                               waitTime));
                                 if (isEnd)
                                 {
                                     await Task.WhenAll(taskList);
@@ -1671,7 +1688,7 @@ namespace MujinAGVDemo
 
         }
 
-        private async Task moveRobotAsync(string serverIP, string warehouseID, string robotID, string nodeID, CancellationToken token)
+        private async Task moveRobotAsync(string serverIP, string warehouseID, string robotID, string nodeID, CancellationToken token, int waitMillisecond = 0)
         {
             if (token.IsCancellationRequested)
             {
@@ -1740,6 +1757,12 @@ namespace MujinAGVDemo
                 }
                 moveTask.Start();
                 await moveTask.ConfigureAwait(true);
+                if (waitMillisecond > 0)
+                {
+                    logger.Debug($"待機開始:{waitMillisecond}[ms]");
+                    await Task.Delay(waitMillisecond);
+                    logger.Debug("待機終了");
+                }                
             }
             //AGVに異常が発生したら例外を出す
             catch (EmergencyException ee)
@@ -1754,7 +1777,7 @@ namespace MujinAGVDemo
             }
         }
         private async Task movePodAsync(string serverIP, string warehouseID, string podID
-            , string nodeID, string robotID, int turnMode, int unload, CancellationToken cancelToken)
+            , string nodeID, string robotID, int turnMode, int unload, CancellationToken cancelToken, int waitMillisecond = 0)
         {
             if (cancelToken.IsCancellationRequested)
                 return;
@@ -1822,6 +1845,12 @@ namespace MujinAGVDemo
 
                 moveTask.Start();
                 await moveTask.ConfigureAwait(true);
+                if (waitMillisecond > 0)
+                {
+                    logger.Debug($"待機開始:{waitMillisecond}[ms]");
+                    await Task.Delay(waitMillisecond);
+                    logger.Debug("待機終了");
+                }
             }
             //AGVに異常が発生したら例外を出す
             catch (EmergencyException ee)
@@ -1835,7 +1864,7 @@ namespace MujinAGVDemo
         }
 
         private async Task movePodAsync(string serverIP, string warehouseID, string podID
-            , string nodeID, string robotID, int turnMode, int unload, CancellationToken cancelToken, bool isAuto)
+            , string nodeID, string robotID, int turnMode, int unload, CancellationToken cancelToken, bool isAuto, int waitMillisecond = 0)
         {
             if (cancelToken.IsCancellationRequested)
                 return;
@@ -1936,6 +1965,12 @@ namespace MujinAGVDemo
 
                 moveTask.Start();
                 await moveTask.ConfigureAwait(true);
+                if (waitMillisecond > 0)
+                {
+                    logger.Debug($"待機開始:{waitMillisecond}[ms]");
+                    await Task.Delay(waitMillisecond);
+                    logger.Debug("待機終了");
+                }
             }
             //AGVに異常が発生したら例外を出す
             catch (EmergencyException ee)
