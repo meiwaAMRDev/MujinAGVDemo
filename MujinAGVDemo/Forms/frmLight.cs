@@ -109,6 +109,10 @@ namespace MujinAGVDemo
         /// CSVファイルの中のタスク後待機時間のインデックス
         /// </summary>
         private const int colWaitTime = 6;
+        /// <summary>
+        /// CSVファイルの中のロボットグループID
+        /// </summary>
+        private const int colRobotGroupID = 7;
 
         private int robotFaceIndex = 4;
 
@@ -1604,12 +1608,18 @@ namespace MujinAGVDemo
                             }
                             else
                             {
-                                logger.Debug($"[{rowCount}]MovePodAuto:AGVGroup[{param.RobotGroupID}] nodeID[{nodeID}] podID[{podID}]");
+                                var robotGroupID = param.RobotGroupID;
+                                if (colRobotGroupID < splitLine.Count)
+                                {
+                                    robotGroupID = splitLine[colRobotGroupID] == string.Empty ? param.RobotGroupID : splitLine[colRobotGroupID].Trim();
+                                }
+
+                                logger.Debug($"[{rowCount}]MovePodAuto:AGVGroup[{robotGroupID}] nodeID[{nodeID}] podID[{podID}]");
                                 taskList.Add(movePodAsync(param.ServerIP,
                                                param.WarehouseID,
                                                podID,
                                                nodeID,
-                                               robotID: param.RobotGroupID,
+                                               robotID: robotGroupID,
                                                turnMode,
                                                unload,
                                                cancelToken,
