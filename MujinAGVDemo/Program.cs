@@ -1,4 +1,5 @@
-﻿using NLog;
+﻿using MujinAGVDemo.Forms;
+using NLog;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -21,7 +22,9 @@ namespace MujinAGVDemo
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             //Application.Run(new frmMain());
-            Application.Run(new frmLight());
+            //Application.Run(new frmLight());
+            Application.Run(new frmMovingCSV());
+
             logger.Info($"{Application.ProductName}{Application.ProductVersion}を終了します。");
         }
     }
