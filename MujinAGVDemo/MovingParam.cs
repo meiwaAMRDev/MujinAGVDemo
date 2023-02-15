@@ -11,7 +11,20 @@ namespace MujinAGVDemo
     {
         const int ON = 1;
         const int OFF = 0;
-
+        /// <summary>
+        /// 移動指示CSVの中の列番号
+        /// </summary>
+        enum Col : int
+        {
+            NodeID = 0,
+            IsSyncro = 1,
+            IsUnload = 2,
+            WithPod = 3,
+            PodID = 4,
+            IsPairEnd = 5,
+            WaitMilliSecond = 6,
+            RobotID = 7
+        }
         [DisplayName("ノードID")]
         public string NodeID { get; set; } = string.Empty;
         [DisplayName("シンクロターン")]
@@ -72,6 +85,95 @@ namespace MujinAGVDemo
             WaitMilliSecond = waitMilliSecond;
         }
         /// <summary>
+        /// コンストラクタ
+        /// </summary>
+        /// <param name="csvText">カンマ区切り文字列</param>
+        public MovingParam(string csvText)
+        {
+            var split = csvText.Split(',');
+            var lastIndex = split.Length - 1;
+            NodeID = split[(int)Col.NodeID].Trim();
+            //ノードIDが全部数字でない場合はNG
+            if (!NodeID.All(char.IsDigit))
+            {
+                return;
+            }
+            var isSyncro = split[(int)Col.IsSyncro].Trim();
+            switch (isSyncro)
+            {
+                case "0":
+                    IsSyncro = false;
+                    break;
+                case "1":
+                    IsSyncro = true;
+                    break;
+                default:
+                    IsSyncro = bool.Parse(isSyncro);
+                    break;
+            }
+
+            var isUnload = split[(int)Col.IsUnload].Trim();
+            switch (isUnload)
+            {
+                case "0":
+                    IsUnload = false;
+                    break;
+                case "1":
+                    IsUnload = true;
+                    break;
+                default:
+                    IsUnload = bool.Parse(isUnload);
+                    break;
+            }
+            if (lastIndex < (int)Col.WithPod)
+            {
+                WithPod = true;
+            }
+            else
+            {
+                var withPod = split[(int)Col.WithPod].Trim();
+                switch (withPod)
+                {
+                    case "0":
+                        WithPod = false;
+                        break;
+                    case "1":
+                        WithPod = true;
+                        break;
+                    default:
+                        WithPod = bool.Parse(withPod);
+                        break;
+                }
+            }
+
+            PodID = lastIndex < (int)Col.PodID ? string.Empty : split[(int)Col.PodID].Trim();
+
+            if (lastIndex < (int)Col.IsPairEnd)
+            {
+                IsPairEnd = true;
+            }
+            else
+            {
+                var isPairEnd = split[(int)Col.IsPairEnd].Trim();
+                switch (isPairEnd)
+                {
+                    case "0":
+                        IsPairEnd = false;
+                        break;
+                    case "1":
+                        IsPairEnd = true;
+                        break;
+                    default:
+                        IsPairEnd = bool.Parse(isPairEnd);
+                        break;
+                }
+            }
+
+            WaitMilliSecond = lastIndex < (int)Col.WaitMilliSecond ? 0 : int.Parse(split[(int)Col.WaitMilliSecond].Trim());
+
+            RobotID = lastIndex < (int)Col.RobotID ? string.Empty : split[(int)Col.RobotID].Trim();
+        }
+        /// <summary>
         /// 移動指示CSV用のテキスト
         /// </summary>
         /// <returns>カンマ区切りテキスト</returns>
@@ -80,6 +182,10 @@ namespace MujinAGVDemo
             //return $"{NodeID},{IsSyncro},{IsUnload},{WithPod},{PodID},{IsPairEnd},{WaitMilliSecond},{RobotID}";
             return $"{NodeID},{(IsSyncro ? ON : OFF)},{(IsUnload ? ON : OFF)},{(WithPod ? ON : OFF)},{PodID},{(IsPairEnd ? ON : OFF)},{WaitMilliSecond},{RobotID}";
         }
+        /// <summary>
+        /// 移動指示CSV用のヘッダーテキスト
+        /// </summary>
+        /// <returns>カンマ区切りヘッダーテキスト</returns>
         public string CSVHeader()
         {
             //return "NodeID,IsSyncro,IsUnload,WithPod,PodID,IsPairEnd,WaitMilliSecond,RobotID";
@@ -96,11 +202,14 @@ namespace MujinAGVDemo
             try
             {
                 var split = csvText.Split(',');
-                var length = split.Length;
-
-                NodeID = split[0].Trim();
-
-                var isSyncro = split[1].Trim();
+                var lastIndex = split.Length - 1;
+                NodeID = split[(int)Col.NodeID].Trim();
+                //ノードIDが全部数字でない場合はNG
+                if (!NodeID.All(char.IsDigit))
+                {
+                    return result;
+                }
+                var isSyncro = split[(int)Col.IsSyncro].Trim();
                 switch (isSyncro)
                 {
                     case "0":
@@ -113,8 +222,7 @@ namespace MujinAGVDemo
                         IsSyncro = bool.Parse(isSyncro);
                         break;
                 }
-
-                var isUnload = split[2].Trim();
+                var isUnload = split[(int)Col.IsUnload].Trim();
                 switch (isUnload)
                 {
                     case "0":
@@ -127,45 +235,61 @@ namespace MujinAGVDemo
                         IsUnload = bool.Parse(isUnload);
                         break;
                 }
-
-                var withPod = split[3].Trim();
-                switch (withPod)
+                if (lastIndex < (int)Col.WithPod)
                 {
-                    case "0":
-                        WithPod = false;
-                        break;
-                    case "1":
-                        WithPod = true;
-                        break;
-                    default:
-                        WithPod = bool.Parse(withPod);
-                        break;
+                    WithPod = true;
                 }
-
-                PodID = split[4].Trim();
-
-                var isPairEnd = split[5].Trim();
-                switch (isPairEnd)
+                else
                 {
-                    case "0":
-                        IsPairEnd = false;
-                        break;
-                    case "1":
-                        IsPairEnd = true;
-                        break;
-                    default:
-                        IsPairEnd = bool.Parse(isPairEnd);
-                        break;
+                    var withPod = split[(int)Col.WithPod].Trim();
+                    switch (withPod)
+                    {
+                        case "0":
+                            WithPod = false;
+                            break;
+                        case "1":
+                            WithPod = true;
+                            break;
+                        default:
+                            WithPod = bool.Parse(withPod);
+                            break;
+                    }
                 }
-
-                WaitMilliSecond = int.Parse(split[6].Trim());
-
-                RobotID = split[7].Trim();
+                PodID = lastIndex < (int)Col.PodID ? string.Empty : split[(int)Col.PodID].Trim();
+                if (lastIndex < (int)Col.IsPairEnd)
+                {
+                    IsPairEnd = true;
+                }
+                else
+                {
+                    var isPairEnd = split[(int)Col.IsPairEnd].Trim();
+                    switch (isPairEnd)
+                    {
+                        case "0":
+                            IsPairEnd = false;
+                            break;
+                        case "1":
+                            IsPairEnd = true;
+                            break;
+                        default:
+                            IsPairEnd = bool.Parse(isPairEnd);
+                            break;
+                    }
+                }
+                WaitMilliSecond = lastIndex < (int)Col.WaitMilliSecond ? 0 : int.Parse(split[(int)Col.WaitMilliSecond].Trim());
+                RobotID = lastIndex < (int)Col.RobotID ? string.Empty : split[(int)Col.RobotID].Trim();
 
                 result = true;
             }
-            catch
+            catch (Exception ex)
             {
+                do
+                {
+                    Console.WriteLine($"{ex.Message},{ex.TargetSite}");
+                    ex = ex.InnerException;
+                } while (ex != null);
+
+
                 result = false;
             }
             return result;

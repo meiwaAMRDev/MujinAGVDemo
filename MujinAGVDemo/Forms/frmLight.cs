@@ -2086,6 +2086,12 @@ namespace MujinAGVDemo
         {
             changeCmbItem(txtNode2, cmbNode2);
         }
+
+        private void mnuEditMovingCSV_Click(object sender, EventArgs e)
+        {
+            var frmMovingCSV = new Forms.frmMovingCSV(param.StationListPath);
+            frmMovingCSV.Show();
+        }
     }
 
 

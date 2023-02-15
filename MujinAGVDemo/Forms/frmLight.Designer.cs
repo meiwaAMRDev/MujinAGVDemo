@@ -121,6 +121,7 @@ namespace MujinAGVDemo
             this.btnLiftDown = new System.Windows.Forms.Button();
             this.btnGetAGVData = new System.Windows.Forms.Button();
             this.chkAllSet = new System.Windows.Forms.CheckBox();
+            this.mnuEditMovingCSV = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.tabControl1.SuspendLayout();
             this.tabMove.SuspendLayout();
@@ -407,7 +408,8 @@ namespace MujinAGVDemo
             // 
             this.デバッグToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.mnuOpenTaskInfo,
-            this.mnuMoveCT});
+            this.mnuMoveCT,
+            this.mnuEditMovingCSV});
             this.デバッグToolStripMenuItem.Name = "デバッグToolStripMenuItem";
             this.デバッグToolStripMenuItem.Size = new System.Drawing.Size(55, 20);
             this.デバッグToolStripMenuItem.Text = "デバッグ";
@@ -415,14 +417,14 @@ namespace MujinAGVDemo
             // mnuOpenTaskInfo
             // 
             this.mnuOpenTaskInfo.Name = "mnuOpenTaskInfo";
-            this.mnuOpenTaskInfo.Size = new System.Drawing.Size(148, 22);
+            this.mnuOpenTaskInfo.Size = new System.Drawing.Size(180, 22);
             this.mnuOpenTaskInfo.Text = "AGVタスク情報";
             this.mnuOpenTaskInfo.Click += new System.EventHandler(this.mnuOpenTaskInfo_Click);
             // 
             // mnuMoveCT
             // 
             this.mnuMoveCT.Name = "mnuMoveCT";
-            this.mnuMoveCT.Size = new System.Drawing.Size(148, 22);
+            this.mnuMoveCT.Size = new System.Drawing.Size(180, 22);
             this.mnuMoveCT.Text = "CT検証";
             this.mnuMoveCT.Click += new System.EventHandler(this.mnuMoveCT_Click);
             // 
@@ -1060,6 +1062,13 @@ namespace MujinAGVDemo
             this.chkAllSet.UseVisualStyleBackColor = false;
             this.chkAllSet.CheckedChanged += new System.EventHandler(this.chkAllSet_CheckedChanged);
             // 
+            // mnuEditMovingCSV
+            // 
+            this.mnuEditMovingCSV.Name = "mnuEditMovingCSV";
+            this.mnuEditMovingCSV.Size = new System.Drawing.Size(180, 22);
+            this.mnuEditMovingCSV.Text = "移動指示CSV編集";
+            this.mnuEditMovingCSV.Click += new System.EventHandler(this.mnuEditMovingCSV_Click);
+            // 
             // frmLight
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
@@ -1197,5 +1206,6 @@ namespace MujinAGVDemo
         private System.Windows.Forms.Label lblRunningTime;
         private System.Windows.Forms.RadioButton radMoveAuto;
         private System.Windows.Forms.RadioButton radMoveRobot;
+        private System.Windows.Forms.ToolStripMenuItem mnuEditMovingCSV;
     }
 }
