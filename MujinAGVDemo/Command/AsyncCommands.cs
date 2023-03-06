@@ -388,47 +388,47 @@ namespace MujinAGVDemo.Command
                 do
                 {
 
-                
-                
-                
 
-                //var t = MoveRobot(token, factory, moveRobotParam);
 
-                var moveRobotResult = (MoveRobotReturnMessage)factory.Create(moveRobotParam).DoAction();
 
-                if (moveRobotResult == null || moveRobotResult?.Data == null || moveRobotResult?.Data?.TaskID == null|| moveRobotResult?.Data?.TaskID == string.Empty)
-                {
 
-                }
-                else
-                {
-                    var taskID = moveRobotResult?.Data?.TaskID;
-                    
-                    do
+                    //var t = MoveRobot(token, factory, moveRobotParam);
+
+                    var moveRobotResult = (MoveRobotReturnMessage)factory.Create(moveRobotParam).DoAction();
+
+                    if (moveRobotResult == null || moveRobotResult?.Data == null || moveRobotResult?.Data?.TaskID == null || moveRobotResult?.Data?.TaskID == string.Empty)
                     {
-                        var ret = (GetTaskDetailReturnMessage)factory.Create(new GetTaskDetailParam(taskID)).DoAction();
-                        var detail = ret?.Data?.Detail;
-                        if (detail != null)
+
+                    }
+                    else
+                    {
+                        var taskID = moveRobotResult?.Data?.TaskID;
+
+                        do
                         {
-                            //Console.WriteLine($"{DateTime.Now}[{detail.Status}]");
-                            if (detail.Status == TaskStatuses.Success
-                                || detail.Status == TaskStatuses.Canceled)
+                            var ret = (GetTaskDetailReturnMessage)factory.Create(new GetTaskDetailParam(taskID)).DoAction();
+                            var detail = ret?.Data?.Detail;
+                            if (detail != null)
                             {
                                 //Console.WriteLine($"{DateTime.Now}[{detail.Status}]");
-                                isSuccess = true;
+                                if (detail.Status == TaskStatuses.Success
+                                    || detail.Status == TaskStatuses.Canceled)
+                                {
+                                    //Console.WriteLine($"{DateTime.Now}[{detail.Status}]");
+                                    isSuccess = true;
+                                }
+                                else if (detail.Status == TaskStatuses.Running)
+                                {
+
+                                }
                             }
-                            else if(detail.Status==TaskStatuses.Running)
+                            else
                             {
-                                
+                                Console.WriteLine($"{DateTime.Now}[detail is null]");
                             }
-                        }
-                        else
-                        {
-                            Console.WriteLine($"{DateTime.Now}[detail is null]");
-                        }
-                    } while (!isSuccess&&!token.IsCancellationRequested);                    
-                }
-                } while (!isSuccess && !token.IsCancellationRequested) ;
+                        } while (!isSuccess && !token.IsCancellationRequested);
+                    }
+                } while (!isSuccess && !token.IsCancellationRequested);
             }, token);
             if (token.IsCancellationRequested)
             {
@@ -571,6 +571,53 @@ namespace MujinAGVDemo.Command
             {
             };
             return param;
+        }
+
+        public static async Task Moving(List<MovingParam> movingParams, bool isAuto)
+        {
+            var taskList = new List<Task>();
+            foreach (var movingParam in movingParams)
+            {
+                //棚なし
+                if (!movingParam.WithPod)
+                {
+                    //MoveRobot
+                    var param = new MoveRobotParam(robotID: movingParam.RobotID,
+                                                   desMode: DestinationModes.NodeID,
+                                                   desID: movingParam.NodeID,
+                                                   isEndWait: true,
+                                                   ownerRegist: false);
+                }
+                //棚あり
+                else
+                {
+                    if (isAuto)
+                    {
+                        //MovePodAuto
+                        var param = new MovePodAutoSelectAGVParam(robotGroupID: movingParam.RobotID,
+                                                                  podID: movingParam.PodID,
+                                                                  desMode: DestinationModes.StorageID,
+                                                                  desID: movingParam.NodeID,
+                                                                  isEndWait: true,
+                                                                  turnMode: movingParam.IsSyncro ? ON : OFF,
+                                                                  unload: movingParam.IsUnload ? ON : OFF
+                                                                  );
+                    }
+                    else
+                    {
+                        //MovePod
+                        var param = new MovePodParam(robotID: movingParam.RobotID,
+                            podID: movingParam.PodID,
+                            desMode: DestinationModes.StorageID,
+                            desID: movingParam.NodeID,
+                            isEndWait: true,
+                            turnMode: movingParam.IsSyncro ? ON : OFF,
+                            unload: movingParam.IsUnload ? ON : OFF
+                            );
+                    }
+                }
+            }
+
         }
     }
 }
