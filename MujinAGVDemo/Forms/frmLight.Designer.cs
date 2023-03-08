@@ -63,6 +63,7 @@ namespace MujinAGVDemo
             this.デバッグToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.mnuOpenTaskInfo = new System.Windows.Forms.ToolStripMenuItem();
             this.mnuMoveCT = new System.Windows.Forms.ToolStripMenuItem();
+            this.mnuEditMovingCSV = new System.Windows.Forms.ToolStripMenuItem();
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabMove = new System.Windows.Forms.TabPage();
             this.btnLoadNodeData = new System.Windows.Forms.Button();
@@ -121,7 +122,7 @@ namespace MujinAGVDemo
             this.btnLiftDown = new System.Windows.Forms.Button();
             this.btnGetAGVData = new System.Windows.Forms.Button();
             this.chkAllSet = new System.Windows.Forms.CheckBox();
-            this.mnuEditMovingCSV = new System.Windows.Forms.ToolStripMenuItem();
+            this.btnRotationCheck = new System.Windows.Forms.Button();
             this.menuStrip1.SuspendLayout();
             this.tabControl1.SuspendLayout();
             this.tabMove.SuspendLayout();
@@ -417,16 +418,23 @@ namespace MujinAGVDemo
             // mnuOpenTaskInfo
             // 
             this.mnuOpenTaskInfo.Name = "mnuOpenTaskInfo";
-            this.mnuOpenTaskInfo.Size = new System.Drawing.Size(180, 22);
+            this.mnuOpenTaskInfo.Size = new System.Drawing.Size(166, 22);
             this.mnuOpenTaskInfo.Text = "AGVタスク情報";
             this.mnuOpenTaskInfo.Click += new System.EventHandler(this.mnuOpenTaskInfo_Click);
             // 
             // mnuMoveCT
             // 
             this.mnuMoveCT.Name = "mnuMoveCT";
-            this.mnuMoveCT.Size = new System.Drawing.Size(180, 22);
+            this.mnuMoveCT.Size = new System.Drawing.Size(166, 22);
             this.mnuMoveCT.Text = "CT検証";
             this.mnuMoveCT.Click += new System.EventHandler(this.mnuMoveCT_Click);
+            // 
+            // mnuEditMovingCSV
+            // 
+            this.mnuEditMovingCSV.Name = "mnuEditMovingCSV";
+            this.mnuEditMovingCSV.Size = new System.Drawing.Size(166, 22);
+            this.mnuEditMovingCSV.Text = "移動指示CSV編集";
+            this.mnuEditMovingCSV.Click += new System.EventHandler(this.mnuEditMovingCSV_Click);
             // 
             // tabControl1
             // 
@@ -1062,18 +1070,22 @@ namespace MujinAGVDemo
             this.chkAllSet.UseVisualStyleBackColor = false;
             this.chkAllSet.CheckedChanged += new System.EventHandler(this.chkAllSet_CheckedChanged);
             // 
-            // mnuEditMovingCSV
+            // btnRotationCheck
             // 
-            this.mnuEditMovingCSV.Name = "mnuEditMovingCSV";
-            this.mnuEditMovingCSV.Size = new System.Drawing.Size(180, 22);
-            this.mnuEditMovingCSV.Text = "移動指示CSV編集";
-            this.mnuEditMovingCSV.Click += new System.EventHandler(this.mnuEditMovingCSV_Click);
+            this.btnRotationCheck.Location = new System.Drawing.Point(720, 151);
+            this.btnRotationCheck.Name = "btnRotationCheck";
+            this.btnRotationCheck.Size = new System.Drawing.Size(75, 23);
+            this.btnRotationCheck.TabIndex = 81;
+            this.btnRotationCheck.Text = "天板回転";
+            this.btnRotationCheck.UseVisualStyleBackColor = true;
+            this.btnRotationCheck.Click += new System.EventHandler(this.btnRotationCheck_Click);
             // 
             // frmLight
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(800, 488);
+            this.Controls.Add(this.btnRotationCheck);
             this.Controls.Add(this.chkAllSet);
             this.Controls.Add(this.btnGetAGVData);
             this.Controls.Add(this.btnLiftDown);
@@ -1207,5 +1219,6 @@ namespace MujinAGVDemo
         private System.Windows.Forms.RadioButton radMoveAuto;
         private System.Windows.Forms.RadioButton radMoveRobot;
         private System.Windows.Forms.ToolStripMenuItem mnuEditMovingCSV;
+        private System.Windows.Forms.Button btnRotationCheck;
     }
 }

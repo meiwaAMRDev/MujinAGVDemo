@@ -619,5 +619,26 @@ namespace MujinAGVDemo.Command
             }
 
         }
+
+        public static async Task RotationCheck(CommandFactory factory, string nodeID, string podID, string robotID, bool isClockwise, CancellationToken token)
+        {
+            if (factory == null)
+            {
+                return;
+            }
+
+            //移動指示
+
+            //リフトアップ＋北
+            await MovePod(token, factory, GetMovePodParam(robotID, nodeID, podID, unload: 0, podFaceIndex: 0));
+            //東（西）
+            await MovePod(token, factory, GetMovePodParam(robotID, nodeID, podID, unload: 0, podFaceIndex: isClockwise ? 1 : 3));
+            //南
+            await MovePod(token, factory, GetMovePodParam(robotID, nodeID, podID, unload: 0, podFaceIndex: 2));
+            //西（東）
+            await MovePod(token, factory, GetMovePodParam(robotID, nodeID, podID, unload: 0, podFaceIndex: isClockwise ? 3 : 1));
+            //北＋リフトダウン
+            await MovePod(token, factory, GetMovePodParam(robotID, nodeID, podID, unload: 1, podFaceIndex: 0));
+        }
     }
 }

@@ -2092,6 +2092,23 @@ namespace MujinAGVDemo
             var frmMovingCSV = new Forms.frmMovingCSV(param.StationListPath);
             frmMovingCSV.Show();
         }
+
+        private async void btnRotationCheck_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                source = new CancellationTokenSource();
+                var token = source.Token;
+                updateParam();
+                await AsyncCommands.RotationCheck(Factory, param.NodeID, param.PodID, param.RobotID, true, token);
+                unsetOwner(param.RobotID);
+                showInfoMessageBox($"天板回転チェック動作が完了しました。");
+            }
+            catch (Exception ex)
+            {
+                showErrorMessageBox($"エラーが発生しました。{ex.ToString()}");
+            }
+        }
     }
 
 
