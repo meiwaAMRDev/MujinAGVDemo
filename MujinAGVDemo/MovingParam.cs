@@ -180,7 +180,7 @@ namespace MujinAGVDemo
         public string CSVText()
         {
             //return $"{NodeID},{IsSyncro},{IsUnload},{WithPod},{PodID},{IsPairEnd},{WaitMilliSecond},{RobotID}";
-            return $"{NodeID},{(IsSyncro ? ON : OFF)},{(IsUnload ? ON : OFF)},{(WithPod ? ON : OFF)},{PodID},{(IsPairEnd ? ON : OFF)},{WaitMilliSecond},{RobotID}";
+            return $"{NodeID},{(IsSyncro ? ON : OFF)},{(IsUnload ? ON : OFF)},{(WithPod ? ON : OFF)},{PodID},{IsPairEnd},{WaitMilliSecond},{RobotID}";
         }
         /// <summary>
         /// 移動指示CSV用のヘッダーテキスト

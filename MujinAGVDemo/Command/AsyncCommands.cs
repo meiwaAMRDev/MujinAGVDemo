@@ -1,6 +1,7 @@
 ﻿using Hetu20dotnet;
 using Hetu20dotnet.Parameters;
 using Hetu20dotnet.ReturnMsgs;
+using NLog;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -18,6 +19,7 @@ namespace MujinAGVDemo.Command
         private const int OFF = 0;
         private const int ON = 1;
         private const double Nan = -255;
+        public static Logger logger = LogManager.GetLogger("ProgramLogger");
 
         /// <summary>
         /// AGV単体で移動します。
@@ -573,7 +575,7 @@ namespace MujinAGVDemo.Command
             return param;
         }
 
-        public static async Task Moving(List<MovingParam> movingParams, bool isAuto)
+        public static async Task Moving(CommandFactory factory, List<MovingParam> movingParams, bool isAuto, CancellationToken token)
         {
             var taskList = new List<Task>();
             foreach (var movingParam in movingParams)
@@ -582,11 +584,12 @@ namespace MujinAGVDemo.Command
                 if (!movingParam.WithPod)
                 {
                     //MoveRobot
-                    var param = new MoveRobotParam(robotID: movingParam.RobotID,
-                                                   desMode: DestinationModes.NodeID,
-                                                   desID: movingParam.NodeID,
-                                                   isEndWait: true,
-                                                   ownerRegist: false);
+                    taskList.Add(MoveRobotAsync(factory, movingParam, token));
+                    if (movingParam.IsPairEnd)
+                    {
+                        await Task.WhenAll(taskList);
+                        taskList.Clear();
+                    }
                 }
                 //棚あり
                 else
@@ -619,7 +622,6 @@ namespace MujinAGVDemo.Command
             }
 
         }
-
         public static async Task RotationCheck(CommandFactory factory, string nodeID, string podID, string robotID, bool isClockwise, CancellationToken token)
         {
             if (factory == null)
@@ -639,6 +641,53 @@ namespace MujinAGVDemo.Command
             await MovePod(token, factory, GetMovePodParam(robotID, nodeID, podID, unload: 0, podFaceIndex: isClockwise ? 3 : 1));
             //北＋リフトダウン
             await MovePod(token, factory, GetMovePodParam(robotID, nodeID, podID, unload: 1, podFaceIndex: 0));
+        }
+
+        public static async Task MoveRobotAsync(CommandFactory factory, MovingParam movingParam, CancellationToken token)
+        {
+            //MoveRobot
+            var param = new MoveRobotParam(robotID: movingParam.RobotID,
+                                           desMode: DestinationModes.NodeID,
+                                           desID: movingParam.NodeID,
+                                           isEndWait: true,
+                                           ownerRegist: false)
+            {
+                CachingCall = (obj, e) =>
+                {
+                }
+            };
+
+            var task = new Task(() =>
+            {
+                var rbReturn = (GetRobotListReturnMessage)factory.Create(new GetRobotListParam()).DoAction();
+                var rb = rbReturn.Data?.RobotList.Where(x => x.RobotID == movingParam.RobotID).FirstOrDefault();
+                if (rb == null)
+                {
+                    return;
+                }
+
+                switch (rb.Owner)
+                {
+                    case "TES":
+                        var setOwnerResult = factory.Create(new SetOwnerParam(movingParam.RobotID)).DoAction();
+                        break;
+                    case "SUPER":
+                        logger.Error($"AGV{movingParam.RobotID}がHetuで占有されているため実行しません。");
+                        return;
+                    default:
+                        break;
+                }
+
+
+                var result = (MoveRobotReturnMessage)factory.Create(param).DoAction();
+                //logger.Info($"MoveRobot終了 AGV[{param.RobotID}] 移動先[{param.DesID}] 移動結果[{result.ReturnMsg}]");
+            }, token);
+            if (token.IsCancellationRequested)
+            {
+                return;
+            }
+            task.Start();
+            await task.ConfigureAwait(true);
         }
     }
 }

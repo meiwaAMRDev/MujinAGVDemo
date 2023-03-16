@@ -413,14 +413,24 @@ namespace MujinAGVDemo
                             break;
                     }
 
-                    var task = AsyncCommands.MoveRobot(token: source.Token,
-                                                       factory: Factory,
-                                                       robotID: param.RobotID,
-                                                       nodeID: dgvMove[dgvNodeColumn, e.RowIndex].Value.ToString(),
-                                                       robotFace: robotFace);
-                    await task;
+                    try
+                    {
+                        await MoveRobotV2(robotID: param.RobotID,
+                                          nodeID: dgvMove[dgvNodeColumn, e.RowIndex].Value.ToString(),
+                                          token: source.Token,
+                                          robotFace: robotFace,
+                                          isShowMessageBox: true);
+                    }
+                    catch (Exception ex)
+                    {
+                        do
+                        {
+                            logger.Error($"エラー：{ex.Message}:{ex.TargetSite}");
+                            ex = ex.InnerException;
+                        }
+                        while (ex != null);
+                    }
 
-                    showMessageBox(task.Result.Item1, task.Result.Item2);
                 }
                 //棚移動をクリック
                 else if (e.ColumnIndex == dgvMovePodColumn)
@@ -839,6 +849,96 @@ namespace MujinAGVDemo
         private void mnuMoveCT_Click(object sender, EventArgs e)
         {
             MoveCT();
+        }
+
+        private async Task MoveRobotV2(string robotID,
+                                       string nodeID,
+                                       CancellationToken token,
+                                       double robotFace = Direction.NoSelect,
+                                       bool isShowMessageBox = true)
+        {
+            var moveRobotParam = new MoveRobotParam(robotID: robotID,
+                                                    desMode: DestinationModes.NodeID,
+                                                    desID: nodeID,
+                                                    robotFace: robotFace
+                                                    )
+            {
+                CachingCall = (obj, ev) =>
+                {
+                }
+            };
+
+            if (Factory == null)
+            {
+                Factory = new CommandFactory(rcsIP: param.ServerIP, warehouseID: param.WarehouseID);
+            }
+
+            await Task.Factory.StartNew(async () =>
+            {
+                logger.Info($"AGV移動を開始します。AGV[{robotID}]行先[{nodeID}]");
+                var result = (MoveRobotReturnMessage)Factory.Create(moveRobotParam).DoAction();
+
+                if (result == null)
+                    return;
+                if (result.Data == null)
+                    return;
+                if (result.Data.TaskID == null)
+                    return;
+
+                var taskID = result.Data.TaskID;
+
+                //var retMsg = new GetTaskDetailReturnMessage();
+                var isTaskEnd = false;
+                var message = string.Empty;
+                do
+                {
+                    if (token.IsCancellationRequested)
+                    {
+                        isTaskEnd = true;
+                        message = $"トークンがキャンセルされました。";
+                        //Console.WriteLine($"トークンがキャンセルされました。");
+                    }
+
+                    var taskDetail = (GetTaskDetailReturnMessage)Factory
+                    .Create(new GetTaskDetailParam(taskID)).DoAction();
+
+                    if (taskDetail == null)
+                    {
+                        await Task.Delay(5000);
+                    }
+
+                    var taskStatus = taskDetail.Data.Detail.Status;
+                    //Console.WriteLine($"{DateTime.Now},{taskStatus}");
+                    logger.Info($"TaskID[{taskID}]TaskStatus[{taskStatus}]");
+
+                    switch (taskStatus)
+                    {
+                        case TaskStatuses.Success:
+                            isTaskEnd = true;
+                            message = $"AGV移動が完了しました。AGV[{robotID}]行先[{nodeID}]";
+                            break;
+                        case TaskStatuses.Running:
+                            await Task.Delay(5000);
+                            break;
+                        case TaskStatuses.Fail:
+                            isTaskEnd = true;
+                            message = $"AGV移動が失敗しました。AGV[{robotID}]行先[{nodeID}]理由[{taskDetail.Data.Detail.ErrorReason}]";
+                            break;
+                        default:
+                            isTaskEnd = true;
+                            message = $"AGV移動が失敗しました。AGV[{robotID}]行先[{nodeID}]理由[{taskDetail.Data.Detail.ErrorReason}]";
+                            break;
+                    }
+
+                } while (!isTaskEnd);
+
+                if (isShowMessageBox)
+                    showInfoMessageBox($"{message}");
+                else
+                    logger.Info($"{message}");
+            });
+
+
         }
 
         private void btnMoveCancel_Click(object sender, EventArgs e)
@@ -1447,6 +1547,278 @@ namespace MujinAGVDemo
                 showErrorMessageBox("CSVファイルの読込に失敗しました。");
                 return;
             }
+
+            //事前に占有する処理
+            if (podID == string.Empty)
+            {
+                if (Factory == null)
+                {
+                    Factory = new CommandFactory(param.ServerIP, param.WarehouseID);
+                }
+
+                var rbReturn = (GetRobotListReturnMessage)Factory.Create(new GetRobotListParam()).DoAction();
+                var rb = rbReturn.Data?.RobotList.Where(x => x.RobotID == robotID).FirstOrDefault();
+                if (rb == null)
+                {
+                    return;
+                }
+
+                switch (rb.Owner)
+                {
+                    case "TES":
+                        var setOwnerResult = Factory.Create(new SetOwnerParam(robotID)).DoAction();
+                        break;
+                    case "SUPER":
+                        logger.Error($"AGV{robotID}がHetuで占有されているため実行しません。");
+                        return;
+                    default:
+                        break;
+                }
+
+            }
+
+            var nowCount = 1;
+            var isInfinityLoop = param.RepeatCount == 0;
+            var isRunning =
+                //無限ループモードまたは実行回数が繰り返し回数未満
+                (isInfinityLoop || nowCount < param.RepeatCount)
+                //かつキャンセルされていない
+                && !cancelToken.IsCancellationRequested;
+            do
+            {
+                if (cancelToken.IsCancellationRequested)
+                {
+                    showInfoMessageBox($"連続動作完了:{lblRunningTime.Text}");
+                    return;
+                }
+                logger.Info(string.Format("{0}回目開始", nowCount));
+                //同時に実行するタスクのリスト
+                var taskList = new List<Task>();
+                for (var rowCount = 0; rowCount < allLines.Count; rowCount++)
+                {
+                    var splitLine = allLines[rowCount].Split(',').ToList();
+                    var nodeID = splitLine[nodeIDIndex].Trim();
+                    if (!nodeID.All(char.IsDigit))
+                    {
+                        //logger.Info($"nodeID=[{nodeID}]:数値ではないため行を飛ばします。");
+                        continue;
+                    }
+                    //logger.Debug($"[{rowCount}]CSV:{allLines[rowCount]}");
+                    //シンクロターン設定読込（0:旋回時にAGVだけ回転、1:旋回時に棚とAGVが同じ向きに回転）
+                    if (!int.TryParse(splitLine[turnModeIndex].Trim(), out var turnMode))
+                    {
+                        logger.Error("turnModeが読み込めません：{0}", splitLine[turnModeIndex]);
+                        continue;
+                    }
+                    //アンロード設定（0:目的地で棚を下ろさない、1:目的地で棚を下ろす）
+                    if (!int.TryParse(splitLine[unloadModeIndex].Trim(), out var unload))
+                    {
+                        logger.Error("unloadが読み込めません：{0}", splitLine[unloadModeIndex]);
+                        continue;
+                    }
+                    //CSVに書かれている棚IDを読込（0または数字に変換できない場合はCSVの棚IDを反映しない）
+                    if (colPodID < splitLine.Count)
+                    {
+                        if (int.TryParse(splitLine[colPodID].Trim(), out var csvPodID))
+                        {
+                            podID = csvPodID == 0 ? podID : csvPodID.ToString();
+                        }
+                    }
+                    //CSVに書かれているタスクペアの終端かを読込
+                    if (!bool.TryParse(splitLine[colIsEnd].Trim(), out var isEnd))
+                    {
+                        //読み込めない場合は終端として扱う
+                        isEnd = true;
+                    }
+                    //CSVに書かれているタスク後待機時間を読込
+                    if (!int.TryParse(splitLine[colWaitTime].Trim(), out var waitTime))
+                    {
+                        //読み込めない場合は待機時間無しとして扱う
+                        waitTime = 0;
+                    }
+
+
+                    //棚搬送するかAGV単体かを読込
+                    if (colWithPod < splitLine.Count)
+                    {
+                        if (!int.TryParse(splitLine[colWithPod].Trim(), out var withPod))
+                        {
+                            logger.Error("withPodが読み込めません：{0}", splitLine[colWithPod]);
+                            continue;
+                        }
+
+                        if (withPod == 0)
+                        {
+                            //事前に占有する処理
+                            if (Factory == null)
+                            {
+                                Factory = new CommandFactory(param.ServerIP, param.WarehouseID);
+                            }
+
+                            var rbReturn = (GetRobotListReturnMessage)Factory.Create(new GetRobotListParam()).DoAction();
+                            var rb = rbReturn.Data?.RobotList.Where(x => x.RobotID == robotID).FirstOrDefault();
+                            if (rb == null)
+                            {
+                                return;
+                            }
+
+                            switch (rb.Owner)
+                            {
+                                case "TES":
+                                    var setOwnerResult = Factory.Create(new SetOwnerParam(robotID)).DoAction();
+                                    break;
+                                case "SUPER":
+                                    logger.Error($"AGV{robotID}がHetuで占有されているため実行しません。");
+                                    return;
+                                default:
+                                    break;
+                            }
+                            logger.Debug($"[{rowCount}]MoveRobot:AGV[{robotID}] nodeID[{nodeID}]");
+                            taskList.Add(moveRobotAsync(param.ServerIP,
+                                             param.WarehouseID,
+                                             robotID,
+                                             nodeID,
+                                             cancelToken,
+                                             waitTime));
+                            if (isEnd)
+                            {
+                                await Task.WhenAll(taskList);
+                                taskList.Clear();
+                            }
+                        }
+                        else
+                        {
+                            if (!isAuto)
+                            {
+                                logger.Debug($"[{rowCount}]MovePod:AGV[{robotID}] nodeID[{nodeID}] podID[{podID}]");
+                                taskList.Add(movePodAsync(param.ServerIP,
+                                               param.WarehouseID,
+                                               podID,
+                                               nodeID,
+                                               robotID,
+                                               turnMode,
+                                               unload,
+                                               cancelToken,
+                                               waitTime));
+                                if (isEnd)
+                                {
+                                    await Task.WhenAll(taskList);
+                                    taskList.Clear();
+                                }
+                            }
+                            else
+                            {
+                                var robotGroupID = param.RobotGroupID;
+                                if (colRobotGroupID < splitLine.Count)
+                                {
+                                    robotGroupID = splitLine[colRobotGroupID] == string.Empty ? param.RobotGroupID : splitLine[colRobotGroupID].Trim();
+                                }
+
+                                logger.Debug($"[{rowCount}]MovePodAuto:AGVGroup[{robotGroupID}] nodeID[{nodeID}] podID[{podID}]");
+                                taskList.Add(movePodAsync(param.ServerIP,
+                                               param.WarehouseID,
+                                               podID,
+                                               nodeID,
+                                               robotID: robotGroupID,
+                                               turnMode,
+                                               unload,
+                                               cancelToken,
+                                               isAuto,
+                                               waitTime));
+                                if (isEnd)
+                                {
+                                    await Task.WhenAll(taskList);
+                                    taskList.Clear();
+                                }
+                            }
+                        }
+                    }
+                    else
+                    {
+                        //棚IDが空白の場合、棚なしAGVのみで移動する
+                        if (podID == string.Empty)
+                        {
+                            //事前に占有する処理
+                            if (Factory == null)
+                            {
+                                Factory = new CommandFactory(param.ServerIP, param.WarehouseID);
+                            }
+
+                            var rbReturn = (GetRobotListReturnMessage)Factory.Create(new GetRobotListParam()).DoAction();
+                            var rb = rbReturn.Data?.RobotList.Where(x => x.RobotID == robotID).FirstOrDefault();
+                            if (rb == null)
+                            {
+                                return;
+                            }
+
+                            switch (rb.Owner)
+                            {
+                                case "TES":
+                                    var setOwnerResult = Factory.Create(new SetOwnerParam(robotID)).DoAction();
+                                    break;
+                                case "SUPER":
+                                    logger.Error($"AGV{robotID}がHetuで占有されているため実行しません。");
+                                    return;
+                                default:
+                                    break;
+                            }
+
+                            await moveRobotAsync(param.ServerIP,
+                                                 param.WarehouseID,
+                                                 robotID,
+                                                 nodeID,
+                                                 cancelToken);
+                        }
+                        else
+                        {
+                            if (!isAuto)
+                            {
+                                await movePodAsync(param.ServerIP,
+                                                   param.WarehouseID,
+                                                   podID,
+                                                   nodeID,
+                                                   robotID,
+                                                   turnMode,
+                                                   unload,
+                                                   cancelToken);
+                            }
+                            else
+                            {
+                                await movePodAsync(param.ServerIP,
+                                                   param.WarehouseID,
+                                                   podID,
+                                                   nodeID,
+                                                   param.RobotGroupID,
+                                                   turnMode,
+                                                   unload,
+                                                   cancelToken,
+                                                   isAuto);
+                            }
+                        }
+                    }
+                }
+
+                if (!isInfinityLoop)
+                {
+                    nowCount++;
+                    if (nowCount > param.RepeatCount)
+                        isRunning = false;
+                }
+            }
+            //while (nowCount != param.RepeatCount && !cancelToken.IsCancellationRequested);
+            while (isRunning);
+            dispatcherTimer.Stop();
+            stopwatch.Stop();
+
+            //lblCurrentLineProcess.Text = "連続動作完了";
+            showInfoMessageBox($"連続動作完了:{lblRunningTime.Text}");
+
+        }
+
+        private async Task movePodRotate(List<string> allLines, ParamSettings param, string robotID, string podID)
+        {
+            source = new CancellationTokenSource();
+            var cancelToken = source.Token;
 
             //事前に占有する処理
             if (podID == string.Empty)
