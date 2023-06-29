@@ -163,6 +163,12 @@
   <ItemGroup>
     <Compile Include="Command\AsyncCommands.cs" />
     <Compile Include="Command\MapCommands.cs" />
+    <Compile Include="Control\LabelAndTextBox.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Control\LabelAndTextBox.Designer.cs">
+      <DependentUpon>LabelAndTextBox.cs</DependentUpon>
+    </Compile>
     <Compile Include="FileIO.cs" />
     <Compile Include="Forms\frmLight.cs">
       <SubType>Form</SubType>
@@ -188,6 +194,12 @@
     <Compile Include="Forms\frmMovingCSV.Designer.cs">
       <DependentUpon>frmMovingCSV.cs</DependentUpon>
     </Compile>
+    <Compile Include="Forms\FrmNodeDatas.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\FrmNodeDatas.Designer.cs">
+      <DependentUpon>FrmNodeDatas.cs</DependentUpon>
+    </Compile>
     <Compile Include="MovingParam.cs" />
     <Compile Include="ParamSettings.cs" />
     <Compile Include="Program.cs" />
@@ -208,6 +220,9 @@
     <Content Include="Setting\ParamSetting.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <EmbeddedResource Include="Control\LabelAndTextBox.resx">
+      <DependentUpon>LabelAndTextBox.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Forms\frmLight.resx">
       <DependentUpon>frmLight.cs</DependentUpon>
     </EmbeddedResource>
@@ -219,6 +234,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Forms\frmMovingCSV.resx">
       <DependentUpon>frmMovingCSV.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\FrmNodeDatas.resx">
+      <DependentUpon>FrmNodeDatas.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>

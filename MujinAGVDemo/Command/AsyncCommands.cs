@@ -382,23 +382,21 @@ namespace MujinAGVDemo.Command
             }
 
 
-            var moveTask = new Task(async () =>
+            var moveTask = new Task(() =>
             {
                 var isSuccess = false;
 
                 var moveRobotParam = GetMoveRobotParam(robotID, nodeID, robotFaceIndex: robotFaceIndex);
                 do
                 {
-
-
-
-
-
                     //var t = MoveRobot(token, factory, moveRobotParam);
 
                     var moveRobotResult = (MoveRobotReturnMessage)factory.Create(moveRobotParam).DoAction();
 
-                    if (moveRobotResult == null || moveRobotResult?.Data == null || moveRobotResult?.Data?.TaskID == null || moveRobotResult?.Data?.TaskID == string.Empty)
+                    if (moveRobotResult == null
+                    || moveRobotResult?.Data == null
+                    || moveRobotResult?.Data?.TaskID == null
+                    || moveRobotResult?.Data?.TaskID == string.Empty)
                     {
 
                     }
@@ -412,11 +410,9 @@ namespace MujinAGVDemo.Command
                             var detail = ret?.Data?.Detail;
                             if (detail != null)
                             {
-                                //Console.WriteLine($"{DateTime.Now}[{detail.Status}]");
                                 if (detail.Status == TaskStatuses.Success
                                     || detail.Status == TaskStatuses.Canceled)
                                 {
-                                    //Console.WriteLine($"{DateTime.Now}[{detail.Status}]");
                                     isSuccess = true;
                                 }
                                 else if (detail.Status == TaskStatuses.Running)

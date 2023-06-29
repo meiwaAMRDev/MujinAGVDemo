@@ -138,17 +138,9 @@ namespace MujinAGVDemo
             }
             try
             {
+                tabControl1.SelectedIndex = 2;
                 updateControl();
                 checkBoxIsStop.Checked = isStop;
-                agvDataControl.Settings.AddAGVHouseDictionary("111", "162918439249", "原位置", Color.LightGreen);
-                agvDataControl.Settings.AddAGVHouseDictionary("112", "162918439248", "原位置", Color.LightGreen);
-                agvDataControl.Settings.AddAGVHouseDictionary("113", "1629184392138", "原位置", Color.LightGreen);
-                agvDataControl.Settings.AddAGVHouseDictionary("114", "1629184392137", "原位置", Color.LightGreen);
-                agvDataControl.Settings.AddAGVHouseDictionary("115", "162918439247", "原位置", Color.LightGreen);
-                agvDataControl.Settings.AddAGVHouseDictionary("116", "162918439278", "原位置", Color.LightGreen);
-                agvDataControl.Settings.AddAGVHouseDictionary("117", "1629184392169", "原位置", Color.LightGreen);
-                agvDataControl.Settings.AddAGVHouseDictionary("118", "1629184392168", "原位置", Color.LightGreen);
-                agvDataControl.Settings.AddAGVHouseDictionary("119", "1629184392170", "原位置", Color.LightGreen);
 
                 txtPod1.Text = param.Pod1Param.PodID;
                 txtTempNode1.Text = param.Pod1Param.TempNodeID;
@@ -161,9 +153,6 @@ namespace MujinAGVDemo
                 txtTempNode2.Text = param.Pod2Param.TempNodeID;
                 txtNode2.Text = param.Pod2Param.NodeID;
 
-                //cmbNode1.SelectedItem = "B1";
-                //cmbNode2.SelectedItem = "F1";
-                //cmbTempNode.SelectedItem = "C1";
                 cmbPodFace.SelectedItem = "指定しない";
                 cmbRobotFace.SelectedItem = "指定しない";
 
@@ -182,13 +171,6 @@ namespace MujinAGVDemo
             lblRunningTime.Text = $"動作時間[{result.TotalSeconds:N1}]sec";
         }
 
-        private async void tmrAGVInfoUpdate_Tick(object sender, EventArgs e)
-        {
-            await Task.Run(() =>
-            {
-                Invoke(new ChangeDgvDelegate(changeDgv));
-            });
-        }
 
         private void btnAddPod_Click(object sender, EventArgs e)
         {
@@ -235,26 +217,6 @@ namespace MujinAGVDemo
             setOwner();
         }
 
-        private async void checkBoxTimerRun_CheckedChanged(object sender, EventArgs e)
-        {
-            logger.Info($"AGV状態[{checkBoxTimerRun.Text}]");
-            if (!tmrAGVInfoUpdate.Enabled)
-            {
-                checkBoxTimerRun.Text = "監視停止";
-                checkBoxTimerRun.BackColor = Color.Red;
-                tmrAGVInfoUpdate.Start();
-                await Task.Run(() =>
-                {
-                    Invoke(new ChangeDgvDelegate(changeDgv));
-                });
-            }
-            else
-            {
-                checkBoxTimerRun.Text = "監視開始";
-                checkBoxTimerRun.BackColor = Color.GreenYellow;
-                tmrAGVInfoUpdate.Stop();
-            }
-        }
 
         private void checkBoxIsStop_CheckedChanged(object sender, EventArgs e)
         {
@@ -591,6 +553,10 @@ namespace MujinAGVDemo
                 Factory = new CommandFactory(param.ServerIP, param.WarehouseID);
             }
             var chargeResult = (ChargeRobotReturnMessage)Factory.Create(new ChargeRobotParam(param.RobotID, param.ChargeZoneID)).DoAction();
+
+            var result = chargeResult.ReturnCode == 0;
+
+            showMessageBox(result, $"AGV[{param.RobotID}]への充電指示が[{(result ? "成功" : "失敗")}]しました。[{chargeResult.ReturnMsg}]");
         }
 
         private void btnTaskCancel_Click(object sender, EventArgs e)
@@ -727,7 +693,7 @@ namespace MujinAGVDemo
                 try
                 {
                     var nodeDatas = new List<NodeData>();
-                    var enc = GetEncoding(filePath);
+                    var enc = MapCommands.GetEncoding(filePath);
                     var allLines = File.ReadAllLines(filePath, enc).ToList();
                     allLines.ForEach(x =>
                     {
@@ -805,9 +771,7 @@ namespace MujinAGVDemo
 
         private void btnChangePodID_Click(object sender, EventArgs e)
         {
-            var temp = txtPod1.Text;
-            txtPod1.Text = txtPod2.Text;
-            txtPod2.Text = temp;
+            (txtPod2.Text, txtPod1.Text) = (txtPod1.Text, txtPod2.Text);
         }
 
         private void cmbTempNode_SelectedIndexChanged(object sender, EventArgs e)
@@ -835,15 +799,6 @@ namespace MujinAGVDemo
             {
                 txtNode2.Text = node.NodeID;
             }
-        }
-        private void mnuOpenTaskInfo_Click(object sender, EventArgs e)
-        {
-            if (Factory == null)
-            {
-                Factory = new CommandFactory(param.ServerIP, param.WarehouseID);
-            }
-            var frm = new frmDGV(Factory);
-            frm.Show();
         }
 
         private void mnuMoveCT_Click(object sender, EventArgs e)
@@ -995,35 +950,7 @@ namespace MujinAGVDemo
             param.Pod2Param.NodeID = txtNode2.Text;
             param.Pod2Param.TempNodeID = string.Empty;
         }
-        /// <summary>
-        /// AGV情報タブのデータを更新します
-        /// </summary>
-        private void changeDgv()
-        {
-            //var (isSuccess, table) = Command.MapCommands.GetAgvDetailTable(param.ServerIP, param.WarehouseID);
-            var factory = new CommandFactory(param.ServerIP, param.WarehouseID);
-            if (!factory.IsConnectedTESServer())
-            {
-                checkBoxTimerRun.Checked = false;
-                var message = $"Hetuサーバーに接続できないためAGV状態監視を終了します。IP:[{param.ServerIP}] WarehouseID:[{param.WarehouseID}]";
-                showErrorMessageBox($"{message}");
-                return;
-            }
-            var getRobotListRet = (GetRobotListReturnMessage)factory.Create(new GetRobotListParam()).DoAction();
-            var getPodListRet = (GetPodListFromDBReturnMessage)factory.Create(new GetPodListFromDBParam()).DoAction();
-            if (getRobotListRet.Data != null)
-            {
-                agvDataControl.ChangeDgv(getRobotListRet, getPodListRet);
-                //dgvAGVDetail.DataSource = table;
-                lblUpdateTime.Text = $"更新日時：{DateTime.Now}";
-            }
-            else
-            {
-                checkBoxTimerRun.Checked = false;
-                showErrorMessageBox("AGV情報の取得に失敗しました。監視を停止します。");
-            }
 
-        }
 
         /// <summary>
         /// 棚を追加します
@@ -1106,9 +1033,8 @@ namespace MujinAGVDemo
         {
             var factory = new CommandFactory(param.ServerIP, param.WarehouseID);
             source = new CancellationTokenSource();
-            //var (isSuccess, message) = Command.MapCommands.UnsetOwner(factory, robotID);
 
-            bool isSuccess = false;
+            bool isSuccess;
             string message = string.Empty;
             int count = 0;
             do
@@ -1298,37 +1224,7 @@ namespace MujinAGVDemo
             });
             dgvMove.AutoResizeColumns();
         }
-        /// <summary>
-        /// 指定したファイルのエンコーディングを判別して取得します。
-        /// </summary>
-        /// <param name="filename">ファイルパス</param>
-        /// <returns>エンコーディング</returns>
-        private static Encoding GetEncoding(string filename)
-        {
-            // BOMを取得
-            var bom = new byte[4];
-            using (var file = new FileStream(filename, FileMode.Open, FileAccess.Read))
-            {
-                file.Read(bom, 0, 4);
-            }
 
-            // BOMを解析
-
-            // UTF-7
-            if (bom[0] == 0x2b && bom[1] == 0x2f && bom[2] == 0x76) return Encoding.UTF7;
-            // UTF-8
-            if (bom[0] == 0xef && bom[1] == 0xbb && bom[2] == 0xbf) return Encoding.UTF8;
-            // UTF-16LE
-            if (bom[0] == 0xff && bom[1] == 0xfe) return Encoding.Unicode;
-            // UTF-16BE
-            if (bom[0] == 0xfe && bom[1] == 0xff) return Encoding.BigEndianUnicode;
-            // UTF-32LE
-            if (bom[0] == 0xff && bom[1] == 0xfe && bom[2] == 0x00 && bom[3] == 0x00) return Encoding.Unicode;
-            // UTF-32BE
-            return bom[0] == 0 && bom[1] == 0 && bom[2] == 0xfe && bom[3] == 0xff
-                ? new UTF32Encoding(true, true)
-                : Encoding.GetEncoding("Shift_Jis");
-        }
         /// <summary>
         /// 棚交換タスク
         /// 棚1を退避させた後に、棚1と棚2の移動タスクを同時に実行する。
@@ -1440,7 +1336,7 @@ namespace MujinAGVDemo
                 showInfoMessageBox($"動作が完了しました。" +
                     $"\n準備動作[{(startTime - preStartTime).ToString(@"hh\時\間mm\分ss\秒ff")}]" +
                     $"\n本番動作[{span.ToString(@"hh\時\間mm\分ss\秒ff")}]" +
-                    $"\n回収動作[{ (afterEndTime - endTime).ToString(@"hh\時\間mm\分ss\秒ff")}]");
+                    $"\n回収動作[{(afterEndTime - endTime).ToString(@"hh\時\間mm\分ss\秒ff")}]");
             }
             catch (Exception ex)
             {
@@ -2480,6 +2376,23 @@ namespace MujinAGVDemo
             {
                 showErrorMessageBox($"エラーが発生しました。{ex.ToString()}");
             }
+        }
+
+        private void mnuOpenNodeData_Click(object sender, EventArgs e)
+        {
+            var frmNodeData = new Forms.FrmNodeDatas(param: param,
+                                                      settingPath: settingPath);
+            frmNodeData.Show();
+        }
+
+        private void mnuOpenAGVData_Click(object sender, EventArgs e)
+        {
+            if (Factory == null)
+            {
+                Factory = new CommandFactory(param.ServerIP, param.WarehouseID);
+            }
+            var frm = new frmDGV(Factory);
+            frm.Show();
         }
     }
 

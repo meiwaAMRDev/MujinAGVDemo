@@ -6,6 +6,7 @@ using Hetu20dotnet.ReturnMsgs;
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -52,12 +53,12 @@ namespace MujinAGVDemo.Command
                         return (true, new string[] { faultFindToMap });
 
                     if (getPodsMessage.ReturnMsg.IndexOf("succ") > 0)
-                        return (false, new string[] { $"{result}: { getPodsMessage.ReturnMsg} コード: { getPodsMessage.ReturnCode}" });
+                        return (false, new string[] { $"{result}: {getPodsMessage.ReturnMsg} コード: {getPodsMessage.ReturnCode}" });
 
                     getPodsMessage.Data.PodList.ForEach(pd =>
                     {
                         var messaage = (RemovePodReturnMessage)factory.Create(new RemovePodParam() { PodID = pd.PodID }).DoAction();
-                        messages.Add($"棚ID:{pd.PodID} {result}: { messaage.ReturnMsg} コード: { messaage.ReturnCode}");
+                        messages.Add($"棚ID:{pd.PodID} {result}: {messaage.ReturnMsg} コード: {messaage.ReturnCode}");
                     });
                 }
             }
@@ -93,7 +94,7 @@ namespace MujinAGVDemo.Command
                 if (cancelTaskResult.ReturnCode != 0)
                     success = false;
 
-                messages.Add($"タスクID:{ts.TaskID} {result}: { cancelTaskResult.ReturnMsg} コード: { cancelTaskResult.ReturnCode}");
+                messages.Add($"タスクID:{ts.TaskID} {result}: {cancelTaskResult.ReturnMsg} コード: {cancelTaskResult.ReturnCode}");
             });
 
             return (success, messages.ToArray());
@@ -159,7 +160,7 @@ namespace MujinAGVDemo.Command
 
             var pauseRobotResult = (PauseRobotReturnMessage)factory.Create(new PauseRobotParam(robotID)).DoAction();
 
-            return (pauseRobotResult.ReturnCode == successCode, $"コマンド：AGV一時停止、対象AGV_ID：{robotID}、{result}: {pauseRobotResult.ReturnMsg}、コード: { pauseRobotResult.ReturnCode}");
+            return (pauseRobotResult.ReturnCode == successCode, $"コマンド：AGV一時停止、対象AGV_ID：{robotID}、{result}: {pauseRobotResult.ReturnMsg}、コード: {pauseRobotResult.ReturnCode}");
         }
 
         /// <summary>指定されたロボットに再開コマンドを実行する。</summary>
@@ -801,8 +802,38 @@ namespace MujinAGVDemo.Command
         }
 
         #endregion
-        
-        
+
+        /// <summary>
+        /// 指定したファイルのエンコーディングを判別して取得します。
+        /// </summary>
+        /// <param name="filename">ファイルパス</param>
+        /// <returns>エンコーディング</returns>
+        public static Encoding GetEncoding(string filename)
+        {
+            // BOMを取得
+            var bom = new byte[4];
+            using (var file = new FileStream(filename, FileMode.Open, FileAccess.Read))
+            {
+                file.Read(bom, 0, 4);
+            }
+
+            // BOMを解析
+
+            // UTF-7
+            if (bom[0] == 0x2b && bom[1] == 0x2f && bom[2] == 0x76) return Encoding.UTF7;
+            // UTF-8
+            if (bom[0] == 0xef && bom[1] == 0xbb && bom[2] == 0xbf) return Encoding.UTF8;
+            // UTF-16LE
+            if (bom[0] == 0xff && bom[1] == 0xfe) return Encoding.Unicode;
+            // UTF-16BE
+            if (bom[0] == 0xfe && bom[1] == 0xff) return Encoding.BigEndianUnicode;
+            // UTF-32LE
+            if (bom[0] == 0xff && bom[1] == 0xfe && bom[2] == 0x00 && bom[3] == 0x00) return Encoding.Unicode;
+            // UTF-32BE
+            return bom[0] == 0 && bom[1] == 0 && bom[2] == 0xfe && bom[3] == 0xff
+                ? new UTF32Encoding(true, true)
+                : Encoding.GetEncoding("Shift_Jis");
+        }
         #endregion
 
         #region Private Methods
@@ -817,7 +848,7 @@ namespace MujinAGVDemo.Command
         /// <param name="errorCode">エラーコード</param>
         /// <returns>作成された文字列</returns>
         private static string getTaskResultMessage(string taskID, TaskTypes taskType, string robotID, TaskStatuses status, int errorCode) =>
-            $"タスクID:{taskID}、タスク型：{taskType}、対象AGV_ID：{robotID}、結果: { status}、コード: { errorCode}";
+            $"タスクID:{taskID}、タスク型：{taskType}、対象AGV_ID：{robotID}、結果: {status}、コード: {errorCode}";
 
         /// <summary>
         /// タスク失敗時の文字列を取得します
@@ -828,7 +859,7 @@ namespace MujinAGVDemo.Command
         /// <param name="errorCode">エラーコード</param>
         /// <returns>作成された文字列</returns>
         private static string getTaskFaultResultMessage(TaskTypes taskType, string robotID, string returnMessage, int errorCode) =>
-            $"タスク実行失敗しました。タスク型：{taskType}、対象AGV_ID：{robotID}、{result}: { returnMessage}、コード: { errorCode}";
+            $"タスク実行失敗しました。タスク型：{taskType}、対象AGV_ID：{robotID}、{result}: {returnMessage}、コード: {errorCode}";
 
         #endregion
     }
