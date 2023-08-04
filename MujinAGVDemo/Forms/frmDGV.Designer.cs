@@ -35,6 +35,7 @@ namespace MujinAGVDemo
             this.lblUpdateTime = new System.Windows.Forms.Label();
             this.agvDataControl = new Hetu20dotnet.Controls.AGVDataControl();
             this.flowLayoutPanel1 = new System.Windows.Forms.FlowLayoutPanel();
+            this.checkBoxPowerLog = new System.Windows.Forms.CheckBox();
             this.flowLayoutPanel1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -79,11 +80,25 @@ namespace MujinAGVDemo
             // 
             this.flowLayoutPanel1.Controls.Add(this.lblUpdateTime);
             this.flowLayoutPanel1.Controls.Add(this.checkBoxTimerRun);
+            this.flowLayoutPanel1.Controls.Add(this.checkBoxPowerLog);
             this.flowLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Top;
             this.flowLayoutPanel1.Location = new System.Drawing.Point(0, 0);
             this.flowLayoutPanel1.Name = "flowLayoutPanel1";
             this.flowLayoutPanel1.Size = new System.Drawing.Size(806, 33);
             this.flowLayoutPanel1.TabIndex = 11;
+            // 
+            // checkBoxPowerLog
+            // 
+            this.checkBoxPowerLog.Appearance = System.Windows.Forms.Appearance.Button;
+            this.checkBoxPowerLog.AutoSize = true;
+            this.checkBoxPowerLog.BackColor = System.Drawing.Color.GreenYellow;
+            this.checkBoxPowerLog.Location = new System.Drawing.Point(253, 3);
+            this.checkBoxPowerLog.Name = "checkBoxPowerLog";
+            this.checkBoxPowerLog.Size = new System.Drawing.Size(57, 22);
+            this.checkBoxPowerLog.TabIndex = 10;
+            this.checkBoxPowerLog.Text = "ログ開始";
+            this.checkBoxPowerLog.UseVisualStyleBackColor = false;
+            this.checkBoxPowerLog.CheckedChanged += new System.EventHandler(this.checkBoxPowerLog_CheckedChanged);
             // 
             // frmDGV
             // 
@@ -107,5 +122,6 @@ namespace MujinAGVDemo
         private System.Windows.Forms.Label lblUpdateTime;
         private Hetu20dotnet.Controls.AGVDataControl agvDataControl;
         private System.Windows.Forms.FlowLayoutPanel flowLayoutPanel1;
+        private System.Windows.Forms.CheckBox checkBoxPowerLog;
     }
 }

@@ -68,6 +68,20 @@ namespace MujinAGVDemo
                 tmrDGV.Stop();
             }
         }
+
+        private void checkBoxPowerLog_CheckedChanged(object sender, EventArgs e)
+        {
+            if (checkBoxPowerLog.Checked)
+            {
+                checkBoxPowerLog.Text = "ログ停止";
+                checkBoxPowerLog.BackColor = Color.Red;
+            }
+            else
+            {
+                checkBoxPowerLog.Text = "ログ開始";
+                checkBoxPowerLog.BackColor = Color.GreenYellow;
+            }
+        }
         /// <summary>
         /// AGV情報タブのデータを更新します
         /// </summary>
@@ -88,8 +102,8 @@ namespace MujinAGVDemo
                 agvDataControl.ChangeDgv(getRobotListRet, getPodListRet);
                 //dgvAGVDetail.DataSource = table;
                 lblUpdateTime.Text = $"更新日時：{DateTime.Now}";
-
-                WriteAGVPowerLog(robotLists: getRobotListRet.Data, savePath: PowerLogPath);
+                if(checkBoxPowerLog.Checked)
+                    WriteAGVPowerLog(robotLists: getRobotListRet.Data, savePath: PowerLogPath);
             }
             else
             {
