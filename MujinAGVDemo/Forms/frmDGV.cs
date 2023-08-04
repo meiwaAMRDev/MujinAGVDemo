@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -22,6 +23,7 @@ namespace MujinAGVDemo
         /// </summary>
         public CommandFactory Factory;
         public readonly Logger logger = LogManager.GetLogger("ProgramLogger");
+        public string PowerLogPath = string.Empty;
         /// <summary>
         /// コンストラクタ
         /// </summary>
@@ -34,7 +36,7 @@ namespace MujinAGVDemo
 
         private void frmMove_Load(object sender, EventArgs e)
         {
-
+            PowerLogPath = Path.Combine("Logs", "Power", $"{DateTime.Now:yyyy-MM-dd}_power.csv");
         }
         /// <summary>
         /// デリゲート
@@ -71,14 +73,6 @@ namespace MujinAGVDemo
         /// </summary>
         private void changeDgv()
         {
-            //var (isSuccess, table) = Command.MapCommands.GetAgvTaskInfoTable(Factory);
-            //if (!isSuccess)
-            //    return;
-            //dgvInfo.DataSource = table;
-            //lblUpdateTime.Text = $"更新日時：{DateTime.Now}";
-
-
-            //var (isSuccess, table) = Command.MapCommands.GetAgvDetailTable(param.ServerIP, param.WarehouseID);
             var factory = Factory;
             if (!factory.IsConnectedTESServer())
             {
@@ -94,11 +88,44 @@ namespace MujinAGVDemo
                 agvDataControl.ChangeDgv(getRobotListRet, getPodListRet);
                 //dgvAGVDetail.DataSource = table;
                 lblUpdateTime.Text = $"更新日時：{DateTime.Now}";
+
+                WriteAGVPowerLog(robotLists: getRobotListRet.Data, savePath: PowerLogPath);
             }
             else
             {
                 checkBoxTimerRun.Checked = false;
                 showErrorMessageBox("AGV情報の取得に失敗しました。監視を停止します。");
+            }
+        }
+        /// <summary>
+        /// 各AGVの時間ごとのバッテリー残量をログに出力します
+        /// </summary>
+        /// <param name="robotLists">AGVデータ</param>
+        /// <param name="savePath">ログ出力先</param>
+        private void WriteAGVPowerLog(GetRobotListReturnMessage.GetRobotListData robotLists, string savePath)
+        {
+            if (!Directory.Exists(Path.GetDirectoryName(savePath)))
+            {
+                Directory.CreateDirectory(Path.GetDirectoryName(savePath));
+            }
+            //StreamWriterでファイルを作る前に存在するか判定
+            var isFileExist = File.Exists(savePath);
+
+            using (var sw = new StreamWriter(path: savePath,
+                                             append: true,
+                                             encoding: Encoding.GetEncoding("shift-jis")))
+            {
+                var robots = robotLists.RobotList.ToList();
+                if (!isFileExist)
+                {
+                    var header = new List<string>() { "time" };
+                    header.AddRange(robots.Select(i => i.RobotID).ToList());
+                    sw.WriteLine(string.Join(",", header));
+                }
+
+                var power = new List<string>() { DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss.fff") };
+                power.AddRange(robots.Select(i => i.UcPower.ToString()).ToList());
+                sw.WriteLine(string.Join(",", power));
             }
         }
 
