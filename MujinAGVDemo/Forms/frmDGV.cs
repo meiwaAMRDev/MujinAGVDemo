@@ -102,7 +102,7 @@ namespace MujinAGVDemo
                 agvDataControl.ChangeDgv(getRobotListRet, getPodListRet);
                 //dgvAGVDetail.DataSource = table;
                 lblUpdateTime.Text = $"更新日時：{DateTime.Now}";
-                if(checkBoxPowerLog.Checked)
+                if (checkBoxPowerLog.Checked)
                     WriteAGVPowerLog(robotLists: getRobotListRet.Data, savePath: PowerLogPath);
             }
             else

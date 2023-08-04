@@ -564,53 +564,6 @@ namespace MujinAGVDemo.Command
             return param;
         }
 
-        //public static async Task Moving(CommandFactory factory, List<MovingParam> movingParams, bool isAuto, CancellationToken token)
-        //{
-        //    var taskList = new List<Task>();
-        //    foreach (var movingParam in movingParams)
-        //    {
-        //        //棚なし
-        //        if (!movingParam.WithPod)
-        //        {
-        //            //MoveRobot
-        //            taskList.Add(MoveRobotAsync(factory, movingParam, token));
-        //            if (movingParam.IsPairEnd)
-        //            {
-        //                await Task.WhenAll(taskList);
-        //                taskList.Clear();
-        //            }
-        //        }
-        //        //棚あり
-        //        else
-        //        {
-        //            if (isAuto)
-        //            {
-        //                //MovePodAuto
-        //                var param = new MovePodAutoSelectAGVParam(robotGroupID: movingParam.RobotID,
-        //                                                          podID: movingParam.PodID,
-        //                                                          desMode: DestinationModes.StorageID,
-        //                                                          desID: movingParam.NodeID,
-        //                                                          isEndWait: true,
-        //                                                          turnMode: movingParam.IsSyncro ? ON : OFF,
-        //                                                          unload: movingParam.IsUnload ? ON : OFF
-        //                                                          );
-        //            }
-        //            else
-        //            {
-        //                //MovePod
-        //                var param = new MovePodParam(robotID: movingParam.RobotID,
-        //                    podID: movingParam.PodID,
-        //                    desMode: DestinationModes.StorageID,
-        //                    desID: movingParam.NodeID,
-        //                    isEndWait: true,
-        //                    turnMode: movingParam.IsSyncro ? ON : OFF,
-        //                    unload: movingParam.IsUnload ? ON : OFF
-        //                    );
-        //            }
-        //        }
-        //    }
-
-        //}
         public static async Task RotationCheck(CommandFactory factory, string nodeID, string podID, string robotID, bool isClockwise, CancellationToken token)
         {
             if (factory == null)
@@ -630,53 +583,6 @@ namespace MujinAGVDemo.Command
             await MovePod(token, factory, GetMovePodParam(robotID, nodeID, podID, unload: 0, podFaceIndex: isClockwise ? 3 : 1));
             //北＋リフトダウン
             await MovePod(token, factory, GetMovePodParam(robotID, nodeID, podID, unload: 1, podFaceIndex: 0));
-        }
-
-        public static async Task MoveRobotAsync(CommandFactory factory, MovingParam movingParam, CancellationToken token)
-        {
-            //MoveRobot
-            var param = new MoveRobotParam(robotID: movingParam.RobotID,
-                                           desMode: DestinationModes.NodeID,
-                                           desID: movingParam.NodeID,
-                                           isEndWait: true,
-                                           ownerRegist: false)
-            {
-                CachingCall = (obj, e) =>
-                {
-                }
-            };
-
-            var task = new Task(() =>
-            {
-                var rbReturn = (GetRobotListReturnMessage)factory.Create(new GetRobotListParam()).DoAction();
-                var rb = rbReturn.Data?.RobotList.Where(x => x.RobotID == movingParam.RobotID).FirstOrDefault();
-                if (rb == null)
-                {
-                    return;
-                }
-
-                switch (rb.Owner)
-                {
-                    case "TES":
-                        var setOwnerResult = factory.Create(new SetOwnerParam(movingParam.RobotID)).DoAction();
-                        break;
-                    case "SUPER":
-                        logger.Error($"AGV{movingParam.RobotID}がHetuで占有されているため実行しません。");
-                        return;
-                    default:
-                        break;
-                }
-
-
-                var result = (MoveRobotReturnMessage)factory.Create(param).DoAction();
-                //logger.Info($"MoveRobot終了 AGV[{param.RobotID}] 移動先[{param.DesID}] 移動結果[{result.ReturnMsg}]");
-            }, token);
-            if (token.IsCancellationRequested)
-            {
-                return;
-            }
-            task.Start();
-            await task.ConfigureAwait(true);
         }
     }
 }
