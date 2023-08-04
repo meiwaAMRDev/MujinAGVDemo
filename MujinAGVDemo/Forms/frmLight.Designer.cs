@@ -121,6 +121,8 @@ namespace MujinAGVDemo
             this.chkAllSet = new System.Windows.Forms.CheckBox();
             this.btnRotationCheck = new System.Windows.Forms.Button();
             this.flowLayoutPanel1 = new System.Windows.Forms.FlowLayoutPanel();
+            this.btnMoveRobot = new System.Windows.Forms.Button();
+            this.btnMovePod = new System.Windows.Forms.Button();
             this.menuStrip1.SuspendLayout();
             this.tabControl1.SuspendLayout();
             this.tabMove.SuspendLayout();
@@ -1079,11 +1081,33 @@ namespace MujinAGVDemo
             this.flowLayoutPanel1.Controls.Add(this.btnGetAGVData);
             this.flowLayoutPanel1.Controls.Add(this.chkAllSet);
             this.flowLayoutPanel1.Controls.Add(this.btnRotationCheck);
+            this.flowLayoutPanel1.Controls.Add(this.btnMoveRobot);
+            this.flowLayoutPanel1.Controls.Add(this.btnMovePod);
             this.flowLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Top;
             this.flowLayoutPanel1.Location = new System.Drawing.Point(0, 24);
             this.flowLayoutPanel1.Name = "flowLayoutPanel1";
             this.flowLayoutPanel1.Size = new System.Drawing.Size(800, 66);
             this.flowLayoutPanel1.TabIndex = 82;
+            // 
+            // btnMoveRobot
+            // 
+            this.btnMoveRobot.Location = new System.Drawing.Point(203, 32);
+            this.btnMoveRobot.Name = "btnMoveRobot";
+            this.btnMoveRobot.Size = new System.Drawing.Size(65, 23);
+            this.btnMoveRobot.TabIndex = 82;
+            this.btnMoveRobot.Text = "AGV移動";
+            this.btnMoveRobot.UseVisualStyleBackColor = true;
+            this.btnMoveRobot.Click += new System.EventHandler(this.btnMoveRobot_Click);
+            // 
+            // btnMovePod
+            // 
+            this.btnMovePod.Location = new System.Drawing.Point(274, 32);
+            this.btnMovePod.Name = "btnMovePod";
+            this.btnMovePod.Size = new System.Drawing.Size(65, 23);
+            this.btnMovePod.TabIndex = 83;
+            this.btnMovePod.Text = "棚搬送";
+            this.btnMovePod.UseVisualStyleBackColor = true;
+            this.btnMovePod.Click += new System.EventHandler(this.btnMovePod_Click);
             // 
             // frmLight
             // 
@@ -1211,5 +1235,7 @@ namespace MujinAGVDemo
         private System.Windows.Forms.ToolStripMenuItem mnuOpenAGVData;
         private System.Windows.Forms.FlowLayoutPanel flowLayoutPanel2;
         private System.Windows.Forms.FlowLayoutPanel flowLayoutPanel1;
+        private System.Windows.Forms.Button btnMoveRobot;
+        private System.Windows.Forms.Button btnMovePod;
     }
 }
