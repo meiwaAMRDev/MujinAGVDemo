@@ -32,31 +32,35 @@ namespace MujinAGVDemo
         const string defaultSettingPath = @"Setting/ParamSetting.xml";
 
         /// <summary>
-        /// 名前列
+        /// ノード情報DGVの列番号
         /// </summary>
-        const int dgvNameColumn = 0;
-        /// <summary>
-        /// ノードID列
-        /// </summary>
-        const int dgvNodeColumn = 1;
-        /// <summary>
-        /// AGV移動列
-        /// </summary>
-        const int dgvMoveAGVColumn = 2;
-        /// <summary>
-        /// 棚移動列
-        /// </summary>
-        const int dgvMovePodColumn = 3;
-        /// <summary>
-        /// 棚作成列
-        /// </summary>
-        const int dgvAddPodColumn = 4;
-        /// <summary>
-        /// 編集列
-        /// </summary>
-        const int dgvEditColumn = 5;
-
-
+        enum NodeDgvColumn : int
+        {
+            /// <summary>
+            /// 名称
+            /// </summary>
+            Name = 0,
+            /// <summary>
+            /// ノードID
+            /// </summary>
+            Node = 1,
+            /// <summary>
+            /// AGV移動
+            /// </summary>
+            MoveAGV = 2,
+            /// <summary>
+            /// 棚搬送
+            /// </summary>
+            MovePod = 3,
+            /// <summary>
+            /// 棚追加
+            /// </summary>
+            AddPod = 4,
+            /// <summary>
+            /// データ編集
+            /// </summary>
+            Edit = 5,
+        }
 
         private const int ON = 1;
         private const int OFF = 0;
@@ -90,30 +94,68 @@ namespace MujinAGVDemo
         #region Public Paramater
 
         public CommandFactory Factory;
-        private int turnModeIndex = 1;
-        private int unloadModeIndex = 2;
-        private int nodeIDIndex = 0;
-        /// <summary>
-        /// CSVファイルの中の棚を使用するかのインデックス
-        /// </summary>
-        private const int colWithPod = 3;
-        /// <summary>
-        /// CSVファイルの中の棚IDのインデックス
-        /// </summary>
-        private const int colPodID = 4;
-        /// <summary>
-        /// CSVファイルの中のタスクペアの終端列のインデックス
-        /// </summary>
-        private const int colIsEnd = 5;
-        /// <summary>
-        /// CSVファイルの中のタスク後待機時間のインデックス
-        /// </summary>
-        private const int colWaitTime = 6;
-        /// <summary>
-        /// CSVファイルの中のロボットグループID
-        /// </summary>
-        private const int colRobotGroupID = 7;
+        //private int turnModeIndex = 1;
+        //private int unloadModeIndex = 2;
+        //private int nodeIDIndex = 0;
+        ///// <summary>
+        ///// CSVファイルの中の棚を使用するかのインデックス
+        ///// </summary>
+        //private const int colWithPod = 3;
+        ///// <summary>
+        ///// CSVファイルの中の棚IDのインデックス
+        ///// </summary>
+        //private const int colPodID = 4;
+        ///// <summary>
+        ///// CSVファイルの中のタスクペアの終端列のインデックス
+        ///// </summary>
+        //private const int colIsEnd = 5;
+        ///// <summary>
+        ///// CSVファイルの中のタスク後待機時間のインデックス
+        ///// </summary>
+        //private const int colWaitTime = 6;
+        ///// <summary>
+        ///// CSVファイルの中のロボットグループID
+        ///// </summary>
+        //private const int colRobotGroupID = 7;
 
+        /// <summary>
+        /// 移動指示CSVの列番号
+        /// </summary>
+        enum MovingCSVColumn : int
+        {
+            /// <summary>
+            /// ノードIDのインデックス
+            /// </summary>
+            Node = 0,
+            /// <summary>
+            /// ターンモードのインデックス
+            /// </summary>
+            TurnMode = 1,
+            /// <summary>
+            /// アンロードモードのインデックス
+            /// </summary>
+            UnloadMode = 2,
+            /// <summary>
+            /// 棚を使用するかのインデックス
+            /// </summary>
+            WithPod = 3,
+            /// <summary>
+            /// 棚IDのインデックス
+            /// </summary>
+            PodID = 4,
+            /// <summary>
+            /// タスクペアの終端かのインデックス
+            /// </summary>
+            IsEnd = 5,
+            /// <summary>
+            /// タスク後待機時間のインデックス
+            /// </summary>
+            WaitTime = 6,
+            /// <summary>
+            /// ロボットグループのインデックス
+            /// </summary>
+            RobotGroup = 7,
+        }
         private int robotFaceIndex = 4;
 
         #endregion Public Paramater
@@ -344,7 +386,7 @@ namespace MujinAGVDemo
             try
             {
                 //AGV移動をクリック
-                if (e.ColumnIndex == dgvMoveAGVColumn)
+                if (e.ColumnIndex == (int)NodeDgvColumn.MoveAGV)
                 {
                     source = new CancellationTokenSource();
 
@@ -371,7 +413,7 @@ namespace MujinAGVDemo
                     try
                     {
                         await MoveRobotV2(robotID: param.RobotID,
-                                          nodeID: dgvMove[dgvNodeColumn, e.RowIndex].Value.ToString(),
+                                          nodeID: dgvMove[(int)NodeDgvColumn.Node, e.RowIndex].Value.ToString(),
                                           token: source.Token,
                                           robotFace: robotFace,
                                           isShowMessageBox: true);
@@ -388,7 +430,7 @@ namespace MujinAGVDemo
 
                 }
                 //棚移動をクリック
-                else if (e.ColumnIndex == dgvMovePodColumn)
+                else if (e.ColumnIndex == (int)NodeDgvColumn.MovePod)
                 {
                     source = new CancellationTokenSource();
                     var robotFace = Direction.NoSelect;
@@ -433,7 +475,7 @@ namespace MujinAGVDemo
                     var task = AsyncCommands.MovePod(token: source.Token,
                                                      factory: Factory,
                                                      robotID: param.RobotID,
-                                                     nodeID: dgvMove[dgvNodeColumn, e.RowIndex].Value.ToString(),
+                                                     nodeID: dgvMove[(int)NodeDgvColumn.Node, e.RowIndex].Value.ToString(),
                                                      podID: param.PodID,
                                                      robotFace: robotFace,
                                                      podFace: podFace,
@@ -444,10 +486,10 @@ namespace MujinAGVDemo
                                    message: task.Result.message);
                 }
                 //編集をクリック
-                else if (e.ColumnIndex == dgvEditColumn)
+                else if (e.ColumnIndex == (int)NodeDgvColumn.Edit)
                 {
-                    var name = dgvMove[dgvNameColumn, e.RowIndex].Value.ToString();
-                    var nodeID = dgvMove[dgvNodeColumn, e.RowIndex].Value.ToString();
+                    var name = dgvMove[(int)NodeDgvColumn.Name, e.RowIndex].Value.ToString();
+                    var nodeID = dgvMove[(int)NodeDgvColumn.Node, e.RowIndex].Value.ToString();
 
                     var target = param.NodeDatas[e.RowIndex];
                     target.Name = name;
@@ -456,9 +498,9 @@ namespace MujinAGVDemo
                     fileIO.SaveSetting(settingPath, param);
                 }
                 //棚作成をクリック
-                else if (e.ColumnIndex == dgvAddPodColumn)
+                else if (e.ColumnIndex == (int)NodeDgvColumn.AddPod)
                 {
-                    var nodeID = dgvMove[dgvNodeColumn, e.RowIndex].Value.ToString();
+                    var nodeID = dgvMove[(int)NodeDgvColumn.Node, e.RowIndex].Value.ToString();
                     if (showCheckMessage($"[{nodeID}]に棚[{param.PodID}]を作成しますか？") != DialogResult.OK)
                     {
                         return;
@@ -1394,7 +1436,7 @@ namespace MujinAGVDemo
             var paramSetting = this.param;
             var robotID = param.RobotID;
             var podID = param.PodID;
-            
+
             await movePodRotate(stationListPath, paramSetting, robotID, podID);
             unsetOwner(robotID);
 
@@ -1464,7 +1506,7 @@ namespace MujinAGVDemo
                 for (var rowCount = 0; rowCount < allLines.Count; rowCount++)
                 {
                     var splitLine = allLines[rowCount].Split(',').ToList();
-                    var nodeID = splitLine[nodeIDIndex].Trim();
+                    var nodeID = splitLine[(int)MovingCSVColumn.Node].Trim();
                     if (!nodeID.All(char.IsDigit))
                     {
                         //logger.Info($"nodeID=[{nodeID}]:数値ではないため行を飛ばします。");
@@ -1472,33 +1514,33 @@ namespace MujinAGVDemo
                     }
                     //logger.Debug($"[{rowCount}]CSV:{allLines[rowCount]}");
                     //シンクロターン設定読込（0:旋回時にAGVだけ回転、1:旋回時に棚とAGVが同じ向きに回転）
-                    if (!int.TryParse(splitLine[turnModeIndex].Trim(), out var turnMode))
+                    if (!int.TryParse(splitLine[(int)MovingCSVColumn.TurnMode].Trim(), out var turnMode))
                     {
-                        logger.Error("turnModeが読み込めません：{0}", splitLine[turnModeIndex]);
+                        logger.Error("turnModeが読み込めません：{0}", splitLine[(int)MovingCSVColumn.TurnMode]);
                         continue;
                     }
                     //アンロード設定（0:目的地で棚を下ろさない、1:目的地で棚を下ろす）
-                    if (!int.TryParse(splitLine[unloadModeIndex].Trim(), out var unload))
+                    if (!int.TryParse(splitLine[(int)MovingCSVColumn.UnloadMode].Trim(), out var unload))
                     {
-                        logger.Error("unloadが読み込めません：{0}", splitLine[unloadModeIndex]);
+                        logger.Error("unloadが読み込めません：{0}", splitLine[(int)MovingCSVColumn.UnloadMode]);
                         continue;
                     }
                     //CSVに書かれている棚IDを読込（0または数字に変換できない場合はCSVの棚IDを反映しない）
-                    if (colPodID < splitLine.Count)
+                    if ((int)MovingCSVColumn.PodID < splitLine.Count)
                     {
-                        if (int.TryParse(splitLine[colPodID].Trim(), out var csvPodID))
+                        if (int.TryParse(splitLine[(int)MovingCSVColumn.PodID].Trim(), out var csvPodID))
                         {
                             podID = csvPodID == 0 ? podID : csvPodID.ToString();
                         }
                     }
                     //CSVに書かれているタスクペアの終端かを読込
-                    if (!bool.TryParse(splitLine[colIsEnd].Trim(), out var isEnd))
+                    if (!bool.TryParse(splitLine[(int)MovingCSVColumn.IsEnd].Trim(), out var isEnd))
                     {
                         //読み込めない場合は終端として扱う
                         isEnd = true;
                     }
                     //CSVに書かれているタスク後待機時間を読込
-                    if (!int.TryParse(splitLine[colWaitTime].Trim(), out var waitTime))
+                    if (!int.TryParse(splitLine[(int)MovingCSVColumn.WaitTime].Trim(), out var waitTime))
                     {
                         //読み込めない場合は待機時間無しとして扱う
                         waitTime = 0;
@@ -1506,11 +1548,11 @@ namespace MujinAGVDemo
 
 
                     //棚搬送するかAGV単体かを読込
-                    if (colWithPod < splitLine.Count)
+                    if ((int)MovingCSVColumn.WithPod < splitLine.Count)
                     {
-                        if (!int.TryParse(splitLine[colWithPod].Trim(), out var withPod))
+                        if (!int.TryParse(splitLine[(int)MovingCSVColumn.WithPod].Trim(), out var withPod))
                         {
-                            logger.Error("withPodが読み込めません：{0}", splitLine[colWithPod]);
+                            logger.Error("withPodが読み込めません：{0}", splitLine[(int)MovingCSVColumn.WithPod]);
                             continue;
                         }
 
@@ -1576,9 +1618,9 @@ namespace MujinAGVDemo
                             else
                             {
                                 var robotGroupID = param.RobotGroupID;
-                                if (colRobotGroupID < splitLine.Count)
+                                if ((int)MovingCSVColumn.RobotGroup < splitLine.Count)
                                 {
-                                    robotGroupID = splitLine[colRobotGroupID] == string.Empty ? param.RobotGroupID : splitLine[colRobotGroupID].Trim();
+                                    robotGroupID = splitLine[(int)MovingCSVColumn.RobotGroup] == string.Empty ? param.RobotGroupID : splitLine[(int)MovingCSVColumn.RobotGroup].Trim();
                                 }
 
                                 logger.Debug($"[{rowCount}]MovePodAuto:AGVGroup[{robotGroupID}] nodeID[{nodeID}] podID[{podID}]");
@@ -1736,7 +1778,7 @@ namespace MujinAGVDemo
                 for (var rowCount = 0; rowCount < allLines.Count; rowCount++)
                 {
                     var splitLine = allLines[rowCount].Split(',').ToList();
-                    var nodeID = splitLine[nodeIDIndex].Trim();
+                    var nodeID = splitLine[(int)MovingCSVColumn.Node].Trim();
                     if (!nodeID.All(char.IsDigit))
                     {
                         //logger.Info($"nodeID=[{nodeID}]:数値ではないため行を飛ばします。");
@@ -1744,33 +1786,33 @@ namespace MujinAGVDemo
                     }
                     //logger.Debug($"[{rowCount}]CSV:{allLines[rowCount]}");
                     //シンクロターン設定読込（0:旋回時にAGVだけ回転、1:旋回時に棚とAGVが同じ向きに回転）
-                    if (!int.TryParse(splitLine[turnModeIndex].Trim(), out var turnMode))
+                    if (!int.TryParse(splitLine[(int)MovingCSVColumn.TurnMode].Trim(), out var turnMode))
                     {
-                        logger.Error("turnModeが読み込めません：{0}", splitLine[turnModeIndex]);
+                        logger.Error("turnModeが読み込めません：{0}", splitLine[(int)MovingCSVColumn.TurnMode]);
                         continue;
                     }
                     //アンロード設定（0:目的地で棚を下ろさない、1:目的地で棚を下ろす）
-                    if (!int.TryParse(splitLine[unloadModeIndex].Trim(), out var unload))
+                    if (!int.TryParse(splitLine[(int)MovingCSVColumn.UnloadMode].Trim(), out var unload))
                     {
-                        logger.Error("unloadが読み込めません：{0}", splitLine[unloadModeIndex]);
+                        logger.Error("unloadが読み込めません：{0}", splitLine[(int)MovingCSVColumn.UnloadMode]);
                         continue;
                     }
                     //CSVに書かれている棚IDを読込（0または数字に変換できない場合はCSVの棚IDを反映しない）
-                    if (colPodID < splitLine.Count)
+                    if ((int)MovingCSVColumn.PodID < splitLine.Count)
                     {
-                        if (int.TryParse(splitLine[colPodID].Trim(), out var csvPodID))
+                        if (int.TryParse(splitLine[(int)MovingCSVColumn.PodID].Trim(), out var csvPodID))
                         {
                             podID = csvPodID == 0 ? podID : csvPodID.ToString();
                         }
                     }
                     //CSVに書かれているタスクペアの終端かを読込
-                    if (!bool.TryParse(splitLine[colIsEnd].Trim(), out var isEnd))
+                    if (!bool.TryParse(splitLine[(int)MovingCSVColumn.IsEnd].Trim(), out var isEnd))
                     {
                         //読み込めない場合は終端として扱う
                         isEnd = true;
                     }
                     //CSVに書かれているタスク後待機時間を読込
-                    if (!int.TryParse(splitLine[colWaitTime].Trim(), out var waitTime))
+                    if (!int.TryParse(splitLine[(int)MovingCSVColumn.WaitTime].Trim(), out var waitTime))
                     {
                         //読み込めない場合は待機時間無しとして扱う
                         waitTime = 0;
@@ -1778,11 +1820,11 @@ namespace MujinAGVDemo
 
 
                     //棚搬送するかAGV単体かを読込
-                    if (colWithPod < splitLine.Count)
+                    if ((int)MovingCSVColumn.WithPod < splitLine.Count)
                     {
-                        if (!int.TryParse(splitLine[colWithPod].Trim(), out var withPod))
+                        if (!int.TryParse(splitLine[(int)MovingCSVColumn.WithPod].Trim(), out var withPod))
                         {
-                            logger.Error("withPodが読み込めません：{0}", splitLine[colWithPod]);
+                            logger.Error("withPodが読み込めません：{0}", splitLine[(int)MovingCSVColumn.WithPod]);
                             continue;
                         }
 
@@ -1848,9 +1890,9 @@ namespace MujinAGVDemo
                             else
                             {
                                 var robotGroupID = param.RobotGroupID;
-                                if (colRobotGroupID < splitLine.Count)
+                                if ((int)MovingCSVColumn.RobotGroup < splitLine.Count)
                                 {
-                                    robotGroupID = splitLine[colRobotGroupID] == string.Empty ? param.RobotGroupID : splitLine[colRobotGroupID].Trim();
+                                    robotGroupID = splitLine[(int)MovingCSVColumn.RobotGroup] == string.Empty ? param.RobotGroupID : splitLine[(int)MovingCSVColumn.RobotGroup].Trim();
                                 }
 
                                 logger.Debug($"[{rowCount}]MovePodAuto:AGVGroup[{robotGroupID}] nodeID[{nodeID}] podID[{podID}]");
