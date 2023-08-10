@@ -554,6 +554,7 @@ namespace MujinAGVDemo
 
         private void btnCharge_Click(object sender, EventArgs e)
         {
+            updateParam();
             if (Factory == null)
             {
                 Factory = new CommandFactory(param.ServerIP, param.WarehouseID);
@@ -561,8 +562,17 @@ namespace MujinAGVDemo
             var chargeResult = (ChargeRobotReturnMessage)Factory.Create(new ChargeRobotParam(param.RobotID, param.ChargeZoneID)).DoAction();
 
             var result = chargeResult.ReturnCode == 0;
+            var messages = $"AGV[{param.RobotID}]への充電指示が[{(result ? "成功" : "失敗")}]しました。[{chargeResult.ReturnMsg}]";
 
-            showMessageBox(result, $"AGV[{param.RobotID}]への充電指示が[{(result ? "成功" : "失敗")}]しました。[{chargeResult.ReturnMsg}]");
+            if (chkIsShowMessage.Checked)
+            {
+                showMessageBox(result, messages);
+            }
+            else
+            {
+                logger.Info(messages);
+            }
+            
         }
 
         private void btnTaskCancel_Click(object sender, EventArgs e)
@@ -592,13 +602,21 @@ namespace MujinAGVDemo
                 Factory = new CommandFactory(param.ServerIP, param.WarehouseID);
             }
             var (isSuccess, messages) = Command.MapCommands.LiftUpRobot(factory: Factory, robotID: param.RobotID);
-            if (!isSuccess)
+            //if (!isSuccess)
+            //{
+            //    showErrorMessageBox(messages);
+            //}
+            //else
+            //{
+            //    showInfoMessageBox(messages);
+            //}
+            if (chkIsShowMessage.Checked)
             {
-                showErrorMessageBox(messages);
+                showMessageBox(isSuccess, messages);
             }
             else
             {
-                showInfoMessageBox(messages);
+                logger.Info(messages);
             }
         }
 
@@ -610,13 +628,21 @@ namespace MujinAGVDemo
                 Factory = new CommandFactory(param.ServerIP, param.WarehouseID);
             }
             var (isSuccess, messages) = Command.MapCommands.LiftDownRobot(factory: Factory, robotID: param.RobotID);
-            if (!isSuccess)
+            //if (!isSuccess)
+            //{
+            //    showErrorMessageBox(messages);
+            //}
+            //else
+            //{
+            //    showInfoMessageBox(messages);
+            //}
+            if (chkIsShowMessage.Checked)
             {
-                showErrorMessageBox(messages);
+                showMessageBox(isSuccess, messages);
             }
             else
             {
-                showInfoMessageBox(messages);
+                logger.Info(messages);
             }
         }
 
@@ -2151,7 +2177,7 @@ namespace MujinAGVDemo
                                   nodeID: param.NodeID,
                                   token: source.Token,
                                   robotFace: robotFace,
-                                  isShowMessageBox: true);
+                                  isShowMessageBox: chkIsShowMessage.Checked);
             }
             catch (Exception ex)
             {
@@ -2217,8 +2243,11 @@ namespace MujinAGVDemo
                                              unload: param.Unload);
             await task;
 
-            showMessageBox(isSuccess: task.Result.result,
+            if (chkIsShowMessage.Checked)
+            {
+                showMessageBox(isSuccess: task.Result.result,
                            message: task.Result.message);
+            }            
         }
     }
 }
