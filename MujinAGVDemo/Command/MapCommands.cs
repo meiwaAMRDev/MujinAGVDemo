@@ -441,6 +441,73 @@ namespace MujinAGVDemo.Command
 
             return (movePodResult.ReturnCode == successCode, returnMessage);
         }
+
+        public static (bool isSuccess, string messages) LiftUpAndDown(CommandFactory factory, string robotID)
+        {
+            var result = (false, "失敗");
+
+            #region 棚を探す
+            //var factory = new CommandFactory(hetuIP, warehouseID);
+            var getRobotListReturnMessage = (GetRobotListReturnMessage)factory.Create(new GetRobotListParam()).DoAction();
+            var rb = getRobotListReturnMessage.Data.RobotList.Where(x => x.RobotID == robotID).FirstOrDefault();
+            var returnMessage = string.Empty;
+            //指定したAGVが見つからない場合はここで終了
+            if (rb == null)
+            {
+                returnMessage = $"AGV[{robotID}]が見つかりません。";
+                return (false, returnMessage);
+            }
+
+            var nodeID = rb.CurNodeID;
+
+            var getPodResult = GetPodID(factory, nodeID);
+            #endregion 棚を探す
+
+            //AGVと同じ場所に棚がない場合はここで終了
+            if (!getPodResult.isSuccess)
+            {
+                returnMessage = $"AGV[{robotID}]と同じ場所に棚がありません。[{getPodResult.messages}]";
+                return (false, returnMessage);
+            }
+
+            #region リフトアップ
+
+            var podID = getPodResult.podID;
+            var upResult = (MovePodReturnMessage)factory.Create(new MovePodParam(
+                robotID,
+                podID,
+                DestinationModes.StorageID,
+                nodeID,
+                isEndWait: true,
+                unload: OFF
+                )).DoAction();
+            if (upResult.ReturnCode != successCode)
+            {
+                return (false, $"AGV[{robotID}]棚[{podID}]のリフトアップに失敗しました。[{upResult.ReturnMsg}]");
+            }
+            #endregion リフトアップ
+
+            #region リフトダウン
+
+            var downResult = (MovePodReturnMessage)factory.Create(new MovePodParam(
+                robotID,
+                podID,
+                DestinationModes.StorageID,
+                nodeID,
+                isEndWait: true,
+                unload: ON
+                )).DoAction();
+            if (downResult.ReturnCode != successCode)
+            {
+                return (false, $"AGV[{robotID}]棚[{podID}]のリフトダウンに失敗しました。[{downResult.ReturnMsg}]");
+            }
+
+
+            #endregion リフトダウン
+
+            return (true,$"AGV[{robotID}]棚[{podID}]の棚リフトアップ＆ダウンが成功しました。");
+        }
+
         /// <summary>
         /// 棚の位置をシステム的に変更する
         /// </summary>

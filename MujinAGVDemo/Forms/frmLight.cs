@@ -602,14 +602,7 @@ namespace MujinAGVDemo
                 Factory = new CommandFactory(param.ServerIP, param.WarehouseID);
             }
             var (isSuccess, messages) = Command.MapCommands.LiftUpRobot(factory: Factory, robotID: param.RobotID);
-            //if (!isSuccess)
-            //{
-            //    showErrorMessageBox(messages);
-            //}
-            //else
-            //{
-            //    showInfoMessageBox(messages);
-            //}
+            
             if (chkIsShowMessage.Checked)
             {
                 showMessageBox(isSuccess, messages);
@@ -2149,6 +2142,10 @@ namespace MujinAGVDemo
         private async void btnMoveRobot_Click(object sender, EventArgs e)
         {
             updateParam();
+            if (Factory == null)
+            {
+                Factory = new CommandFactory(param.ServerIP, param.WarehouseID);
+            }
             source = new CancellationTokenSource();
 
             var robotFace = Direction.NoSelect;
@@ -2193,6 +2190,10 @@ namespace MujinAGVDemo
         private async void btnMovePod_Click(object sender, EventArgs e)
         {
             updateParam();
+            if (Factory == null)
+            {
+                Factory = new CommandFactory(param.ServerIP, param.WarehouseID);
+            }
             source = new CancellationTokenSource();
             var robotFace = Direction.NoSelect;
             switch (cmbRobotFace.SelectedIndex)
@@ -2248,6 +2249,30 @@ namespace MujinAGVDemo
                 showMessageBox(isSuccess: task.Result.result,
                            message: task.Result.message);
             }            
+        }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void btnLiftUpAndDown_Click(object sender, EventArgs e)
+        {
+            updateParam();
+            if (Factory == null)
+            {
+                Factory = new CommandFactory(param.ServerIP, param.WarehouseID);
+            }
+
+            var (isSuccess, messages) = MapCommands.LiftUpAndDown(factory: Factory, robotID: param.RobotID);
+
+            if (chkIsShowMessage.Checked)
+            {
+                showMessageBox(isSuccess, messages);
+            }
+            else
+            {
+                logger.Info(messages);
+            }
         }
     }
 }
