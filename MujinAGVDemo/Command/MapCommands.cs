@@ -444,8 +444,6 @@ namespace MujinAGVDemo.Command
 
         public static (bool isSuccess, string messages) LiftUpAndDown(CommandFactory factory, string robotID)
         {
-            var result = (false, "失敗");
-
             #region 棚を探す
             //var factory = new CommandFactory(hetuIP, warehouseID);
             var getRobotListReturnMessage = (GetRobotListReturnMessage)factory.Create(new GetRobotListParam()).DoAction();
@@ -505,7 +503,7 @@ namespace MujinAGVDemo.Command
 
             #endregion リフトダウン
 
-            return (true,$"AGV[{robotID}]棚[{podID}]の棚リフトアップ＆ダウンが成功しました。");
+            return (true, $"AGV[{robotID}]棚[{podID}]の棚リフトアップ＆ダウンが成功しました。");
         }
 
         /// <summary>

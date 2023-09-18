@@ -30,13 +30,8 @@ namespace MujinAGVDemo
         private void InitializeComponent()
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(frmLight));
-            this.textBoxServerIP = new System.Windows.Forms.TextBox();
             this.btnOpenParamSettings = new System.Windows.Forms.Button();
-            this.textBoxWarehouseID = new System.Windows.Forms.TextBox();
-            this.textBoxLayoutID = new System.Windows.Forms.TextBox();
             this.btnLoadSetting = new System.Windows.Forms.Button();
-            this.textBoxPodID = new System.Windows.Forms.TextBox();
-            this.textBoxNodeID = new System.Windows.Forms.TextBox();
             this.label1 = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
             this.btnSaveSetting = new System.Windows.Forms.Button();
@@ -44,7 +39,6 @@ namespace MujinAGVDemo
             this.label4 = new System.Windows.Forms.Label();
             this.label5 = new System.Windows.Forms.Label();
             this.checkBoxIsStop = new System.Windows.Forms.CheckBox();
-            this.textBoxRobotID = new System.Windows.Forms.TextBox();
             this.label8 = new System.Windows.Forms.Label();
             this.btnRemovePodAll = new System.Windows.Forms.Button();
             this.btnSetPodPos = new System.Windows.Forms.Button();
@@ -86,12 +80,18 @@ namespace MujinAGVDemo
             this.btnMoveCancel = new System.Windows.Forms.Button();
             this.btnMoveCSV = new System.Windows.Forms.Button();
             this.tabSetting = new System.Windows.Forms.TabPage();
+            this.cmbRobotID = new System.Windows.Forms.ComboBox();
+            this.cmbPodID = new System.Windows.Forms.ComboBox();
+            this.cmbLayoutID = new System.Windows.Forms.ComboBox();
+            this.cmbWarehouseID = new System.Windows.Forms.ComboBox();
+            this.cmbServerIP = new System.Windows.Forms.ComboBox();
+            this.cmbChargeZoneID = new System.Windows.Forms.ComboBox();
+            this.cmbNodeID = new System.Windows.Forms.ComboBox();
             this.cmbRobotFace = new System.Windows.Forms.ComboBox();
             this.label15 = new System.Windows.Forms.Label();
             this.cmbPodFace = new System.Windows.Forms.ComboBox();
             this.label7 = new System.Windows.Forms.Label();
             this.label6 = new System.Windows.Forms.Label();
-            this.textBoxChargeZoneID = new System.Windows.Forms.TextBox();
             this.chkUnload = new System.Windows.Forms.CheckBox();
             this.chkTurn = new System.Windows.Forms.CheckBox();
             this.tabExchange = new System.Windows.Forms.TabPage();
@@ -121,10 +121,12 @@ namespace MujinAGVDemo
             this.chkAllSet = new System.Windows.Forms.CheckBox();
             this.btnRotationCheck = new System.Windows.Forms.Button();
             this.flowLayoutPanel1 = new System.Windows.Forms.FlowLayoutPanel();
+            this.cmbCommand = new System.Windows.Forms.ComboBox();
+            this.btnAction = new System.Windows.Forms.Button();
             this.btnMoveRobot = new System.Windows.Forms.Button();
             this.btnMovePod = new System.Windows.Forms.Button();
-            this.chkIsShowMessage = new System.Windows.Forms.CheckBox();
             this.btnLiftUpAndDown = new System.Windows.Forms.Button();
+            this.chkIsShowMessage = new System.Windows.Forms.CheckBox();
             this.menuStrip1.SuspendLayout();
             this.tabControl1.SuspendLayout();
             this.tabMove.SuspendLayout();
@@ -137,14 +139,6 @@ namespace MujinAGVDemo
             this.flowLayoutPanel1.SuspendLayout();
             this.SuspendLayout();
             // 
-            // textBoxServerIP
-            // 
-            this.textBoxServerIP.Location = new System.Drawing.Point(91, 6);
-            this.textBoxServerIP.Name = "textBoxServerIP";
-            this.textBoxServerIP.Size = new System.Drawing.Size(148, 19);
-            this.textBoxServerIP.TabIndex = 47;
-            this.textBoxServerIP.Text = "serverIP";
-            // 
             // btnOpenParamSettings
             // 
             this.btnOpenParamSettings.Location = new System.Drawing.Point(409, 116);
@@ -155,22 +149,6 @@ namespace MujinAGVDemo
             this.btnOpenParamSettings.UseVisualStyleBackColor = true;
             this.btnOpenParamSettings.Click += new System.EventHandler(this.btnOpenParamSettings_Click);
             // 
-            // textBoxWarehouseID
-            // 
-            this.textBoxWarehouseID.Location = new System.Drawing.Point(91, 29);
-            this.textBoxWarehouseID.Name = "textBoxWarehouseID";
-            this.textBoxWarehouseID.Size = new System.Drawing.Size(148, 19);
-            this.textBoxWarehouseID.TabIndex = 48;
-            this.textBoxWarehouseID.Text = "warehouseID";
-            // 
-            // textBoxLayoutID
-            // 
-            this.textBoxLayoutID.Location = new System.Drawing.Point(91, 52);
-            this.textBoxLayoutID.Name = "textBoxLayoutID";
-            this.textBoxLayoutID.Size = new System.Drawing.Size(148, 19);
-            this.textBoxLayoutID.TabIndex = 49;
-            this.textBoxLayoutID.Text = "layoutID";
-            // 
             // btnLoadSetting
             // 
             this.btnLoadSetting.Location = new System.Drawing.Point(409, 96);
@@ -180,22 +158,6 @@ namespace MujinAGVDemo
             this.btnLoadSetting.Text = "設定読出";
             this.btnLoadSetting.UseVisualStyleBackColor = true;
             this.btnLoadSetting.Click += new System.EventHandler(this.btnLoadSetting_Click);
-            // 
-            // textBoxPodID
-            // 
-            this.textBoxPodID.Location = new System.Drawing.Point(91, 75);
-            this.textBoxPodID.Name = "textBoxPodID";
-            this.textBoxPodID.Size = new System.Drawing.Size(148, 19);
-            this.textBoxPodID.TabIndex = 50;
-            this.textBoxPodID.Text = "podID";
-            // 
-            // textBoxNodeID
-            // 
-            this.textBoxNodeID.Location = new System.Drawing.Point(91, 98);
-            this.textBoxNodeID.Name = "textBoxNodeID";
-            this.textBoxNodeID.Size = new System.Drawing.Size(148, 19);
-            this.textBoxNodeID.TabIndex = 51;
-            this.textBoxNodeID.Text = "nodeID";
             // 
             // label1
             // 
@@ -265,18 +227,10 @@ namespace MujinAGVDemo
             this.checkBoxIsStop.UseVisualStyleBackColor = false;
             this.checkBoxIsStop.CheckedChanged += new System.EventHandler(this.checkBoxIsStop_CheckedChanged);
             // 
-            // textBoxRobotID
-            // 
-            this.textBoxRobotID.Location = new System.Drawing.Point(91, 121);
-            this.textBoxRobotID.Name = "textBoxRobotID";
-            this.textBoxRobotID.Size = new System.Drawing.Size(148, 19);
-            this.textBoxRobotID.TabIndex = 57;
-            this.textBoxRobotID.Text = "robotID";
-            // 
             // label8
             // 
             this.label8.AutoSize = true;
-            this.label8.Location = new System.Drawing.Point(3, 123);
+            this.label8.Location = new System.Drawing.Point(3, 126);
             this.label8.Name = "label8";
             this.label8.Size = new System.Drawing.Size(42, 12);
             this.label8.TabIndex = 58;
@@ -284,7 +238,7 @@ namespace MujinAGVDemo
             // 
             // btnRemovePodAll
             // 
-            this.btnRemovePodAll.Location = new System.Drawing.Point(244, 3);
+            this.btnRemovePodAll.Location = new System.Drawing.Point(439, 3);
             this.btnRemovePodAll.Name = "btnRemovePodAll";
             this.btnRemovePodAll.Size = new System.Drawing.Size(71, 23);
             this.btnRemovePodAll.TabIndex = 70;
@@ -294,8 +248,8 @@ namespace MujinAGVDemo
             // 
             // btnSetPodPos
             // 
-            this.btnSetPodPos.Location = new System.Drawing.Point(156, 2);
-            this.btnSetPodPos.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.btnSetPodPos.Location = new System.Drawing.Point(351, 2);
+            this.btnSetPodPos.Margin = new System.Windows.Forms.Padding(2);
             this.btnSetPodPos.Name = "btnSetPodPos";
             this.btnSetPodPos.Size = new System.Drawing.Size(83, 23);
             this.btnSetPodPos.TabIndex = 69;
@@ -305,7 +259,7 @@ namespace MujinAGVDemo
             // 
             // btnAddPod
             // 
-            this.btnAddPod.Location = new System.Drawing.Point(3, 3);
+            this.btnAddPod.Location = new System.Drawing.Point(198, 3);
             this.btnAddPod.Name = "btnAddPod";
             this.btnAddPod.Size = new System.Drawing.Size(71, 23);
             this.btnAddPod.TabIndex = 67;
@@ -315,7 +269,7 @@ namespace MujinAGVDemo
             // 
             // btnRemovePod
             // 
-            this.btnRemovePod.Location = new System.Drawing.Point(80, 3);
+            this.btnRemovePod.Location = new System.Drawing.Point(275, 3);
             this.btnRemovePod.Name = "btnRemovePod";
             this.btnRemovePod.Size = new System.Drawing.Size(71, 23);
             this.btnRemovePod.TabIndex = 68;
@@ -325,8 +279,8 @@ namespace MujinAGVDemo
             // 
             // btnSetOwner
             // 
-            this.btnSetOwner.Location = new System.Drawing.Point(399, 2);
-            this.btnSetOwner.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.btnSetOwner.Location = new System.Drawing.Point(81, 31);
+            this.btnSetOwner.Margin = new System.Windows.Forms.Padding(2);
             this.btnSetOwner.Name = "btnSetOwner";
             this.btnSetOwner.Size = new System.Drawing.Size(75, 23);
             this.btnSetOwner.TabIndex = 72;
@@ -336,8 +290,8 @@ namespace MujinAGVDemo
             // 
             // btnUnSetOwner
             // 
-            this.btnUnSetOwner.Location = new System.Drawing.Point(320, 2);
-            this.btnUnSetOwner.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.btnUnSetOwner.Location = new System.Drawing.Point(2, 31);
+            this.btnUnSetOwner.Margin = new System.Windows.Forms.Padding(2);
             this.btnUnSetOwner.Name = "btnUnSetOwner";
             this.btnUnSetOwner.Size = new System.Drawing.Size(75, 23);
             this.btnUnSetOwner.TabIndex = 71;
@@ -433,7 +387,7 @@ namespace MujinAGVDemo
             this.tabMove.Controls.Add(this.dgvMove);
             this.tabMove.Location = new System.Drawing.Point(4, 22);
             this.tabMove.Name = "tabMove";
-            this.tabMove.Padding = new System.Windows.Forms.Padding(3, 3, 3, 3);
+            this.tabMove.Padding = new System.Windows.Forms.Padding(3);
             this.tabMove.Size = new System.Drawing.Size(544, 200);
             this.tabMove.TabIndex = 1;
             this.tabMove.Text = "移動指示";
@@ -661,7 +615,7 @@ namespace MujinAGVDemo
             // numRepeatCount
             // 
             this.numRepeatCount.Location = new System.Drawing.Point(6, 22);
-            this.numRepeatCount.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.numRepeatCount.Margin = new System.Windows.Forms.Padding(2);
             this.numRepeatCount.Name = "numRepeatCount";
             this.numRepeatCount.Size = new System.Drawing.Size(60, 19);
             this.numRepeatCount.TabIndex = 83;
@@ -693,17 +647,21 @@ namespace MujinAGVDemo
             // 
             // tabSetting
             // 
+            this.tabSetting.Controls.Add(this.cmbRobotID);
+            this.tabSetting.Controls.Add(this.cmbPodID);
+            this.tabSetting.Controls.Add(this.cmbLayoutID);
+            this.tabSetting.Controls.Add(this.cmbWarehouseID);
+            this.tabSetting.Controls.Add(this.cmbServerIP);
+            this.tabSetting.Controls.Add(this.cmbChargeZoneID);
+            this.tabSetting.Controls.Add(this.cmbNodeID);
             this.tabSetting.Controls.Add(this.cmbRobotFace);
             this.tabSetting.Controls.Add(this.label15);
             this.tabSetting.Controls.Add(this.cmbPodFace);
             this.tabSetting.Controls.Add(this.label7);
             this.tabSetting.Controls.Add(this.label6);
-            this.tabSetting.Controls.Add(this.textBoxChargeZoneID);
             this.tabSetting.Controls.Add(this.chkUnload);
             this.tabSetting.Controls.Add(this.chkTurn);
-            this.tabSetting.Controls.Add(this.textBoxServerIP);
             this.tabSetting.Controls.Add(this.label8);
-            this.tabSetting.Controls.Add(this.textBoxRobotID);
             this.tabSetting.Controls.Add(this.label5);
             this.tabSetting.Controls.Add(this.label4);
             this.tabSetting.Controls.Add(this.label3);
@@ -711,19 +669,71 @@ namespace MujinAGVDemo
             this.tabSetting.Controls.Add(this.btnOpenParamSettings);
             this.tabSetting.Controls.Add(this.label1);
             this.tabSetting.Controls.Add(this.btnLoadSetting);
-            this.tabSetting.Controls.Add(this.textBoxNodeID);
             this.tabSetting.Controls.Add(this.btnSaveSetting);
-            this.tabSetting.Controls.Add(this.textBoxWarehouseID);
             this.tabSetting.Controls.Add(this.checkBoxIsStop);
-            this.tabSetting.Controls.Add(this.textBoxPodID);
-            this.tabSetting.Controls.Add(this.textBoxLayoutID);
             this.tabSetting.Location = new System.Drawing.Point(4, 22);
             this.tabSetting.Name = "tabSetting";
-            this.tabSetting.Padding = new System.Windows.Forms.Padding(3, 3, 3, 3);
+            this.tabSetting.Padding = new System.Windows.Forms.Padding(3);
             this.tabSetting.Size = new System.Drawing.Size(544, 200);
             this.tabSetting.TabIndex = 0;
             this.tabSetting.Text = "基本設定";
             this.tabSetting.UseVisualStyleBackColor = true;
+            // 
+            // cmbRobotID
+            // 
+            this.cmbRobotID.FormattingEnabled = true;
+            this.cmbRobotID.Location = new System.Drawing.Point(91, 123);
+            this.cmbRobotID.Name = "cmbRobotID";
+            this.cmbRobotID.Size = new System.Drawing.Size(132, 20);
+            this.cmbRobotID.TabIndex = 81;
+            // 
+            // cmbPodID
+            // 
+            this.cmbPodID.FormattingEnabled = true;
+            this.cmbPodID.Location = new System.Drawing.Point(91, 75);
+            this.cmbPodID.Name = "cmbPodID";
+            this.cmbPodID.Size = new System.Drawing.Size(132, 20);
+            this.cmbPodID.TabIndex = 80;
+            // 
+            // cmbLayoutID
+            // 
+            this.cmbLayoutID.FormattingEnabled = true;
+            this.cmbLayoutID.Location = new System.Drawing.Point(91, 51);
+            this.cmbLayoutID.Name = "cmbLayoutID";
+            this.cmbLayoutID.Size = new System.Drawing.Size(132, 20);
+            this.cmbLayoutID.TabIndex = 79;
+            // 
+            // cmbWarehouseID
+            // 
+            this.cmbWarehouseID.FormattingEnabled = true;
+            this.cmbWarehouseID.Location = new System.Drawing.Point(91, 29);
+            this.cmbWarehouseID.Name = "cmbWarehouseID";
+            this.cmbWarehouseID.Size = new System.Drawing.Size(132, 20);
+            this.cmbWarehouseID.TabIndex = 78;
+            // 
+            // cmbServerIP
+            // 
+            this.cmbServerIP.FormattingEnabled = true;
+            this.cmbServerIP.Location = new System.Drawing.Point(91, 6);
+            this.cmbServerIP.Name = "cmbServerIP";
+            this.cmbServerIP.Size = new System.Drawing.Size(132, 20);
+            this.cmbServerIP.TabIndex = 77;
+            // 
+            // cmbChargeZoneID
+            // 
+            this.cmbChargeZoneID.FormattingEnabled = true;
+            this.cmbChargeZoneID.Location = new System.Drawing.Point(324, 6);
+            this.cmbChargeZoneID.Name = "cmbChargeZoneID";
+            this.cmbChargeZoneID.Size = new System.Drawing.Size(148, 20);
+            this.cmbChargeZoneID.TabIndex = 76;
+            // 
+            // cmbNodeID
+            // 
+            this.cmbNodeID.FormattingEnabled = true;
+            this.cmbNodeID.Location = new System.Drawing.Point(91, 98);
+            this.cmbNodeID.Name = "cmbNodeID";
+            this.cmbNodeID.Size = new System.Drawing.Size(132, 20);
+            this.cmbNodeID.TabIndex = 75;
             // 
             // cmbRobotFace
             // 
@@ -782,14 +792,6 @@ namespace MujinAGVDemo
             this.label6.Size = new System.Drawing.Size(75, 12);
             this.label6.TabIndex = 69;
             this.label6.Text = "chargeZoneID";
-            // 
-            // textBoxChargeZoneID
-            // 
-            this.textBoxChargeZoneID.Location = new System.Drawing.Point(324, 6);
-            this.textBoxChargeZoneID.Name = "textBoxChargeZoneID";
-            this.textBoxChargeZoneID.Size = new System.Drawing.Size(148, 19);
-            this.textBoxChargeZoneID.TabIndex = 68;
-            this.textBoxChargeZoneID.Text = "chargeZoneID";
             // 
             // chkUnload
             // 
@@ -1005,7 +1007,7 @@ namespace MujinAGVDemo
             // 
             // btnCharge
             // 
-            this.btnCharge.Location = new System.Drawing.Point(3, 32);
+            this.btnCharge.Location = new System.Drawing.Point(161, 32);
             this.btnCharge.Name = "btnCharge";
             this.btnCharge.Size = new System.Drawing.Size(75, 23);
             this.btnCharge.TabIndex = 75;
@@ -1015,7 +1017,7 @@ namespace MujinAGVDemo
             // 
             // btnTaskCancel
             // 
-            this.btnTaskCancel.Location = new System.Drawing.Point(84, 32);
+            this.btnTaskCancel.Location = new System.Drawing.Point(242, 32);
             this.btnTaskCancel.Name = "btnTaskCancel";
             this.btnTaskCancel.Size = new System.Drawing.Size(92, 23);
             this.btnTaskCancel.TabIndex = 76;
@@ -1025,7 +1027,7 @@ namespace MujinAGVDemo
             // 
             // btnLiftUp
             // 
-            this.btnLiftUp.Location = new System.Drawing.Point(182, 32);
+            this.btnLiftUp.Location = new System.Drawing.Point(340, 32);
             this.btnLiftUp.Name = "btnLiftUp";
             this.btnLiftUp.Size = new System.Drawing.Size(63, 23);
             this.btnLiftUp.TabIndex = 77;
@@ -1035,7 +1037,7 @@ namespace MujinAGVDemo
             // 
             // btnLiftDown
             // 
-            this.btnLiftDown.Location = new System.Drawing.Point(251, 32);
+            this.btnLiftDown.Location = new System.Drawing.Point(409, 32);
             this.btnLiftDown.Name = "btnLiftDown";
             this.btnLiftDown.Size = new System.Drawing.Size(63, 23);
             this.btnLiftDown.TabIndex = 78;
@@ -1045,8 +1047,8 @@ namespace MujinAGVDemo
             // 
             // btnGetAGVData
             // 
-            this.btnGetAGVData.Location = new System.Drawing.Point(319, 31);
-            this.btnGetAGVData.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.btnGetAGVData.Location = new System.Drawing.Point(477, 31);
+            this.btnGetAGVData.Margin = new System.Windows.Forms.Padding(2);
             this.btnGetAGVData.Name = "btnGetAGVData";
             this.btnGetAGVData.Size = new System.Drawing.Size(70, 23);
             this.btnGetAGVData.TabIndex = 79;
@@ -1059,7 +1061,7 @@ namespace MujinAGVDemo
             this.chkAllSet.Appearance = System.Windows.Forms.Appearance.Button;
             this.chkAllSet.AutoSize = true;
             this.chkAllSet.BackColor = System.Drawing.Color.GreenYellow;
-            this.chkAllSet.Location = new System.Drawing.Point(394, 32);
+            this.chkAllSet.Location = new System.Drawing.Point(3, 61);
             this.chkAllSet.Name = "chkAllSet";
             this.chkAllSet.Size = new System.Drawing.Size(51, 22);
             this.chkAllSet.TabIndex = 80;
@@ -1069,7 +1071,7 @@ namespace MujinAGVDemo
             // 
             // btnRotationCheck
             // 
-            this.btnRotationCheck.Location = new System.Drawing.Point(451, 32);
+            this.btnRotationCheck.Location = new System.Drawing.Point(60, 61);
             this.btnRotationCheck.Name = "btnRotationCheck";
             this.btnRotationCheck.Size = new System.Drawing.Size(63, 23);
             this.btnRotationCheck.TabIndex = 81;
@@ -1079,6 +1081,8 @@ namespace MujinAGVDemo
             // 
             // flowLayoutPanel1
             // 
+            this.flowLayoutPanel1.Controls.Add(this.cmbCommand);
+            this.flowLayoutPanel1.Controls.Add(this.btnAction);
             this.flowLayoutPanel1.Controls.Add(this.btnAddPod);
             this.flowLayoutPanel1.Controls.Add(this.btnRemovePod);
             this.flowLayoutPanel1.Controls.Add(this.btnSetPodPos);
@@ -1102,9 +1106,28 @@ namespace MujinAGVDemo
             this.flowLayoutPanel1.Size = new System.Drawing.Size(552, 102);
             this.flowLayoutPanel1.TabIndex = 82;
             // 
+            // cmbCommand
+            // 
+            this.cmbCommand.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cmbCommand.FormattingEnabled = true;
+            this.cmbCommand.Location = new System.Drawing.Point(3, 3);
+            this.cmbCommand.Name = "cmbCommand";
+            this.cmbCommand.Size = new System.Drawing.Size(121, 20);
+            this.cmbCommand.TabIndex = 86;
+            // 
+            // btnAction
+            // 
+            this.btnAction.Location = new System.Drawing.Point(130, 3);
+            this.btnAction.Name = "btnAction";
+            this.btnAction.Size = new System.Drawing.Size(62, 23);
+            this.btnAction.TabIndex = 87;
+            this.btnAction.Text = "実行";
+            this.btnAction.UseVisualStyleBackColor = true;
+            this.btnAction.Click += new System.EventHandler(this.btnAction_Click);
+            // 
             // btnMoveRobot
             // 
-            this.btnMoveRobot.Location = new System.Drawing.Point(3, 61);
+            this.btnMoveRobot.Location = new System.Drawing.Point(129, 61);
             this.btnMoveRobot.Name = "btnMoveRobot";
             this.btnMoveRobot.Size = new System.Drawing.Size(65, 23);
             this.btnMoveRobot.TabIndex = 82;
@@ -1114,7 +1137,7 @@ namespace MujinAGVDemo
             // 
             // btnMovePod
             // 
-            this.btnMovePod.Location = new System.Drawing.Point(74, 61);
+            this.btnMovePod.Location = new System.Drawing.Point(200, 61);
             this.btnMovePod.Name = "btnMovePod";
             this.btnMovePod.Size = new System.Drawing.Size(65, 23);
             this.btnMovePod.TabIndex = 83;
@@ -1122,28 +1145,28 @@ namespace MujinAGVDemo
             this.btnMovePod.UseVisualStyleBackColor = true;
             this.btnMovePod.Click += new System.EventHandler(this.btnMovePod_Click);
             // 
-            // chkIsShowMessage
-            // 
-            this.chkIsShowMessage.AutoSize = true;
-            this.chkIsShowMessage.Checked = true;
-            this.chkIsShowMessage.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.chkIsShowMessage.Location = new System.Drawing.Point(227, 60);
-            this.chkIsShowMessage.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
-            this.chkIsShowMessage.Name = "chkIsShowMessage";
-            this.chkIsShowMessage.Size = new System.Drawing.Size(93, 16);
-            this.chkIsShowMessage.TabIndex = 84;
-            this.chkIsShowMessage.Text = "メッセージ表示";
-            this.chkIsShowMessage.UseVisualStyleBackColor = true;
-            // 
             // btnLiftUpAndDown
             // 
-            this.btnLiftUpAndDown.Location = new System.Drawing.Point(145, 61);
+            this.btnLiftUpAndDown.Location = new System.Drawing.Point(271, 61);
             this.btnLiftUpAndDown.Name = "btnLiftUpAndDown";
             this.btnLiftUpAndDown.Size = new System.Drawing.Size(77, 23);
             this.btnLiftUpAndDown.TabIndex = 85;
             this.btnLiftUpAndDown.Text = "棚位置調整";
             this.btnLiftUpAndDown.UseVisualStyleBackColor = true;
             this.btnLiftUpAndDown.Click += new System.EventHandler(this.btnLiftUpAndDown_Click);
+            // 
+            // chkIsShowMessage
+            // 
+            this.chkIsShowMessage.AutoSize = true;
+            this.chkIsShowMessage.Checked = true;
+            this.chkIsShowMessage.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.chkIsShowMessage.Location = new System.Drawing.Point(353, 60);
+            this.chkIsShowMessage.Margin = new System.Windows.Forms.Padding(2);
+            this.chkIsShowMessage.Name = "chkIsShowMessage";
+            this.chkIsShowMessage.Size = new System.Drawing.Size(93, 16);
+            this.chkIsShowMessage.TabIndex = 84;
+            this.chkIsShowMessage.Text = "メッセージ表示";
+            this.chkIsShowMessage.UseVisualStyleBackColor = true;
             // 
             // frmLight
             // 
@@ -1180,13 +1203,8 @@ namespace MujinAGVDemo
         }
 
         #endregion
-        private System.Windows.Forms.TextBox textBoxServerIP;
         private System.Windows.Forms.Button btnOpenParamSettings;
-        private System.Windows.Forms.TextBox textBoxWarehouseID;
-        private System.Windows.Forms.TextBox textBoxLayoutID;
         private System.Windows.Forms.Button btnLoadSetting;
-        private System.Windows.Forms.TextBox textBoxPodID;
-        private System.Windows.Forms.TextBox textBoxNodeID;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.Button btnSaveSetting;
@@ -1194,7 +1212,6 @@ namespace MujinAGVDemo
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.Label label5;
         private System.Windows.Forms.CheckBox checkBoxIsStop;
-        private System.Windows.Forms.TextBox textBoxRobotID;
         private System.Windows.Forms.Label label8;
         private System.Windows.Forms.Button btnRemovePodAll;
         private System.Windows.Forms.Button btnSetPodPos;
@@ -1213,7 +1230,6 @@ namespace MujinAGVDemo
         private System.Windows.Forms.CheckBox chkTurn;
         private System.Windows.Forms.CheckBox chkUnload;
         private System.Windows.Forms.Label label6;
-        private System.Windows.Forms.TextBox textBoxChargeZoneID;
         private System.Windows.Forms.Button btnCharge;
         private System.Windows.Forms.Button btnTaskCancel;
         private System.Windows.Forms.Button btnLiftUp;
@@ -1275,5 +1291,14 @@ namespace MujinAGVDemo
         private System.Windows.Forms.Button btnMovePod;
         private System.Windows.Forms.CheckBox chkIsShowMessage;
         private System.Windows.Forms.Button btnLiftUpAndDown;
+        private System.Windows.Forms.ComboBox cmbCommand;
+        private System.Windows.Forms.Button btnAction;
+        private System.Windows.Forms.ComboBox cmbNodeID;
+        private System.Windows.Forms.ComboBox cmbChargeZoneID;
+        private System.Windows.Forms.ComboBox cmbServerIP;
+        private System.Windows.Forms.ComboBox cmbRobotID;
+        private System.Windows.Forms.ComboBox cmbPodID;
+        private System.Windows.Forms.ComboBox cmbLayoutID;
+        private System.Windows.Forms.ComboBox cmbWarehouseID;
     }
 }

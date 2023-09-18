@@ -5,7 +5,6 @@ using MujinAGVDemo.Command;
 using NLog;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Data;
 using System.Diagnostics;
 using System.Drawing;
@@ -99,6 +98,25 @@ namespace MujinAGVDemo
             /// </summary>
             RobotGroup = 7,
         }
+        enum AGVcommands : int
+        {
+            棚追加 = 0,
+            棚削除 = 1,
+            棚位置セット = 2,
+            全棚削除 = 3,
+            占有解除 = 4,
+            占有 = 5,
+            充電 = 6,
+            タスクキャンセル = 7,
+            リフトアップ = 8,
+            リフトダウン = 9,
+            AGV情報 = 10,
+            全占有切替 = 11,
+            天板回転 = 12,
+            AGV移動 = 13,
+            棚搬送 = 14,
+            棚アップダウン = 15,
+        };
         private const int ON = 1;
         private const int OFF = 0;
         /// <summary>
@@ -176,6 +194,9 @@ namespace MujinAGVDemo
 
                 dispatcherTimer.Interval = new TimeSpan(0, 0, 0, 0, 10);
                 dispatcherTimer.Tick += DispatcherTimer_Tick;
+
+                cmbCommand.Items.AddRange(Enum.GetNames(typeof(AGVcommands)));
+                cmbCommand.SelectedIndex = 0;
             }
             catch (Exception ex)
             {
@@ -572,7 +593,7 @@ namespace MujinAGVDemo
             {
                 logger.Info(messages);
             }
-            
+
         }
 
         private void btnTaskCancel_Click(object sender, EventArgs e)
@@ -602,7 +623,7 @@ namespace MujinAGVDemo
                 Factory = new CommandFactory(param.ServerIP, param.WarehouseID);
             }
             var (isSuccess, messages) = Command.MapCommands.LiftUpRobot(factory: Factory, robotID: param.RobotID);
-            
+
             if (chkIsShowMessage.Checked)
             {
                 showMessageBox(isSuccess, messages);
@@ -923,18 +944,19 @@ namespace MujinAGVDemo
         /// </summary>
         private void updateControl()
         {
-            textBoxServerIP.Text = param.ServerIP;
-            textBoxWarehouseID.Text = param.WarehouseID;
-            textBoxLayoutID.Text = param.LayoutID;
-            textBoxPodID.Text = param.PodID;
-            textBoxNodeID.Text = param.NodeID;
-            textBoxRobotID.Text = param.RobotID;
+            cmbServerIP.Text = param.ServerIP;
+            cmbWarehouseID.Text = param.WarehouseID;
+            cmbLayoutID.Text = param.LayoutID;
+            cmbPodID.Text = param.PodID;
+            cmbNodeID.Text = param.NodeID;
+            cmbRobotID.Text = param.RobotID;
             textBoxStationListPath.Text = param.StationListPath;
             numRepeatCount.Value = param.RepeatCount;
-            textBoxChargeZoneID.Text = param.ChargeZoneID;
+            cmbChargeZoneID.Text = param.ChargeZoneID;
             chkTurn.Checked = param.TurnMode == ON;
             chkUnload.Checked = param.Unload == ON;
             textBoxGroupID.Text = param.RobotGroupID;
+            AddHistoryAll();
 
             updateDgvMove(param.NodeDatas);
         }
@@ -943,17 +965,18 @@ namespace MujinAGVDemo
         /// </summary>
         private void updateParam()
         {
-            param.ServerIP = textBoxServerIP.Text;
-            param.WarehouseID = textBoxWarehouseID.Text;
-            param.LayoutID = textBoxLayoutID.Text;
-            param.PodID = textBoxPodID.Text;
-            param.NodeID = textBoxNodeID.Text;
-            param.RobotID = textBoxRobotID.Text;
+            AddHistoryAll();
+
+            param.ServerIP = cmbServerIP.Text;
+            param.WarehouseID = cmbWarehouseID.Text;
+            param.LayoutID = cmbLayoutID.Text;
+            param.PodID = cmbPodID.Text;
+            param.NodeID = cmbNodeID.Text;
+            param.RobotID = cmbRobotID.Text;
             param.StationListPath = textBoxStationListPath.Text;
             param.RepeatCount = (int)numRepeatCount.Value;
-            param.ChargeZoneID = textBoxChargeZoneID.Text;
+            param.ChargeZoneID = cmbChargeZoneID.Text;
             param.RobotGroupID = textBoxGroupID.Text;
-
             param.Pod1Param.PodID = txtPod1.Text;
             param.Pod1Param.NodeID = txtNode1.Text;
             param.Pod1Param.TempNodeID = txtTempNode1.Text;
@@ -962,8 +985,23 @@ namespace MujinAGVDemo
             param.Pod2Param.NodeID = txtNode2.Text;
             param.Pod2Param.TempNodeID = string.Empty;
         }
-
-
+        private void AddHistory(System.Windows.Forms.ComboBox comboBox)
+        {
+            if (!comboBox.Items.Contains(comboBox.Text))
+            {
+                comboBox.Items.Add(comboBox.Text);
+            }
+        }
+        private void AddHistoryAll()
+        {
+            AddHistory(cmbServerIP);
+            AddHistory(cmbWarehouseID);
+            AddHistory(cmbLayoutID);
+            AddHistory(cmbPodID);
+            AddHistory(cmbNodeID);
+            AddHistory(cmbRobotID);
+            AddHistory(cmbChargeZoneID);
+        }
         /// <summary>
         /// 棚を追加します
         /// </summary>
@@ -2248,7 +2286,7 @@ namespace MujinAGVDemo
             {
                 showMessageBox(isSuccess: task.Result.result,
                            message: task.Result.message);
-            }            
+            }
         }
         /// <summary>
         /// 
@@ -2272,6 +2310,63 @@ namespace MujinAGVDemo
             else
             {
                 logger.Info(messages);
+            }
+        }
+
+        private void btnAction_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                var command = (AGVcommands)cmbCommand.SelectedIndex;
+                switch (command)
+                {
+                    case AGVcommands.棚追加:
+                        btnAddPod_Click(sender, e); break;
+                    case AGVcommands.棚削除:
+                        btnRemovePod_Click(sender, e); break;
+                    case AGVcommands.棚位置セット:
+                        btnSetPodPos_Click(sender, e); break;
+                    case AGVcommands.全棚削除:
+                        btnRemovePodAll_Click(sender, e); break;
+                    case AGVcommands.占有解除:
+                        btnUnSetOwner_Click(sender, e); break;
+                    case AGVcommands.占有:
+                        btnSetOwner_Click(sender, e); break;
+                    case AGVcommands.充電:
+                        btnCharge_Click(sender, e); break;
+                    case AGVcommands.タスクキャンセル:
+                        btnTaskCancel_Click(sender, e); break;
+                    case AGVcommands.リフトアップ:
+                        btnLiftUp_Click(sender, e); break;
+                    case AGVcommands.リフトダウン:
+                        btnLiftDown_Click(sender, e); break;
+                    case AGVcommands.AGV情報:
+                        btnGetAGVData_Click(sender, e); break;
+                    case AGVcommands.全占有切替:
+                        chkAllSet_CheckedChanged(sender, e); break;
+                    case AGVcommands.天板回転:
+                        btnRotationCheck_Click(sender, e); break;
+                    case AGVcommands.AGV移動:
+                        btnMoveRobot_Click(sender, e); break;
+                    case AGVcommands.棚搬送:
+                        btnMovePod_Click(sender, e); break;
+                    case AGVcommands.棚アップダウン:
+                        btnLiftUpAndDown_Click(sender, e); break;
+                    default:
+                        break;
+                }
+            }
+            catch (Exception ex)
+            {
+                var message = $"コマンド実行でエラー発生[{ex.ToString()}]";
+                if (chkIsShowMessage.Checked)
+                {
+                    showMessageBox(false, message);
+                }
+                else
+                {
+                    logger.Info(message);
+                }
             }
         }
     }
