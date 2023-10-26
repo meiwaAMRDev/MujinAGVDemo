@@ -152,15 +152,24 @@ namespace MujinAGVDemo.Command
         /// <param name="warehouseID">倉庫ID</param>
         /// <param name="robotID">一時停止するAGV_ID</param>
         /// <returns>一時停止動作のの結果メッセージ</returns>
-        public static (bool isSuccess, string messages) PauseRobot(string hetuIP, string warehouseID, string robotID)
+        public static (bool isSuccess, string messages) PauseRobot(string hetuIP, string warehouseID, string robotID, bool isAll = false)
         {
             var factory = new CommandFactory(hetuIP, warehouseID);
+            return PauseRobot(factory, robotID, isAll: isAll);
+        }
+        /// <summary>指定されたロボットを一時停止コマンドを実行する。</summary>
+        /// <param name="factory">ファクトリ</param>
+        /// <param name="robotID">一時停止するAGV_ID</param>
+        /// <returns>一時停止動作のの結果メッセージ</returns>
+        public static (bool isSuccess, string messages) PauseRobot(CommandFactory factory, string robotID, bool isAll = false)
+        {
             if (!factory.IsConnectedTESServer())
                 return (false, faultConnectoToHetuServer);
 
-            var pauseRobotResult = (PauseRobotReturnMessage)factory.Create(new PauseRobotParam(robotID)).DoAction();
+            var pauseRobotResult = (PauseRobotReturnMessage)factory.Create(new PauseRobotParam(robotID, isAll: isAll)).DoAction();
 
-            return (pauseRobotResult.ReturnCode == successCode, $"コマンド：AGV一時停止、対象AGV_ID：{robotID}、{result}: {pauseRobotResult.ReturnMsg}、コード: {pauseRobotResult.ReturnCode}");
+            return (pauseRobotResult.ReturnCode == successCode,
+                $"コマンド：AGV一時停止、対象AGV_ID：{(isAll ? "全AGV" : robotID)}、{result}: {pauseRobotResult.ReturnMsg}、コード: {pauseRobotResult.ReturnCode}");
         }
 
         /// <summary>指定されたロボットに再開コマンドを実行する。</summary>
@@ -168,15 +177,25 @@ namespace MujinAGVDemo.Command
         /// <param name="warehouseID">倉庫ID</param>
         /// <param name="robotID">再開するAGV_ID</param>
         /// <returns>再開動作の結果メッセージ</returns>
-        public static (bool isSuccess, string messages) ResumeRobot(string hetuIP, string warhouseID, string robotID)
+        public static (bool isSuccess, string messages) ResumeRobot(string hetuIP, string warhouseID, string robotID, bool isAll = false)
         {
             var factory = new CommandFactory(hetuIP, warhouseID);
+            return ResumeRobot(factory, robotID, isAll: isAll);
+        }
+        /// <summary>指定されたロボットに再開コマンドを実行する。</summary>
+        /// <param name="hetuIP">接続するHetuサーバーのIPアドレス</param>
+        /// <param name="warehouseID">倉庫ID</param>
+        /// <param name="robotID">再開するAGV_ID</param>
+        /// <returns>再開動作の結果メッセージ</returns>
+        public static (bool isSuccess, string messages) ResumeRobot(CommandFactory factory, string robotID, bool isAll = false)
+        {
             if (!factory.IsConnectedTESServer())
                 return (false, faultConnectoToHetuServer);
 
-            var resumeRobotResult = (ResumeRobotReturnMessage)factory.Create(new ResumeRobotParam(robotID)).DoAction();
+            var resumeRobotResult = (ResumeRobotReturnMessage)factory.Create(new ResumeRobotParam(robotID, isAll: isAll)).DoAction();
 
-            return (resumeRobotResult.ReturnCode == successCode, $"コマンド：AGV再開、対象AGV_ID：{robotID}、{result}: {resumeRobotResult.ReturnMsg}、コード: {resumeRobotResult.ReturnCode}");
+            return (resumeRobotResult.ReturnCode == successCode,
+                $"コマンド：AGV再開、対象AGV_ID：{(isAll ? "全AGV" : robotID)}、{result}: {resumeRobotResult.ReturnMsg}、コード: {resumeRobotResult.ReturnCode}");
         }
 
         /// <summary>指定されたロボットに充電するコマンドを実行する。</summary>
@@ -373,7 +392,7 @@ namespace MujinAGVDemo.Command
             }
 
             var movePodResult = (MovePodReturnMessage)factory.Create(movePodParam).DoAction();
-            factory.Create(new UnsetOwnerParam(robotID)).DoAction();
+            //factory.Create(new UnsetOwnerParam(robotID)).DoAction();
             if (movePodResult.ReturnMsg == null)
             {
                 return (false, $"リフトダウン結果が取得できませんでした。AGV[{robotID}] ノード[{rb.CurNodeID}] 棚[{podID}]");
@@ -634,6 +653,38 @@ namespace MujinAGVDemo.Command
             return (true, table);
         }
 
+        public static (bool isSuccess, string messages) TurnRobot(CommandFactory factory, string robotID, double robotFace)
+        {
+            //var factory = new CommandFactory(hetuIP, warehouseID);
+            var getRobotListReturnMessage = (GetRobotListReturnMessage)factory.Create(new GetRobotListParam()).DoAction();
+            var rb = getRobotListReturnMessage.Data.RobotList.Where(x => x.RobotID == robotID).FirstOrDefault();
+            var returnMessage = string.Empty;
+            //指定したAGVが見つからない場合はここで終了
+            if (rb == null)
+            {
+                returnMessage = $"AGV[{robotID}]が見つかりません。";
+                return (false, returnMessage);
+            }
+
+            var nodeID = rb.CurNodeID;
+
+            var moveRobotResult = (MoveRobotReturnMessage)factory.Create(new MoveRobotParam(
+                     robotID,
+                     DestinationModes.NodeID,
+                     nodeID,
+                     isEndWait: true,
+                     ownerRegist: true,
+                     robotFace: robotFace
+                 )).DoAction();
+
+            if (moveRobotResult.ReturnMsg == null)
+            {
+                return (false, $"旋回結果が取得できませんでした。AGV[{robotID}] ノード[{rb.CurNodeID}]");
+            }
+            returnMessage = $"AGV[{robotID}]を旋回します。結果[{moveRobotResult.ReturnMsg}]リターンコード[{moveRobotResult.ReturnCode}]";
+
+            return (moveRobotResult.ReturnCode == successCode, returnMessage);
+        }
 
         /// <summary>
         /// AGVが持ち上げている棚IDを取得する

@@ -116,6 +116,9 @@ namespace MujinAGVDemo
             AGV移動 = 13,
             棚搬送 = 14,
             棚アップダウン = 15,
+            一時停止 = 16,
+            運行 = 17,
+            AGV旋回 = 18,
         };
         private const int ON = 1;
         private const int OFF = 0;
@@ -196,7 +199,7 @@ namespace MujinAGVDemo
                 dispatcherTimer.Tick += DispatcherTimer_Tick;
 
                 cmbCommand.Items.AddRange(Enum.GetNames(typeof(AGVcommands)));
-                cmbCommand.SelectedIndex = 0;
+                cmbCommand.SelectedIndex = (int)AGVcommands.棚アップダウン;
             }
             catch (Exception ex)
             {
@@ -2352,6 +2355,12 @@ namespace MujinAGVDemo
                         btnMovePod_Click(sender, e); break;
                     case AGVcommands.棚アップダウン:
                         btnLiftUpAndDown_Click(sender, e); break;
+                    case AGVcommands.一時停止:
+                        btnPause_Click(sender, e); break;
+                    case AGVcommands.運行:
+                        btnResume_Click(sender, e); break;
+                    case AGVcommands.AGV旋回:
+                        btnTurnAGV_Click(sender, e); break;
                     default:
                         break;
                 }
@@ -2367,6 +2376,99 @@ namespace MujinAGVDemo
                 {
                     logger.Info(message);
                 }
+            }
+        }
+
+        private void btnPause_Click(object sender, EventArgs e)
+        {
+            updateParam();
+            if (Factory == null)
+            {
+                Factory = new CommandFactory(param.ServerIP, param.WarehouseID);
+            }
+
+            var (isSuccess, message) = Command.MapCommands.PauseRobot(Factory, param.RobotID);
+            if (chkIsShowMessage.Checked)
+            {
+                showMessageBox(isSuccess, message);
+            }
+        }
+
+        private void btnResume_Click(object sender, EventArgs e)
+        {
+            updateParam();
+            if (Factory == null)
+            {
+                Factory = new CommandFactory(param.ServerIP, param.WarehouseID);
+            }
+
+            var (isSuccess, message) = Command.MapCommands.ResumeRobot(Factory, param.RobotID);
+            if (chkIsShowMessage.Checked)
+            {
+                showMessageBox(isSuccess, message);
+            }
+        }
+
+        private void btnTurnAGV_Click(object sender, EventArgs e)
+        {
+            updateParam();
+            if (Factory == null)
+            {
+                Factory = new CommandFactory(param.ServerIP, param.WarehouseID);
+            }
+            var robotFace = Direction.NoSelect;
+            switch (cmbRobotFace.SelectedIndex)
+            {
+                case 0:
+                    robotFace = Direction.North;
+                    break;
+                case 1:
+                    robotFace = Direction.East;
+                    break;
+                case 2:
+                    robotFace = Direction.South;
+                    break;
+                case 3:
+                    robotFace = Direction.West;
+                    break;
+                case 4:
+                    robotFace = Direction.NoSelect;
+                    break;
+            }
+            var (isSuccess, message) = Command.MapCommands.TurnRobot(Factory, param.RobotID, robotFace);
+            if (chkIsShowMessage.Checked)
+            {
+                showMessageBox(isSuccess, message);
+            }
+        }
+
+        private void btnResumeAll_Click(object sender, EventArgs e)
+        {
+            updateParam();
+            if (Factory == null)
+            {
+                Factory = new CommandFactory(param.ServerIP, param.WarehouseID);
+            }
+
+            var (isSuccess, message) = Command.MapCommands.ResumeRobot(Factory, param.RobotID, isAll: true);
+            if (chkIsShowMessage.Checked)
+            {
+                showMessageBox(isSuccess, message);
+            }
+        }
+
+        private void btnPauseAll_Click(object sender, EventArgs e)
+        {
+            updateParam();
+            if (Factory == null)
+            {
+                Factory = new CommandFactory(param.ServerIP, param.WarehouseID);
+            }
+
+            var (isSuccess, message) = Command.MapCommands.PauseRobot(Factory, param.RobotID, isAll: true);
+            if (chkIsShowMessage.Checked)
+            {
+                showMessageBox(isSuccess, message);
             }
         }
     }
