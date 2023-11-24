@@ -199,7 +199,7 @@ namespace MujinAGVDemo
                 dispatcherTimer.Tick += DispatcherTimer_Tick;
 
                 cmbCommand.Items.AddRange(Enum.GetNames(typeof(AGVcommands)));
-                cmbCommand.SelectedIndex = (int)AGVcommands.棚アップダウン;
+                cmbCommand.SelectedIndex = (int)AGVcommands.運行;
             }
             catch (Exception ex)
             {

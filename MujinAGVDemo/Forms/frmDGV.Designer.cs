@@ -73,7 +73,7 @@ namespace MujinAGVDemo
             | System.Windows.Forms.AnchorStyles.Right)));
             this.agvDataControl.Location = new System.Drawing.Point(0, 31);
             this.agvDataControl.Name = "agvDataControl";
-            this.agvDataControl.Size = new System.Drawing.Size(804, 311);
+            this.agvDataControl.Size = new System.Drawing.Size(372, 529);
             this.agvDataControl.TabIndex = 10;
             // 
             // flowLayoutPanel1
@@ -84,7 +84,7 @@ namespace MujinAGVDemo
             this.flowLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Top;
             this.flowLayoutPanel1.Location = new System.Drawing.Point(0, 0);
             this.flowLayoutPanel1.Name = "flowLayoutPanel1";
-            this.flowLayoutPanel1.Size = new System.Drawing.Size(806, 33);
+            this.flowLayoutPanel1.Size = new System.Drawing.Size(374, 33);
             this.flowLayoutPanel1.TabIndex = 11;
             // 
             // checkBoxPowerLog
@@ -104,7 +104,7 @@ namespace MujinAGVDemo
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(806, 342);
+            this.ClientSize = new System.Drawing.Size(374, 560);
             this.Controls.Add(this.flowLayoutPanel1);
             this.Controls.Add(this.agvDataControl);
             this.Name = "frmDGV";

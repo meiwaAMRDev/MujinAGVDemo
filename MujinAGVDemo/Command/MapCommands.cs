@@ -668,14 +668,21 @@ namespace MujinAGVDemo.Command
 
             var nodeID = rb.CurNodeID;
 
-            var moveRobotResult = (MoveRobotReturnMessage)factory.Create(new MoveRobotParam(
+            var param = new MoveRobotParam(
                      robotID,
                      DestinationModes.NodeID,
                      nodeID,
                      isEndWait: true,
                      ownerRegist: true,
                      robotFace: robotFace
-                 )).DoAction();
+                 )
+            {
+                CachingCall = (obj, ev) =>
+                {
+                }
+            };
+
+            var moveRobotResult = (MoveRobotReturnMessage)factory.Create(param).DoAction();
 
             if (moveRobotResult.ReturnMsg == null)
             {
