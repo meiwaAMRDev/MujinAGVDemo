@@ -133,7 +133,11 @@ namespace MujinAGVDemo
                 if (!isFileExist)
                 {
                     var header = new List<string>() { "time" };
-                    header.AddRange(robots.Select(i => i.RobotID).ToList());
+                    //header.AddRange(robots.Select(i => i.RobotID).ToList());                    
+                    foreach (var robot in robots)
+                    {
+                        header.Add($"AGV{robot.RobotID}");
+                    }
                     sw.WriteLine(string.Join(",", header));
                 }
 
