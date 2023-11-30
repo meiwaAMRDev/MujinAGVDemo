@@ -2471,5 +2471,41 @@ namespace MujinAGVDemo
                 showMessageBox(isSuccess, message);
             }
         }
+        public List<string> GetPodList(CommandFactory factory)
+        {
+            var result = new List<string>();
+            var getPodListReturnMessage = (GetPodListReturnMessage)factory.Create(new GetPodListParam()).DoAction();
+            var podList = getPodListReturnMessage.Data.PodList.ToList();
+            podList.ForEach(pod =>
+            {
+                result.Add($"{pod.PodID},{pod.StorageID},{pod.RobotID},{pod.PodType},{pod.PositionType}");
+            });
+            return result;
+        }
+
+        private void mnuGetPodList_Click(object sender, EventArgs e)
+        {
+            if (Factory == null)
+            {
+                Factory = new CommandFactory(param.ServerIP, param.WarehouseID);
+            }
+            var podListPath = Path.Combine(logDirPath, "PodList.csv");
+
+            using (var sw = new StreamWriter(podListPath))
+            {
+                sw.WriteLine();
+                sw.WriteLine(GetPodList(Factory));
+            }
+
+            if (showCheckMessage($"棚情報を[{podListPath}]に保存しました。場所を開きますか？") == DialogResult.OK)
+            {
+                if (!Directory.Exists(logDirPath))
+                {
+                    showErrorMessageBox($"{Path.GetFullPath(logDirPath)}が見つかりません。");
+                    return;
+                }
+                System.Diagnostics.Process.Start("EXPLORER.EXE", logDirPath);
+            }
+        }
     }
 }

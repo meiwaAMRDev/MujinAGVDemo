@@ -957,6 +957,7 @@ namespace MujinAGVDemo.Command
                 ? new UTF32Encoding(true, true)
                 : Encoding.GetEncoding("Shift_Jis");
         }
+                
         #endregion
 
         #region Private Methods
