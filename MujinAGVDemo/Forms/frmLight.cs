@@ -2493,8 +2493,12 @@ namespace MujinAGVDemo
 
             using (var sw = new StreamWriter(podListPath))
             {
-                sw.WriteLine();
-                sw.WriteLine(GetPodList(Factory));
+                sw.WriteLine($"PodID,StrageID,RobotID,PodType,PositionType");
+                var list = GetPodList(Factory);
+                list.ForEach(pod =>
+                {
+                    sw.WriteLine(pod);
+                });
             }
 
             if (showCheckMessage($"棚情報を[{podListPath}]に保存しました。場所を開きますか？") == DialogResult.OK)
