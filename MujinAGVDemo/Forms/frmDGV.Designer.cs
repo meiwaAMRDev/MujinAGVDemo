@@ -33,10 +33,11 @@ namespace MujinAGVDemo
             this.tmrDGV = new System.Windows.Forms.Timer(this.components);
             this.checkBoxTimerRun = new System.Windows.Forms.CheckBox();
             this.lblUpdateTime = new System.Windows.Forms.Label();
-            this.agvDataControl = new Hetu20dotnet.Controls.AGVDataControl();
             this.flowLayoutPanel1 = new System.Windows.Forms.FlowLayoutPanel();
             this.checkBoxPowerLog = new System.Windows.Forms.CheckBox();
+            this.dataGridView1 = new System.Windows.Forms.DataGridView();
             this.flowLayoutPanel1.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
             this.SuspendLayout();
             // 
             // tmrDGV
@@ -49,9 +50,10 @@ namespace MujinAGVDemo
             this.checkBoxTimerRun.Appearance = System.Windows.Forms.Appearance.Button;
             this.checkBoxTimerRun.AutoSize = true;
             this.checkBoxTimerRun.BackColor = System.Drawing.Color.GreenYellow;
-            this.checkBoxTimerRun.Location = new System.Drawing.Point(184, 3);
+            this.checkBoxTimerRun.Location = new System.Drawing.Point(230, 4);
+            this.checkBoxTimerRun.Margin = new System.Windows.Forms.Padding(4);
             this.checkBoxTimerRun.Name = "checkBoxTimerRun";
-            this.checkBoxTimerRun.Size = new System.Drawing.Size(63, 22);
+            this.checkBoxTimerRun.Size = new System.Drawing.Size(77, 25);
             this.checkBoxTimerRun.TabIndex = 8;
             this.checkBoxTimerRun.Text = "監視開始";
             this.checkBoxTimerRun.UseVisualStyleBackColor = false;
@@ -60,21 +62,12 @@ namespace MujinAGVDemo
             // lblUpdateTime
             // 
             this.lblUpdateTime.AutoSize = true;
-            this.lblUpdateTime.Location = new System.Drawing.Point(3, 0);
+            this.lblUpdateTime.Location = new System.Drawing.Point(4, 0);
+            this.lblUpdateTime.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.lblUpdateTime.Name = "lblUpdateTime";
-            this.lblUpdateTime.Size = new System.Drawing.Size(175, 12);
+            this.lblUpdateTime.Size = new System.Drawing.Size(218, 15);
             this.lblUpdateTime.TabIndex = 9;
             this.lblUpdateTime.Text = "更新日時：yyyy/mm/dd hh:mm:ss";
-            // 
-            // agvDataControl
-            // 
-            this.agvDataControl.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.agvDataControl.Location = new System.Drawing.Point(0, 31);
-            this.agvDataControl.Name = "agvDataControl";
-            this.agvDataControl.Size = new System.Drawing.Size(372, 529);
-            this.agvDataControl.TabIndex = 10;
             // 
             // flowLayoutPanel1
             // 
@@ -83,8 +76,9 @@ namespace MujinAGVDemo
             this.flowLayoutPanel1.Controls.Add(this.checkBoxPowerLog);
             this.flowLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Top;
             this.flowLayoutPanel1.Location = new System.Drawing.Point(0, 0);
+            this.flowLayoutPanel1.Margin = new System.Windows.Forms.Padding(4);
             this.flowLayoutPanel1.Name = "flowLayoutPanel1";
-            this.flowLayoutPanel1.Size = new System.Drawing.Size(374, 33);
+            this.flowLayoutPanel1.Size = new System.Drawing.Size(499, 41);
             this.flowLayoutPanel1.TabIndex = 11;
             // 
             // checkBoxPowerLog
@@ -92,26 +86,43 @@ namespace MujinAGVDemo
             this.checkBoxPowerLog.Appearance = System.Windows.Forms.Appearance.Button;
             this.checkBoxPowerLog.AutoSize = true;
             this.checkBoxPowerLog.BackColor = System.Drawing.Color.GreenYellow;
-            this.checkBoxPowerLog.Location = new System.Drawing.Point(253, 3);
+            this.checkBoxPowerLog.Location = new System.Drawing.Point(315, 4);
+            this.checkBoxPowerLog.Margin = new System.Windows.Forms.Padding(4);
             this.checkBoxPowerLog.Name = "checkBoxPowerLog";
-            this.checkBoxPowerLog.Size = new System.Drawing.Size(57, 22);
+            this.checkBoxPowerLog.Size = new System.Drawing.Size(70, 25);
             this.checkBoxPowerLog.TabIndex = 10;
             this.checkBoxPowerLog.Text = "ログ開始";
             this.checkBoxPowerLog.UseVisualStyleBackColor = false;
             this.checkBoxPowerLog.CheckedChanged += new System.EventHandler(this.checkBoxPowerLog_CheckedChanged);
             // 
+            // dataGridView1
+            // 
+            this.dataGridView1.AllowUserToAddRows = false;
+            this.dataGridView1.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.dataGridView1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.dataGridView1.Location = new System.Drawing.Point(0, 41);
+            this.dataGridView1.Name = "dataGridView1";
+            this.dataGridView1.RowHeadersVisible = false;
+            this.dataGridView1.RowHeadersWidth = 51;
+            this.dataGridView1.RowTemplate.Height = 24;
+            this.dataGridView1.Size = new System.Drawing.Size(499, 659);
+            this.dataGridView1.TabIndex = 12;
+            this.dataGridView1.CellFormatting += new System.Windows.Forms.DataGridViewCellFormattingEventHandler(this.dataGridView1_CellFormatting);
+            // 
             // frmDGV
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(374, 560);
+            this.ClientSize = new System.Drawing.Size(499, 700);
+            this.Controls.Add(this.dataGridView1);
             this.Controls.Add(this.flowLayoutPanel1);
-            this.Controls.Add(this.agvDataControl);
+            this.Margin = new System.Windows.Forms.Padding(4);
             this.Name = "frmDGV";
             this.Text = "AGV状態監視";
             this.Load += new System.EventHandler(this.frmMove_Load);
             this.flowLayoutPanel1.ResumeLayout(false);
             this.flowLayoutPanel1.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).EndInit();
             this.ResumeLayout(false);
 
         }
@@ -120,8 +131,8 @@ namespace MujinAGVDemo
         private System.Windows.Forms.Timer tmrDGV;
         private System.Windows.Forms.CheckBox checkBoxTimerRun;
         private System.Windows.Forms.Label lblUpdateTime;
-        private Hetu20dotnet.Controls.AGVDataControl agvDataControl;
         private System.Windows.Forms.FlowLayoutPanel flowLayoutPanel1;
         private System.Windows.Forms.CheckBox checkBoxPowerLog;
+        private System.Windows.Forms.DataGridView dataGridView1;
     }
 }

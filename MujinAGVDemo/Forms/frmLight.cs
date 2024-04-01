@@ -1085,8 +1085,8 @@ namespace MujinAGVDemo
             source = new CancellationTokenSource();
 
             bool isSuccess;
-            var message = string.Empty;
             var count = 0;
+            string message;
             do
             {
                 count++;

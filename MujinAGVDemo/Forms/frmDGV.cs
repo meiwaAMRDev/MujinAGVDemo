@@ -24,6 +24,7 @@ namespace MujinAGVDemo
         public CommandFactory Factory;
         public readonly Logger logger = LogManager.GetLogger("ProgramLogger");
         public string PowerLogPath = string.Empty;
+        public AGVDataDisplaySetting AGVDataDisplaySetting = new AGVDataDisplaySetting();
         /// <summary>
         /// コンストラクタ
         /// </summary>
@@ -96,11 +97,12 @@ namespace MujinAGVDemo
                 return;
             }
             var getRobotListRet = (GetRobotListReturnMessage)factory.Create(new GetRobotListParam()).DoAction();
-            var getPodListRet = (GetPodListFromDBReturnMessage)factory.Create(new GetPodListFromDBParam()).DoAction();
+            //var getPodListRet = (GetPodListFromDBReturnMessage)factory.Create(new GetPodListFromDBParam()).DoAction();
             if (getRobotListRet.Data != null)
             {
-                agvDataControl.ChangeDgv(getRobotListRet, getPodListRet);
-                //dgvAGVDetail.DataSource = table;
+                dataGridView1.DataSource = getAGVDataTable(getRobotListRet).table;
+
+                dataGridView1.AutoResizeColumns();
                 lblUpdateTime.Text = $"更新日時：{DateTime.Now}";
                 if (checkBoxPowerLog.Checked)
                     WriteAGVPowerLog(robotLists: getRobotListRet.Data, savePath: PowerLogPath);
@@ -110,6 +112,98 @@ namespace MujinAGVDemo
                 checkBoxTimerRun.Checked = false;
                 showErrorMessageBox("AGV情報の取得に失敗しました。監視を停止します。");
             }
+        }
+
+        /// <summary>
+        /// AGVのデータをDataTableとして取得します
+        /// </summary>
+        /// <param name="getRobotListReturnMessage"></param>
+        /// <param name="getPodListFromDBReturnMessage">GetPodListFromDBのリターンメッセージ</param>
+        /// <returns>isSuccess:AGV情報があればtrue,table:AGV情報のデータテーブル</returns>
+        private (bool isSuccess, DataTable table) getAGVDataTable(GetRobotListReturnMessage getRobotListReturnMessage)
+        {
+            var table = new DataTable();
+
+            if (getRobotListReturnMessage.Data == null)
+            {
+                //NoticeErrorEvent?.Invoke(this, "AGV情報がありません。");
+                return (false, table);
+            }
+
+            table.Columns.Add("グループ");
+            table.Columns.Add("号機");
+            table.Columns.Add("状態");
+            table.Columns.Add("所有者");
+            table.Columns.Add("コード");
+            table.Columns.Add("エラー");
+            table.Columns.Add("電池");
+            table.Columns.Add("棚ID");
+            table.Columns.Add("タスクタイプ");
+            table.Columns.Add("タスクID");
+            table.Columns.Add("ノードID");
+            table.Columns.Add("X座標");
+            table.Columns.Add("Y座標");
+
+            getRobotListReturnMessage.Data?.RobotList
+                //AGVの所属グループ・ロボットIDでソート
+                .OrderBy(rb => rb.RobotID)
+                .OrderBy(rb => rb.RobotGroupID)
+                .ToList()
+                .ForEach(rb =>
+                {
+                    var pod = rb.Pods
+                    .ToList()
+                    .FirstOrDefault(p => p.PositionType == (int)PodPositionTypes.Robot);
+
+                    var podID = pod == null ? string.Empty : pod.PodID;
+                    var errorCode = string.Empty;
+                    var errorMessage = string.Empty;
+                    if (rb.ErrorCodes.Count > 0)
+                    {
+                        errorCode = rb.ErrorCodes.FirstOrDefault().ToString();
+                        errorMessage = $"{rb.ErrorMessage}";
+                    }
+                    else
+                    {
+                        errorCode = "0";
+                        errorMessage = $"{rb.ErrorState}";
+                    }
+                    table.Rows.Add(rb.RobotGroupID,
+                               rb.RobotID,
+                               rb.WorkStatus,
+                               rb.Owner,
+                               //rb.ErrorState,
+                               errorCode,
+                               errorMessage,
+                               $"{rb.UcPower}",
+                               $"{podID}",
+                               rb.TaskType,
+                               rb.TaskID,
+                               rb.CurNodeID,
+                               rb.CurX,
+                               rb.CurY);
+                });
+
+            return (true, table);
+        }
+        /// <summary>
+        /// 列のインデックス
+        /// </summary>
+        private enum agvDataColumn : int
+        {
+            RobotGroup,
+            RobotID,
+            WorkStatus,
+            Owner,
+            ErrorCode,
+            ErrorState,
+            UcPower,
+            PodID,
+            TaskType,
+            TaskID,
+            NodeID,
+            X,
+            Y,
         }
         /// <summary>
         /// 各AGVの時間ごとのバッテリー残量をログに出力します
@@ -201,5 +295,148 @@ namespace MujinAGVDemo
         }
 
         #endregion メッセージボックス関連
+
+        private void dataGridView1_CellFormatting(object sender, DataGridViewCellFormattingEventArgs e)
+        {
+            if (e.Value == null)
+                return;
+
+            var text = e.Value.ToString();
+            //稼働状態
+            if (e.ColumnIndex == (int)agvDataColumn.WorkStatus)
+            {
+                var a = AGVDataDisplaySetting.WorkStatus
+                    .Where(x => x.Name == text).FirstOrDefault();
+                changeDGVDisplay(e, a);
+            }
+            if (e.ColumnIndex == (int)agvDataColumn.TaskType)
+            {
+                var a = AGVDataDisplaySetting.TaskType
+                    .Where(x => x.Name == text).FirstOrDefault();
+                changeDGVDisplay(e, a);
+            }
+            if (e.ColumnIndex == (int)agvDataColumn.Owner)
+            {
+                var a = AGVDataDisplaySetting.Owner
+                    .Where(x => x.Name == text).FirstOrDefault();
+                changeDGVDisplay(e, a);
+            }
+            if (e.ColumnIndex == (int)agvDataColumn.ErrorState)
+            {
+                var a = AGVDataDisplaySetting.Error
+                    .Where(x => x.Name == text).FirstOrDefault();
+                changeDGVDisplay(e, a);
+            }
+            if(e.ColumnIndex == (int)agvDataColumn.UcPower)
+            {
+                if(!int.TryParse(text,out var power))
+                {
+                    return;
+                }
+                e.CellStyle.BackColor = power > AGVDataDisplaySetting.PowerLineYellow
+                    ? Color.LightGreen
+                    : power > AGVDataDisplaySetting.PowerLineRed ? Color.Yellow : Color.Red;
+            }
+            if (e.ColumnIndex == (int)agvDataColumn.PodID)
+            {
+                if (text != string.Empty)
+                {
+                    e.CellStyle.BackColor = Color.AliceBlue;
+                }
+            }
+        }
+
+        private static void changeDGVDisplay(DataGridViewCellFormattingEventArgs e, DGVDisplayData a)
+        {
+            if (a == null)
+            {
+                e.CellStyle.BackColor = Color.White;
+            }
+            else
+            {
+                e.CellStyle.BackColor = a.Color;
+                e.Value = a.DisplayName;
+            }
+        }
+    }
+    public class AGVDataDisplaySetting
+    {
+        public List<DGVDisplayData> TaskType { get; set; }
+        public List<DGVDisplayData> Error { get; set; }
+        public List<DGVDisplayData> Owner { get; set; }
+        public List<DGVDisplayData> WorkStatus { get; set; }
+
+        public int PowerLineYellow { get; set; } = 50;
+        public int PowerLineRed { get; set; } = 30;
+
+
+        public AGVDataDisplaySetting()
+        {
+            TaskType = new List<DGVDisplayData>()
+            {
+                new DGVDisplayData("None","待機状態",Color.White),
+                new DGVDisplayData("MoveRobot","AGV移動",Color.White),
+                new DGVDisplayData("MovePod","棚搬送",Color.White),
+                new DGVDisplayData("Charge","充電",Color.White),
+                new DGVDisplayData("ChangeMap","マップ変更",Color.White),
+                new DGVDisplayData("Custom","カスタムタスク",Color.White),
+                new DGVDisplayData("InsulateZone","絶縁ゾーン（謎)",Color.White),
+            };
+            Error = new List<DGVDisplayData>()
+            {
+                new DGVDisplayData("NoError","正常",Color.White),
+                new DGVDisplayData("CanNotReadQRFloor","床のQRコードが読めないとき",Color.Red),
+                new DGVDisplayData("CanNotReadQRPod","棚のQRコードが読めないとき",Color.Red),
+                new DGVDisplayData("EmergencyButtonPushed","非常停止ボタンが押された",Color.Red),
+                new DGVDisplayData("BumperTouched","バンパーになにか当たった",Color.Red),
+                new DGVDisplayData("ChargerAbnormal","充電器に異常が発生しました",Color.Red),
+                new DGVDisplayData("AGVPowerCardAbnormal","AGV電源基盤の異常が発生しました",Color.Red),
+                new DGVDisplayData("EmergencyButtonPushedDB","非常停止ボタンが押されました。(DB版)",Color.Red),
+                new DGVDisplayData("BumperTouchedDB","バンパーに何か衝突しました。(DB版)",Color.Red),
+                new DGVDisplayData("CanNotReadQRPodDB","棚のQRの読み取りに失敗しました。",Color.Red),
+                new DGVDisplayData("CanNotReadQRFloorDB","地面のQRコードの読み取りに失敗しました。",Color.Red),
+                new DGVDisplayData("ObstacleDetected","センサーが障害物を検出しました。",Color.Red),
+                new DGVDisplayData("LowBatery","電池残量が残り少ないです。",Color.Red),
+                new DGVDisplayData("AGVMotorModuleCommunicationError","足回りのモジュールとの通信異常が発生しました。",Color.Red),
+                new DGVDisplayData("AGVLidarModuleErro","LiDARモジュールに異常が発生しました。",Color.Red),
+                new DGVDisplayData("FailedCharge","充電に失敗しました。",Color.Red),
+                new DGVDisplayData("WheelAbnormal","ホイールに異常が発生しました。",Color.Red),
+                new DGVDisplayData("LifterAbnormal","リフターに異常が発生しました。",Color.Red),
+            };
+            Owner = new List<DGVDisplayData>
+            {
+                new DGVDisplayData("TES","なし",Color.White),
+                new DGVDisplayData("SUPER","HETU",Color.Orange),
+                new DGVDisplayData("biz_test","明和",Color.Yellow),
+            };
+            WorkStatus = new List<DGVDisplayData>
+            {
+                new DGVDisplayData("BUSY","作業中",Color.LightBlue),
+                new DGVDisplayData("IDLE","アイドリング",Color.White),
+                new DGVDisplayData("CHARGE","充電",Color.Orange),
+                new DGVDisplayData("PAUSED","一時停止",Color.Yellow),
+                new DGVDisplayData("ERROR","異常",Color.Red),
+                new DGVDisplayData("OFFLINE","オフライン",Color.Gray),
+                new DGVDisplayData("Exception","例外",Color.Red),
+            };
+        }
+    }
+    public class DGVDisplayData
+    {
+        public string Name { get; set; }
+        public string DisplayName { get; set; }
+        public Color Color { get; set; }
+        public DGVDisplayData()
+        {
+            Name = string.Empty;
+            DisplayName = string.Empty;
+            Color = Color.White;
+        }
+        public DGVDisplayData(string name, string displayName, Color color)
+        {
+            Name = name;
+            DisplayName = displayName;
+            Color = color;
+        }
     }
 }
