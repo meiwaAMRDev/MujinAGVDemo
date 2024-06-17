@@ -605,7 +605,17 @@ namespace MujinAGVDemo
             {
                 Factory = new CommandFactory(param.ServerIP, param.WarehouseID);
             }
-            var taskStatusList = new List<TaskStatuses>() { TaskStatuses.Ready, TaskStatuses.Init, TaskStatuses.Running };
+            var taskStatusList = new List<TaskStatuses>()
+            {
+                TaskStatuses.Init,
+                TaskStatuses.Ready,
+                TaskStatuses.Running,
+                TaskStatuses.Canceling,
+                //TaskStatuses.Success,
+                TaskStatuses.Fail,
+                //TaskStatuses.Canceled,
+                TaskStatuses.NoDefine,
+            };
             var getTaskResult = (GetAllTaskSelectStatusFromDBReturnMessage)Factory.Create(new GetAllTaskSelectStatusFromDBParam(taskStatusList)).DoAction();
             var taskList = getTaskResult.GetAllTaskSelectStatusList
                 .Where(x => x.RobotID == param.RobotID)
