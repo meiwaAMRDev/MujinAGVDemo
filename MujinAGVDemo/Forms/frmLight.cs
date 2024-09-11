@@ -29,6 +29,10 @@ namespace MujinAGVDemo
         /// 設定ファイルのデフォルトパス
         /// </summary>
         const string defaultSettingPath = @"Setting/ParamSetting.xml";
+        /// <summary>
+        /// ロボットグループ設定のパス
+        /// </summary>
+        const string robotGroupSettingPath = @"Setting/RobotGroupSetting.csv";
 
         /// <summary>
         /// ノード情報DGVの列番号
@@ -98,6 +102,11 @@ namespace MujinAGVDemo
             /// </summary>
             RobotGroup = 7,
         }
+        enum GroupCSVColumn : int
+        {
+            ID=0,
+            Name=1,
+        }
         enum AGVcommands : int
         {
             棚追加 = 0,
@@ -122,6 +131,7 @@ namespace MujinAGVDemo
         };
         private const int ON = 1;
         private const int OFF = 0;
+
         /// <summary>
         /// ログディレクトリのパス
         /// </summary>
@@ -139,7 +149,7 @@ namespace MujinAGVDemo
         public readonly Logger logger = LogManager.GetLogger("ProgramLogger");
         private CancellationTokenSource source = new CancellationTokenSource();
         private List<string> nodeNames = new List<string>();
-
+        List<RobotGroup> RobotGroups = new List<RobotGroup>();
         Stopwatch stopwatch = new Stopwatch();
         DispatcherTimer dispatcherTimer = new DispatcherTimer();
         /// <summary>
@@ -205,6 +215,20 @@ namespace MujinAGVDemo
             {
                 logger.Error(ex.ToString());
             }
+
+            RobotGroups.Clear();
+            if (File.Exists(robotGroupSettingPath))
+            {
+                var lines= File.ReadAllLines(robotGroupSettingPath,Encoding.GetEncoding("Shift-Jis"));
+                for (var i = 0; i < lines.Length; i++)
+                {
+                    if (i == 0)
+                        continue;
+                    var s = lines[i].Split(',').ToList();
+                    RobotGroups.Add(new RobotGroup(s[(int)GroupCSVColumn.ID].Trim(), s[(int)GroupCSVColumn.Name].Trim()));
+                }
+            }
+            System.Diagnostics.Debug.WriteLine("");
         }
 
         private void DispatcherTimer_Tick(object sender, EventArgs e)
@@ -2186,7 +2210,7 @@ namespace MujinAGVDemo
             {
                 Factory = new CommandFactory(param.ServerIP, param.WarehouseID);
             }
-            var frm = new frmDGV(Factory);
+            var frm = new frmDGV(Factory,RobotGroups);
             frm.Show();
         }
 
@@ -2520,6 +2544,17 @@ namespace MujinAGVDemo
                 }
                 System.Diagnostics.Process.Start("EXPLORER.EXE", logDirPath);
             }
+        }
+    }
+    public class RobotGroup
+    {
+        public string RobotGroupID { get; set; } = string.Empty;
+        public string GroupName { get; set;} = string.Empty;
+
+        public RobotGroup(string robotGroupID,string groupName)
+        {
+            RobotGroupID = robotGroupID;
+            GroupName = groupName;
         }
     }
 }

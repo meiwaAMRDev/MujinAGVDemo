@@ -25,6 +25,7 @@ namespace MujinAGVDemo
         public readonly Logger logger = LogManager.GetLogger("ProgramLogger");
         public string PowerLogPath = string.Empty;
         public AGVDataDisplaySetting AGVDataDisplaySetting = new AGVDataDisplaySetting();
+        public List<RobotGroup> RobotGroups = new List<RobotGroup>();
         /// <summary>
         /// コンストラクタ
         /// </summary>
@@ -33,6 +34,12 @@ namespace MujinAGVDemo
         {
             InitializeComponent();
             Factory = factory;
+        }
+        public frmDGV(CommandFactory factory, List<RobotGroup> robotGroups)
+        {
+            InitializeComponent();
+            Factory = factory;
+            RobotGroups = robotGroups;
         }
 
         private void frmMove_Load(object sender, EventArgs e)
@@ -168,7 +175,10 @@ namespace MujinAGVDemo
                         errorCode = "0";
                         errorMessage = $"{rb.ErrorState}";
                     }
-                    table.Rows.Add(rb.RobotGroupID,
+                    var robotGroup = RobotGroups.Where(x => x.RobotGroupID == rb.RobotGroupID).FirstOrDefault();
+                    var robotGroupID = robotGroup == null ? rb.RobotGroupID : robotGroup.GroupName;
+
+                    table.Rows.Add(robotGroupID,
                                rb.RobotID,
                                rb.WorkStatus,
                                rb.Owner,
@@ -327,9 +337,9 @@ namespace MujinAGVDemo
                     .Where(x => x.Name == text).FirstOrDefault();
                 changeDGVDisplay(e, a);
             }
-            if(e.ColumnIndex == (int)agvDataColumn.UcPower)
+            if (e.ColumnIndex == (int)agvDataColumn.UcPower)
             {
-                if(!int.TryParse(text,out var power))
+                if (!int.TryParse(text, out var power))
                 {
                     return;
                 }
