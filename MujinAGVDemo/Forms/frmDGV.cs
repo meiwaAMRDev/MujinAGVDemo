@@ -168,13 +168,15 @@ namespace MujinAGVDemo
                     if (rb.ErrorCodes.Count > 0)
                     {
                         errorCode = rb.ErrorCodes.FirstOrDefault().ToString();
-                        errorMessage = $"{rb.ErrorMessage}";
                     }
                     else
                     {
                         errorCode = "0";
-                        errorMessage = $"{rb.ErrorState}";
                     }
+                    var a = AGVDataDisplaySetting.Error
+                            .Where(x => x.Name == errorCode).FirstOrDefault();
+                    errorMessage = a != null ? a.DisplayName : $"{rb.ErrorMessage}";
+
                     var robotGroup = RobotGroups.Where(x => x.RobotGroupID == rb.RobotGroupID).FirstOrDefault();
                     var robotGroupID = robotGroup == null ? rb.RobotGroupID : robotGroup.GroupName;
 
@@ -333,9 +335,13 @@ namespace MujinAGVDemo
             }
             if (e.ColumnIndex == (int)agvDataColumn.ErrorState)
             {
-                var a = AGVDataDisplaySetting.Error
-                    .Where(x => x.Name == text).FirstOrDefault();
-                changeDGVDisplay(e, a);
+                //var a = AGVDataDisplaySetting.Error
+                //    .Where(x => x.Name == text).FirstOrDefault();
+                //changeDGVDisplay(e, a);
+                if (text != "正常")
+                {
+                    e.CellStyle.BackColor = Color.Red;
+                }
             }
             if (e.ColumnIndex == (int)agvDataColumn.UcPower)
             {
@@ -394,24 +400,61 @@ namespace MujinAGVDemo
             };
             Error = new List<DGVDisplayData>()
             {
-                new DGVDisplayData("NoError","正常",Color.White),
-                new DGVDisplayData("CanNotReadQRFloor","床のQRコードが読めないとき",Color.Red),
-                new DGVDisplayData("CanNotReadQRPod","棚のQRコードが読めないとき",Color.Red),
-                new DGVDisplayData("EmergencyButtonPushed","非常停止ボタンが押された",Color.Red),
-                new DGVDisplayData("BumperTouched","バンパーになにか当たった",Color.Red),
-                new DGVDisplayData("ChargerAbnormal","充電器に異常が発生しました",Color.Red),
-                new DGVDisplayData("AGVPowerCardAbnormal","AGV電源基盤の異常が発生しました",Color.Red),
-                new DGVDisplayData("EmergencyButtonPushedDB","非常停止ボタンが押されました。(DB版)",Color.Red),
-                new DGVDisplayData("BumperTouchedDB","バンパーに何か衝突しました。(DB版)",Color.Red),
-                new DGVDisplayData("CanNotReadQRPodDB","棚のQRの読み取りに失敗しました。",Color.Red),
-                new DGVDisplayData("CanNotReadQRFloorDB","地面のQRコードの読み取りに失敗しました。",Color.Red),
-                new DGVDisplayData("ObstacleDetected","センサーが障害物を検出しました。",Color.Red),
-                new DGVDisplayData("LowBatery","電池残量が残り少ないです。",Color.Red),
-                new DGVDisplayData("AGVMotorModuleCommunicationError","足回りのモジュールとの通信異常が発生しました。",Color.Red),
-                new DGVDisplayData("AGVLidarModuleErro","LiDARモジュールに異常が発生しました。",Color.Red),
-                new DGVDisplayData("FailedCharge","充電に失敗しました。",Color.Red),
-                new DGVDisplayData("WheelAbnormal","ホイールに異常が発生しました。",Color.Red),
-                new DGVDisplayData("LifterAbnormal","リフターに異常が発生しました。",Color.Red),
+                //new DGVDisplayData("NoError","正常",Color.White),
+                //new DGVDisplayData("CanNotReadQRFloor","床のQRコードが読めないとき",Color.Red),
+                //new DGVDisplayData("CanNotReadQRPod","棚のQRコードが読めないとき",Color.Red),
+                //new DGVDisplayData("EmergencyButtonPushed","非常停止ボタンが押された",Color.Red),
+                //new DGVDisplayData("BumperTouched","バンパーになにか当たった",Color.Red),
+                //new DGVDisplayData("ChargerAbnormal","充電器に異常が発生しました",Color.Red),
+                //new DGVDisplayData("AGVPowerCardAbnormal","AGV電源基盤の異常が発生しました",Color.Red),
+                //new DGVDisplayData("EmergencyButtonPushedDB","非常停止ボタンが押されました。(DB版)",Color.Red),
+                //new DGVDisplayData("BumperTouchedDB","バンパーに何か衝突しました。(DB版)",Color.Red),
+                //new DGVDisplayData("CanNotReadQRPodDB","棚のQRの読み取りに失敗しました。",Color.Red),
+                //new DGVDisplayData("CanNotReadQRFloorDB","地面のQRコードの読み取りに失敗しました。",Color.Red),
+                //new DGVDisplayData("ObstacleDetected","センサーが障害物を検出しました。",Color.Red),
+                //new DGVDisplayData("LowBatery","電池残量が残り少ないです。",Color.Red),
+                //new DGVDisplayData("AGVMotorModuleCommunicationError","足回りのモジュールとの通信異常が発生しました。",Color.Red),
+                //new DGVDisplayData("AGVLidarModuleErro","LiDARモジュールに異常が発生しました。",Color.Red),
+                //new DGVDisplayData("FailedCharge","充電に失敗しました。",Color.Red),
+                //new DGVDisplayData("WheelAbnormal","ホイールに異常が発生しました。",Color.Red),
+                //new DGVDisplayData("LifterAbnormal","リフターに異常が発生しました。",Color.Red),
+                new DGVDisplayData("0","正常",Color.White),
+                new DGVDisplayData("01010101","前方の障害物を検出しました。",Color.Red),
+                new DGVDisplayData("01010102","後方の障害物を検出しました。",Color.Red),
+                new DGVDisplayData("01010103","地面のQRコードが曲がっています。",Color.Red),
+                new DGVDisplayData("01120104","電力が充電閾値を下回っています。",Color.Red),
+                new DGVDisplayData("02010201","地面のQRコードの読み取りに失敗しました。",Color.Red),
+                new DGVDisplayData("02010202","棚のQRの読み取りに失敗しました。",Color.Red),
+                new DGVDisplayData("02010203","非常停止ボタンが押されました。",Color.Red),
+                new DGVDisplayData("02010204","バンパーに何か衝突しました。",Color.Red),
+                new DGVDisplayData("02010205","充電に失敗しました。",Color.Red),
+                new DGVDisplayData("02010206","ロボットが過負荷になっています。",Color.Red),
+                new DGVDisplayData("02010208","偏荷重異常が発生しました。",Color.Red),
+                new DGVDisplayData("02010209","棚IDがデータと一致しません",Color.Red),
+                new DGVDisplayData("02010210","床QRコードを連続して見失いました",Color.Red),
+                new DGVDisplayData("02010215","ネットワークエラーが発生しました。",Color.Red),
+                new DGVDisplayData("03030301","EKF異常が発生しました。",Color.Red),
+                new DGVDisplayData("03030302","AGVに異常が発生しました。",Color.Red),
+                new DGVDisplayData("03030303","シャーシ制御ソフトウェアの初期化に失敗しました。",Color.Red),
+                new DGVDisplayData("03030304","RTB2C異常が発生しました。",Color.Red),
+                new DGVDisplayData("040404xx","左駆動モータに異常が発生しました。",Color.Red),
+                new DGVDisplayData("040504xx","右駆動モータに異常が発生しました。",Color.Red),
+                new DGVDisplayData("040604xx","回転モーターに異常が発生しました。",Color.Red),
+                new DGVDisplayData("040704xx","リフトモーターに異常が発生しました。",Color.Red),
+                new DGVDisplayData("040804xx","電源管理ボードに異常が発生しました。",Color.Red),
+                new DGVDisplayData("04090401","前方キーボード通信に異常が発生しました。",Color.Red),
+                new DGVDisplayData("04090411","後方キーボード通信に異常が発生しました。",Color.Red),
+                new DGVDisplayData("04110401","重量センサーに異常が発生しました。",Color.Red),
+                new DGVDisplayData("04110411","重量センサーに異常が発生しました。",Color.Red),
+                new DGVDisplayData("04120401","バッテリーに異常が発生しました",Color.Red),
+                new DGVDisplayData("041204xx","バッテリーに異常が発生しました",Color.Red),
+                new DGVDisplayData("041304xx","充電器に異常が発生しました。",Color.Red),
+                new DGVDisplayData("04140401","障害物センサーに異常が発生しました。",Color.Red),
+                new DGVDisplayData("04150401","バンパーセンサーに異常が発生しました。",Color.Red),
+                new DGVDisplayData("04170401","IMUﾓｼﾞｭｰﾙに異常が発生しました。",Color.Red),
+                new DGVDisplayData("041804xx","ローラ異常が発生しました。",Color.Red),
+                new DGVDisplayData("04160402","床QRコード読み取りﾓｼﾞｭｰﾙに異常が発生しました。",Color.Red),
+                new DGVDisplayData("04160401","棚QRコード読み取りﾓｼﾞｭｰﾙに異常が発生しました。",Color.Red),
             };
             Owner = new List<DGVDisplayData>
             {
