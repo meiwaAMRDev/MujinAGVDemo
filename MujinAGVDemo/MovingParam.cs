@@ -23,7 +23,9 @@ namespace MujinAGVDemo
             PodID = 4,
             IsPairEnd = 5,
             WaitMilliSecond = 6,
-            RobotID = 7
+            RobotID = 7,
+            RobotFace = 8,
+            PodFace = 9,
         }
         [DisplayName("ノードID")]
         public string NodeID { get; set; } = string.Empty;
@@ -42,6 +44,16 @@ namespace MujinAGVDemo
         [DisplayName("AGVIDまたはグループID")]
         public string RobotID { get; set; } = string.Empty;
         /// <summary>
+        /// AGV向き（0:北　1:東　2:南　3:西　4:指定なし）
+        /// </summary>
+        [DisplayName("AGV向き")]
+        public int RobotFace { get; set; } = 4;
+        /// <summary>
+        /// 棚向き（0:北　1:東　2:南　3:西　4:指定なし）
+        /// </summary>
+        [DisplayName("棚向き")]
+        public int PodFace { get; set; } = 4;
+        /// <summary>
         /// コンストラクタ
         /// </summary>
         public MovingParam()
@@ -54,6 +66,8 @@ namespace MujinAGVDemo
             WithPod = true;
             IsPairEnd = true;
             WaitMilliSecond = 0;
+            RobotFace = 4;
+            PodFace = 4;
         }
         /// <summary>
         /// コンストラクタ
@@ -66,6 +80,8 @@ namespace MujinAGVDemo
         /// <param name="withPod">棚搬送するか</param>
         /// <param name="isPairEnd">タスクペアの終端か</param>
         /// <param name="waitMilliSecond">タスク後の待機時間[ms]</param>
+        /// <param name="robotFace">AGV向き（0:北　1:東　2:南　3:西　4:指定なし）</param>
+        /// <param name="podFace">AGV向き（0:北　1:東　2:南　3:西　4:指定なし）</param>
         public MovingParam(string nodeID,
                            string podID,
                            string robotID,
@@ -73,7 +89,9 @@ namespace MujinAGVDemo
                            bool isUnload,
                            bool withPod,
                            bool isPairEnd,
-                           int waitMilliSecond)
+                           int waitMilliSecond,
+                           int robotFace,
+                           int podFace)
         {
             NodeID = nodeID;
             PodID = podID;
@@ -83,6 +101,8 @@ namespace MujinAGVDemo
             WithPod = withPod;
             IsPairEnd = isPairEnd;
             WaitMilliSecond = waitMilliSecond;
+            RobotFace = robotFace;
+            PodFace = podFace;
         }
         /// <summary>
         /// コンストラクタ
@@ -172,6 +192,9 @@ namespace MujinAGVDemo
             WaitMilliSecond = lastIndex < (int)Col.WaitMilliSecond ? 0 : int.Parse(split[(int)Col.WaitMilliSecond].Trim());
 
             RobotID = lastIndex < (int)Col.RobotID ? string.Empty : split[(int)Col.RobotID].Trim();
+
+            RobotFace = lastIndex < (int)Col.RobotFace ? 4 : int.Parse(split[(int)Col.RobotFace].Trim());
+            PodFace = lastIndex < (int)Col.PodFace ? 4 : int.Parse(split[(int)Col.PodFace].Trim());
         }
         /// <summary>
         /// 移動指示CSV用のテキスト
@@ -180,7 +203,7 @@ namespace MujinAGVDemo
         public string CSVText()
         {
             //return $"{NodeID},{IsSyncro},{IsUnload},{WithPod},{PodID},{IsPairEnd},{WaitMilliSecond},{RobotID}";
-            return $"{NodeID},{(IsSyncro ? ON : OFF)},{(IsUnload ? ON : OFF)},{(WithPod ? ON : OFF)},{PodID},{IsPairEnd},{WaitMilliSecond},{RobotID}";
+            return $"{NodeID},{(IsSyncro ? ON : OFF)},{(IsUnload ? ON : OFF)},{(WithPod ? ON : OFF)},{PodID},{IsPairEnd},{WaitMilliSecond},{RobotID},{RobotFace},{PodFace}";
         }
         /// <summary>
         /// 移動指示CSV用のヘッダーテキスト
@@ -188,8 +211,8 @@ namespace MujinAGVDemo
         /// <returns>カンマ区切りヘッダーテキスト</returns>
         public string CSVHeader()
         {
-            //return "NodeID,IsSyncro,IsUnload,WithPod,PodID,IsPairEnd,WaitMilliSecond,RobotID";
-            return "移動先ノードID,シンクロターン,棚を下ろす,棚搬送,棚ID,タスクペアの終端,タスク後待機時間,AGVIDまたはグループID";
+            return "NodeID,IsSyncro,IsUnload,WithPod,PodID,IsPairEnd,WaitMilliSecond,RobotID,RobotFace,PodFace";
+            //return "移動先ノードID,シンクロターン,棚を下ろす,棚搬送,棚ID,タスクペアの終端,タスク後待機時間,AGVIDまたはグループID,AGV向き,棚向き";
         }
         /// <summary>
         /// カンマ区切り文字列を使ってMovingParamをセットします。
@@ -278,7 +301,8 @@ namespace MujinAGVDemo
                 }
                 WaitMilliSecond = lastIndex < (int)Col.WaitMilliSecond ? 0 : int.Parse(split[(int)Col.WaitMilliSecond].Trim());
                 RobotID = lastIndex < (int)Col.RobotID ? string.Empty : split[(int)Col.RobotID].Trim();
-
+                RobotFace = lastIndex < (int)Col.RobotFace ? 4 : int.Parse(split[(int)Col.RobotFace].Trim());
+                PodFace = lastIndex < (int)Col.PodFace ? 4 : int.Parse(split[(int)Col.PodFace].Trim());
                 result = true;
             }
             catch (Exception ex)

@@ -101,11 +101,19 @@ namespace MujinAGVDemo
             /// ロボットグループのインデックス
             /// </summary>
             RobotGroup = 7,
+            /// <summary>
+            /// AGV向きのインデックス（0:北　1:東　2:南　3:西　4:指定なし）
+            /// </summary>
+            RobotFace = 8,
+            /// <summary>
+            /// 棚向きのインデックス（0:北　1:東　2:南　3:西　4:指定なし）
+            /// </summary>
+            PodFace = 9,
         }
         enum GroupCSVColumn : int
         {
-            ID=0,
-            Name=1,
+            ID = 0,
+            Name = 1,
         }
         enum AGVcommands : int
         {
@@ -163,7 +171,6 @@ namespace MujinAGVDemo
 
         public CommandFactory Factory;
 
-        private int robotFaceIndex = 4;
 
         #endregion Public Paramater
 
@@ -219,7 +226,7 @@ namespace MujinAGVDemo
             RobotGroups.Clear();
             if (File.Exists(robotGroupSettingPath))
             {
-                var lines= File.ReadAllLines(robotGroupSettingPath,Encoding.GetEncoding("Shift-Jis"));
+                var lines = File.ReadAllLines(robotGroupSettingPath, Encoding.GetEncoding("Shift-Jis"));
                 for (var i = 0; i < lines.Length; i++)
                 {
                     if (i == 0)
@@ -1577,6 +1584,9 @@ namespace MujinAGVDemo
                 {
                     var splitLine = allLines[rowCount].Split(',').ToList();
                     var nodeID = splitLine[(int)MovingCSVColumn.Node].Trim();
+                    podID = splitLine[(int)MovingCSVColumn.PodID].Trim();
+                    robotID = splitLine[(int)MovingCSVColumn.RobotGroup].Trim();
+
                     if (!nodeID.All(char.IsDigit))
                     {
                         //logger.Info($"nodeID=[{nodeID}]:数値ではないため行を飛ばします。");
@@ -1615,7 +1625,62 @@ namespace MujinAGVDemo
                         //読み込めない場合は待機時間無しとして扱う
                         waitTime = 0;
                     }
-
+                    var robotFaceIndex = 4;
+                    if ((int)MovingCSVColumn.RobotFace < splitLine.Count)
+                    {
+                        if (!int.TryParse(splitLine[(int)MovingCSVColumn.RobotFace].Trim(), out robotFaceIndex))
+                        {
+                            //読み込めない場合は指定無しとして扱う
+                            robotFaceIndex = 4;
+                        }
+                    }
+                    var podFaceIndex = 4;
+                    if ((int)MovingCSVColumn.PodFace < splitLine.Count)
+                    {
+                        if (!int.TryParse(splitLine[(int)MovingCSVColumn.PodFace].Trim(), out podFaceIndex))
+                        {
+                            //読み込めない場合は指定無しとして扱う
+                            podFaceIndex = 4;
+                        }
+                    }
+                    var robotFace = Direction.NoSelect;
+                    switch (robotFaceIndex)
+                    {
+                        case 0:
+                            robotFace = Direction.North;
+                            break;
+                        case 1:
+                            robotFace = Direction.East;
+                            break;
+                        case 2:
+                            robotFace = Direction.South;
+                            break;
+                        case 3:
+                            robotFace = Direction.West;
+                            break;
+                        case 4:
+                            robotFace = Direction.NoSelect;
+                            break;
+                    }
+                    var podFace = Direction.NoSelect;
+                    switch (podFaceIndex)
+                    {
+                        case 0:
+                            podFace = Direction.North;
+                            break;
+                        case 1:
+                            podFace = Direction.East;
+                            break;
+                        case 2:
+                            podFace = Direction.South;
+                            break;
+                        case 3:
+                            podFace = Direction.West;
+                            break;
+                        case 4:
+                            podFace = Direction.NoSelect;
+                            break;
+                    }
 
                     //棚搬送するかAGV単体かを読込
                     if ((int)MovingCSVColumn.WithPod < splitLine.Count)
@@ -1653,12 +1718,18 @@ namespace MujinAGVDemo
                                     break;
                             }
                             logger.Debug($"[{rowCount}]MoveRobot:AGV[{robotID}] nodeID[{nodeID}]");
-                            taskList.Add(moveRobotAsync(param.ServerIP,
-                                             param.WarehouseID,
-                                             robotID,
-                                             nodeID,
-                                             cancelToken,
-                                             waitTime));
+                            var moveRobotParam = new MoveRobotParam(robotID: robotID,
+                                                                    desMode: DestinationModes.NodeID,
+                                                                    desID: nodeID,
+                                                                    robotFace: robotFace, isEndWait: true)
+                            {
+                            };
+
+                            taskList.Add(AsyncCommands.moveRobotAsync(serverIP: param.ServerIP,
+                                               warehouseID: param.WarehouseID,
+                                               param: moveRobotParam,
+                                               cancelToken: cancelToken,
+                                               waitMillisecond: waitTime));
                             if (isEnd)
                             {
                                 await Task.WhenAll(taskList);
@@ -1670,15 +1741,20 @@ namespace MujinAGVDemo
                             if (!isAuto)
                             {
                                 logger.Debug($"[{rowCount}]MovePod:AGV[{robotID}] nodeID[{nodeID}] podID[{podID}]");
-                                taskList.Add(movePodAsync(param.ServerIP,
-                                               param.WarehouseID,
-                                               podID,
-                                               nodeID,
-                                               robotID,
-                                               turnMode,
-                                               unload,
-                                               cancelToken,
-                                               waitTime));
+                                var movePodParam = new MovePodParam(robotID: robotID,
+                                                                    podID: podID,
+                                                                    desMode: DestinationModes.StorageID,
+                                                                    desID: nodeID,
+                                                                    turnMode: turnMode,
+                                                                    robotFace: robotFace,
+                                                                    podFace: podFace,
+                                                                    unload: unload);
+
+                                taskList.Add(AsyncCommands.movePodAsync(serverIP: param.ServerIP,
+                                                   warehouseID: param.WarehouseID,
+                                                   param: movePodParam,
+                                                   cancelToken: cancelToken,
+                                                   waitMillisecond: waitTime));
                                 if (isEnd)
                                 {
                                     await Task.WhenAll(taskList);
@@ -1697,16 +1773,17 @@ namespace MujinAGVDemo
                                 }
 
                                 logger.Debug($"[{rowCount}]MovePodAuto:AGVGroup[{robotGroupID}] nodeID[{nodeID}] podID[{podID}]");
-                                taskList.Add(movePodAsync(param.ServerIP,
-                                               param.WarehouseID,
-                                               podID,
-                                               nodeID,
-                                               robotID: robotGroupID,
-                                               turnMode,
-                                               unload,
-                                               cancelToken,
-                                               isAuto,
-                                               waitTime));
+                                var movePodAutoParam = new MovePodAutoSelectAGVParam(robotGroupID: param.RobotGroupID,
+                                                                                     podID: podID,
+                                                                                     desMode: DestinationModes.StorageID,
+                                                                                     desID: nodeID,
+                                                                                     turnMode: turnMode,
+                                                                                     unload: unload);
+                                taskList.Add(AsyncCommands.movePodAutoAsync(serverIP: param.ServerIP,
+                                                                     warehouseID: param.WarehouseID,
+                                                                     param: movePodAutoParam,
+                                                                     cancelToken: cancelToken,
+                                                                     waitMillisecond: waitTime));
                                 if (isEnd)
                                 {
                                     await Task.WhenAll(taskList);
@@ -1744,37 +1821,48 @@ namespace MujinAGVDemo
                                 default:
                                     break;
                             }
-
-                            await moveRobotAsync(param.ServerIP,
-                                                 param.WarehouseID,
-                                                 robotID,
-                                                 nodeID,
-                                                 cancelToken);
+                            var moveRobotParam = new MoveRobotParam(robotID: robotID,
+                                                                  desMode: DestinationModes.NodeID,
+                                                                  desID: nodeID,
+                                                                  robotFace: robotFace);
+                            await AsyncCommands.moveRobotAsync(serverIP: param.ServerIP,
+                                                               warehouseID: param.WarehouseID,
+                                                               param: moveRobotParam,
+                                                               cancelToken: cancelToken,
+                                                               waitMillisecond: waitTime);
                         }
                         else
                         {
                             if (!isAuto)
                             {
-                                await movePodAsync(param.ServerIP,
-                                                   param.WarehouseID,
-                                                   podID,
-                                                   nodeID,
-                                                   robotID,
-                                                   turnMode,
-                                                   unload,
-                                                   cancelToken);
+                                var movePodParam = new MovePodParam(robotID: robotID,
+                                                                    podID: podID,
+                                                                    desMode: DestinationModes.StorageID,
+                                                                    desID: nodeID,
+                                                                    turnMode: turnMode,
+                                                                    robotFace: robotFace,
+                                                                    podFace: podFace,
+                                                                    unload: unload);
+
+                                await AsyncCommands.movePodAsync(serverIP: param.ServerIP,
+                                                   warehouseID: param.WarehouseID,
+                                                   param: movePodParam,
+                                                   cancelToken: cancelToken,
+                                                   waitMillisecond: waitTime);
                             }
                             else
                             {
-                                await movePodAsync(param.ServerIP,
-                                                   param.WarehouseID,
-                                                   podID,
-                                                   nodeID,
-                                                   param.RobotGroupID,
-                                                   turnMode,
-                                                   unload,
-                                                   cancelToken,
-                                                   isAuto);
+                                var movePodAutoParam = new MovePodAutoSelectAGVParam(robotGroupID: param.RobotGroupID,
+                                                                                     podID: podID,
+                                                                                     desMode: DestinationModes.StorageID,
+                                                                                     desID: nodeID,
+                                                                                     turnMode: turnMode,
+                                                                                     unload: unload);
+                                await AsyncCommands.movePodAutoAsync(serverIP: param.ServerIP,
+                                                                     warehouseID: param.WarehouseID,
+                                                                     param: movePodAutoParam,
+                                                                     cancelToken: cancelToken,
+                                                                     waitMillisecond: waitTime);
                             }
                         }
                     }
@@ -1797,309 +1885,10 @@ namespace MujinAGVDemo
 
         }
 
-        private async Task moveRobotAsync(string serverIP,
-                                          string warehouseID,
-                                          string robotID,
-                                          string nodeID,
-                                          CancellationToken token,
-                                          int waitMillisecond = 0)
-        {
-            if (token.IsCancellationRequested)
-            {
-                logger.Info("AGV移動がキャンセルされました。");
-                return;
-            }
-
-            var factory = new CommandFactory(serverIP, warehouseID);
-            if (!factory.IsConnectedTESServer())
-            {
-                logger.Error(Messages.NotConnectMsg);
-                return;
-            }
-
-            try
-            {
-                var moveTask = new Task(() =>
-                {
-                    var moveRobotParam = new MoveRobotParam(
-                            robotID,
-                            DestinationModes.NodeID,
-                            nodeID,
-                            isEndWait: true,
-                            ownerRegist: false
-                            )
-                    {
-                        //CachingCallがnullだと例外が発生するため何もしないイベントを追加
-                        CachingCall = (obj, e) =>
-                        {
-                        }
-                    };
-                    switch (robotFaceIndex)
-                    {
-                        case 0:
-                            moveRobotParam.RobotFace = Direction.North;
-                            break;
-                        case 1:
-                            moveRobotParam.RobotFace = Direction.East;
-                            break;
-                        case 2:
-                            moveRobotParam.RobotFace = Direction.South;
-                            break;
-                        case 3:
-                            moveRobotParam.RobotFace = Direction.West;
-                            break;
-                        case 4:
-                            moveRobotParam.RobotFace = Direction.NoSelect;
-                            break;
-                    }
-                    var moveRobotResult = (MoveRobotReturnMessage)factory.Create(moveRobotParam).DoAction();
-
-                    logger.Info($"MoveRobot終了 AGV[{robotID}] 移動先[{nodeID}] 移動結果[{moveRobotResult.ReturnMsg}]");
-
-                    this.Invoke((MethodInvoker)(() =>
-                    {
-                        //lblCurrentLineProcess.Text = logMessage;
-                    }));
-                }, token);
-                if (token.IsCancellationRequested)
-                {
-                    return;
-                }
-                moveTask.Start();
-                await moveTask.ConfigureAwait(true);
-                if (waitMillisecond > 0)
-                {
-                    logger.Debug($"待機開始:{waitMillisecond}[ms]");
-                    await Task.Delay(waitMillisecond);
-                    logger.Debug("待機終了");
-                }
-            }
-            //AGVに異常が発生したら例外を出す
-            catch (EmergencyException ee)
-            {
-                logger.Error(ee.Message);
-                //showMoveRobotErrorDialog(ee.Message);
-            }
-            catch (Exception ex)
-            {
-                logger.Error(ex);
-                //showMoveRobotErrorDialog(ex.Message);
-            }
-        }
-        private async Task movePodAsync(string serverIP,
-                                        string warehouseID,
-                                        string podID,
-                                        string nodeID,
-                                        string robotID,
-                                        int turnMode,
-                                        int unload,
-                                        CancellationToken cancelToken,
-                                        int waitMillisecond = 0)
-        {
-            if (cancelToken.IsCancellationRequested)
-                return;
-            var factory = new CommandFactory(serverIP, warehouseID);
-            if (!factory.IsConnectedTESServer())
-            {
-                logger.Error(Messages.NotConnectMsg);
-                return;
-            }
-            try
-            {
-                //棚を下ろす際はシンクロターンできないようにする
-                if (unload == ON)
-                {
-                    turnMode = OFF;
-                }
-                var moveTask = new Task(() =>
-                {
-                    var movePodParam = new MovePodParam(
-                            robotID,
-                            podID,
-                            DestinationModes.StorageID,
-                            nodeID,
-                            isEndWait: true,
-                            turnMode: turnMode,
-                            unload: unload
-                            );
-
-                    //switch (listBoxDirection.SelectedIndex)
-                    switch (robotFaceIndex)
-                    //switch(cmbRobotFace.SelectedIndex)
-                    {
-                        case 0:
-                            movePodParam.RobotFace = Direction.North;
-                            break;
-                        case 1:
-                            movePodParam.RobotFace = Direction.East;
-                            break;
-                        case 2:
-                            movePodParam.RobotFace = Direction.South;
-                            break;
-                        case 3:
-                            movePodParam.RobotFace = Direction.West;
-                            break;
-                        case 4:
-                            movePodParam.RobotFace = Direction.NoSelect;
-                            break;
-                    }
-
-                    var movePodResult = (MovePodReturnMessage)factory.Create(movePodParam).DoAction();
-
-                    logger.Info($"MovePod終了 AGV[{robotID}] 移動先[{nodeID}] 棚[{podID}] 移動結果[{movePodResult.ReturnMsg}]");
-                    //logger.Info(movePodResult.ReturnMsg);
-                    this.Invoke((MethodInvoker)(() =>
-                    {
-                        //lblCurrentLineProcess.Text = logMessage;
-                    }));
-                }, cancelToken);
-                if (cancelToken.IsCancellationRequested)
-                    return;
-
-                moveTask.Start();
-                await moveTask.ConfigureAwait(true);
-                if (waitMillisecond > 0)
-                {
-                    logger.Debug($"待機開始:{waitMillisecond}[ms]");
-                    await Task.Delay(waitMillisecond);
-                    logger.Debug("待機終了");
-                }
-            }
-            //AGVに異常が発生したら例外を出す
-            catch (EmergencyException ee)
-            {
-                logger.Error(ee.Message);
-            }
-            catch (Exception ex)
-            {
-                logger.Error(ex);
-            }
-        }
-
-        private async Task movePodAsync(string serverIP,
-                                        string warehouseID,
-                                        string podID,
-                                        string nodeID,
-                                        string robotID,
-                                        int turnMode,
-                                        int unload,
-                                        CancellationToken cancelToken,
-                                        bool isAuto,
-                                        int waitMillisecond = 0)
-        {
-            if (cancelToken.IsCancellationRequested)
-                return;
-            var factory = new CommandFactory(serverIP, warehouseID);
-            if (!factory.IsConnectedTESServer())
-            {
-                logger.Error(Messages.NotConnectMsg);
-                return;
-            }
-            try
-            {
-                //棚を下ろす際はシンクロターンできないようにする
-                if (unload == ON)
-                {
-                    turnMode = OFF;
-                }
-                var moveTask = new Task(() =>
-                {
-
-                    if (!isAuto)
-                    {
-                        var movePodParam = new MovePodParam(
-                            robotID,
-                            podID,
-                            DestinationModes.StorageID,
-                            nodeID,
-                            isEndWait: true,
-                            turnMode: turnMode,
-                            unload: unload
-                            );
-                        switch (robotFaceIndex)
-                        {
-                            case 0:
-                                movePodParam.RobotFace = Direction.North;
-                                break;
-                            case 1:
-                                movePodParam.RobotFace = Direction.East;
-                                break;
-                            case 2:
-                                movePodParam.RobotFace = Direction.South;
-                                break;
-                            case 3:
-                                movePodParam.RobotFace = Direction.West;
-                                break;
-                            case 4:
-                                movePodParam.RobotFace = Direction.NoSelect;
-                                break;
-                        }
-
-                        var movePodResult = (MovePodReturnMessage)factory.Create(movePodParam).DoAction();
-
-                        logger.Info($"MovePod終了 AGV[{robotID}] 移動先[{nodeID}] 棚[{podID}] 移動結果[{movePodResult.ReturnMsg}]");
-                    }
-                    else
-                    {
-                        var movePodAutoParam = new MovePodAutoSelectAGVParam(
-                            robotGroupID: robotID,
-                            podID: podID,
-                            desMode: DestinationModes.StorageID,
-                            desID: nodeID,
-                            isEndWait: true,
-                            turnMode: turnMode,
-                            unload: unload
-                            );
-                        switch (robotFaceIndex)
-                        {
-                            case 0:
-                                movePodAutoParam.RobotFace = Direction.North;
-                                break;
-                            case 1:
-                                movePodAutoParam.RobotFace = Direction.East;
-                                break;
-                            case 2:
-                                movePodAutoParam.RobotFace = Direction.South;
-                                break;
-                            case 3:
-                                movePodAutoParam.RobotFace = Direction.West;
-                                break;
-                            case 4:
-                                movePodAutoParam.RobotFace = Direction.NoSelect;
-                                break;
-                        }
-
-                        var movePodResult = (MovePodAutoSelectAGVReturnMessage)factory.Create(movePodAutoParam).DoAction();
-
-                        logger.Info($"MovePodAuto終了 AGVGroup[{robotID}] 移動先[{nodeID}] 棚[{podID}] 移動結果[{movePodResult.ReturnMsg}]");
-                    }
-                }, cancelToken);
-                if (cancelToken.IsCancellationRequested)
-                    return;
-
-                moveTask.Start();
-                await moveTask.ConfigureAwait(true);
-                if (waitMillisecond > 0)
-                {
-                    logger.Debug($"待機開始:{waitMillisecond}[ms]");
-                    await Task.Delay(waitMillisecond);
-                    logger.Debug("待機終了");
-                }
-            }
-            //AGVに異常が発生したら例外を出す
-            catch (EmergencyException ee)
-            {
-                logger.Error(ee.Message);
-            }
-            catch (Exception ex)
-            {
-                logger.Error(ex);
-            }
-        }
 
         private void cmbRobotFace_SelectedIndexChanged(object sender, EventArgs e)
         {
-            robotFaceIndex = cmbRobotFace.SelectedIndex;
+            //robotFaceIndex = cmbRobotFace.SelectedIndex;
         }
 
         private void textBoxStationListPath_DragDrop(object sender, DragEventArgs e)
@@ -2210,7 +1999,7 @@ namespace MujinAGVDemo
             {
                 Factory = new CommandFactory(param.ServerIP, param.WarehouseID);
             }
-            var frm = new frmDGV(Factory,RobotGroups);
+            var frm = new frmDGV(Factory, RobotGroups);
             frm.Show();
         }
 
@@ -2549,9 +2338,9 @@ namespace MujinAGVDemo
     public class RobotGroup
     {
         public string RobotGroupID { get; set; } = string.Empty;
-        public string GroupName { get; set;} = string.Empty;
+        public string GroupName { get; set; } = string.Empty;
 
-        public RobotGroup(string robotGroupID,string groupName)
+        public RobotGroup(string robotGroupID, string groupName)
         {
             RobotGroupID = robotGroupID;
             GroupName = groupName;

@@ -20,7 +20,32 @@ namespace MujinAGVDemo.Command
         private const int ON = 1;
         private const double Nan = -255;
         public static Logger logger = LogManager.GetLogger("ProgramLogger");
-
+        public static string GetDirectionString(double direction)
+        {
+            var result = string.Empty;
+            switch (direction)
+            {
+                case Direction.North:
+                    result = "North";
+                    break;
+                case Direction.East:
+                    result = "East";
+                    break;
+                case Direction.South:
+                    result = "South";
+                    break;
+                case Direction.West:
+                    result = "West";
+                    break;
+                case Direction.NoSelect:
+                    result = "NoSelect";
+                    break;
+                default:
+                    result = "NoSelect";
+                    break;
+            }
+            return result;
+        } 
         /// <summary>
         /// AGV単体で移動します。
         /// </summary>
@@ -74,7 +99,187 @@ namespace MujinAGVDemo.Command
             await moveTask.ConfigureAwait(true);
             return moveTask.Result;
         }
+        /// <summary>
+        /// 棚移動（AGV自動選択）
+        /// </summary>
+        /// <param name="serverIP"></param>
+        /// <param name="warehouseID"></param>
+        /// <param name="param"></param>
+        /// <param name="cancelToken"></param>
+        /// <param name="waitMillisecond"></param>
+        /// <returns></returns>
+        public static async Task moveRobotAsync(string serverIP,
+                                        string warehouseID,
+                                        MoveRobotParam param,
+                                        CancellationToken cancelToken,
+                                        int waitMillisecond = 0)
+        {
+            if (cancelToken.IsCancellationRequested)
+                return;
+            var factory = new CommandFactory(serverIP, warehouseID);
+            if (!factory.IsConnectedTESServer())
+            {
+                logger.Error(Messages.NotConnectMsg);
+                return;
+            }
+            try
+            {
+                if (param.CachingCall == null)
+                {
+                    param.CachingCall = (obj, e) =>
+                    {
+                    };
+                }
 
+                var moveTask = new Task(() =>
+                {
+                    var moveRobotResult = (MoveRobotReturnMessage)factory.Create(param).DoAction();
+
+                    logger.Info($"MoveRobot終了 AGV[{param.RobotID}] 移動先[{param.DesID}] 移動結果[{moveRobotResult.ReturnMsg}] AGV向き[{GetDirectionString(param.RobotFace)}]");
+                    
+                }, cancelToken);
+                if (cancelToken.IsCancellationRequested)
+                    return;
+
+                moveTask.Start();
+                await moveTask.ConfigureAwait(true);
+                if (waitMillisecond > 0)
+                {
+                    logger.Debug($"待機開始:{waitMillisecond}[ms]");
+                    await Task.Delay(waitMillisecond);
+                    logger.Debug("待機終了");
+                }
+            }
+            //AGVに異常が発生したら例外を出す
+            catch (EmergencyException ee)
+            {
+                logger.Error(ee.Message);
+            }
+            catch (Exception ex)
+            {
+                logger.Error(ex);
+            }
+        }
+        /// <summary>
+        /// 棚移動（AGV自動選択）
+        /// </summary>
+        /// <param name="serverIP">HetuIPアドレス</param>
+        /// <param name="warehouseID">WarehouseID</param>
+        /// <param name="param">パラメータ</param>
+        /// <param name="cancelToken">キャンセルトークン</param>
+        /// <param name="waitMillisecond">待機時間</param>
+        /// <returns></returns>
+        public static async Task movePodAutoAsync(string serverIP,
+                                        string warehouseID,
+                                        MovePodAutoSelectAGVParam param,
+                                        CancellationToken cancelToken,
+                                        int waitMillisecond = 0
+                                        )
+        {
+            if (cancelToken.IsCancellationRequested)
+                return;
+            var factory = new CommandFactory(serverIP, warehouseID);
+            if (!factory.IsConnectedTESServer())
+            {
+                logger.Error(Messages.NotConnectMsg);
+                return;
+            }
+            try
+            {
+                //棚を下ろす際はシンクロターンできないようにする
+                if (param.Unload == ON)
+                {
+                    param.TurnMode= OFF;
+                }
+                var moveTask = new Task(() =>
+                {
+                        var movePodResult = (MovePodAutoSelectAGVReturnMessage)factory.Create(param).DoAction();
+
+                        logger.Info($"MovePodAuto終了 AGVGroup[{param.RobotGroupID}] 移動先[{param.DesID}] 棚[{param.PodID}] 移動結果[{movePodResult.ReturnMsg}] AGV向き[{GetDirectionString(param.RobotFace)}] 棚向き[{GetDirectionString(param.PodFace)}]");
+                    
+                }, cancelToken);
+                if (cancelToken.IsCancellationRequested)
+                    return;
+
+                moveTask.Start();
+                await moveTask.ConfigureAwait(true);
+                if (waitMillisecond > 0)
+                {
+                    logger.Debug($"待機開始:{waitMillisecond}[ms]");
+                    await Task.Delay(waitMillisecond);
+                    logger.Debug("待機終了");
+                }
+            }
+            //AGVに異常が発生したら例外を出す
+            catch (EmergencyException ee)
+            {
+                logger.Error(ee.Message);
+            }
+            catch (Exception ex)
+            {
+                logger.Error(ex);
+            }
+        }
+        /// <summary>
+        /// 棚移動
+        /// </summary>
+        /// <param name="serverIP">HetuIPアドレス</param>
+        /// <param name="warehouseID">WarehouseID</param>
+        /// <param name="param">パラメータ</param>
+        /// <param name="cancelToken">キャンセルトークン</param>
+        /// <param name="waitMillisecond">待機時間[ms]</param>
+        /// <returns></returns>
+        public static async Task movePodAsync(string serverIP,
+                                        string warehouseID,
+                                        MovePodParam param,
+                                        CancellationToken cancelToken,
+                                        int waitMillisecond = 0)
+        {
+            if (cancelToken.IsCancellationRequested)
+                return;
+            var factory = new CommandFactory(serverIP, warehouseID);
+            if (!factory.IsConnectedTESServer())
+            {
+                logger.Error(Messages.NotConnectMsg);
+                return;
+            }
+            try
+            {
+                //棚を下ろす際はシンクロターンできないようにする
+                if (param.Unload == ON)
+                {
+                    param.TurnMode = OFF;
+                }
+
+                var moveTask = new Task(() =>
+                {
+                    var movePodResult = (MovePodReturnMessage)factory.Create(param).DoAction();
+
+                    logger.Info($"MovePod終了 AGV[{param.RobotID}] 移動先[{param.DesID}] 棚[{param.PodID}] 移動結果[{movePodResult.ReturnMsg}] AGV向き[{GetDirectionString(param.RobotFace)}] 棚向き[{GetDirectionString(param.PodFace)}]");
+                    
+                }, cancelToken);
+                if (cancelToken.IsCancellationRequested)
+                    return;
+
+                moveTask.Start();
+                await moveTask.ConfigureAwait(true);
+                if (waitMillisecond > 0)
+                {
+                    logger.Debug($"待機開始:{waitMillisecond}[ms]");
+                    await Task.Delay(waitMillisecond);
+                    logger.Debug("待機終了");
+                }
+            }
+            //AGVに異常が発生したら例外を出す
+            catch (EmergencyException ee)
+            {
+                logger.Error(ee.Message);
+            }
+            catch (Exception ex)
+            {
+                logger.Error(ex);
+            }
+        }
         /// <summary>
         /// AGVが棚を持って移動します。
         /// </summary>
